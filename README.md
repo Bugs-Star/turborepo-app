@@ -1,135 +1,102 @@
-# Turborepo starter
 
-This Turborepo starter is maintained by the Turborepo core team.
+## 0. TurboRepo에 대해서
 
-## Using this example
+TurboRepo는 모노레포(Monorepo)의 특성상, 모든 패키지를 **루트(Root) 디렉토리**에서 관리합니다. 
 
-Run the following command:
+중요 : **개별 워크스페이스(웹, API 등)에서 패키지를 설치하면 안 돼요.**
 
-```sh
-npx create-turbo@latest
-```
 
-## What's inside?
 
-This Turborepo includes the following packages/apps:
 
-### Apps and Packages
+## 1. 패키지 설치 및 관리
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+**워크스페이스(Workspace)**는 모노레포(Monorepo) 내에서 관리되는 개별적인 프로젝트 단위라고 생각하면 돼요.
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+하나의 Git 저장소(Monorepo) 안에 여러 개의 독립된 프로젝트(예: web, api, admin, worker)가 존재할 때, 이 각각의 프로젝트를 워크스페이스라고 부릅니다.
 
-### Utilities
+쉽게 말해, 전체 프로젝트가 하나의 큰 건물이라면, 그 안에 있는 web, api, admin 같은 프로젝트들은 각각 독립된 방 역할을 하는 셈이죠.
 
-This Turborepo has some additional tools already setup for you:
+  * **새로운 패키지 설치:**
 
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+    새로운 패키지(`lodash` 등)를 설치할 때는 프로젝트의 루트 디렉토리에서 다음 명령어를 사용해야 합니다. `--filter` 옵션을 사용하면 특정 워크스페이스에만 패키지를 설치할 수 있어요.
 
-### Build
+    ```bash
+    pnpm add lodash --filter=web
+    ```
 
-To build all apps and packages, run the following command:
+    만약 모든 워크스페이스에서 공통으로 사용하는 패키지라면, 아래와 같이 `--workspace` 옵션을 사용해 `dependencies`에 설치해야 합니다.
 
-```
-cd my-turborepo
+    ```bash
+    pnpm add dayjs --workspace
+    ```
 
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build
+  * **패키지 삭제:**
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build
-yarn dlx turbo build
-pnpm exec turbo build
-```
+    패키지를 삭제할 때도 마찬가지로 루트 디렉토리에서 `--filter` 옵션을 사용합니다.
 
-You can build a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
+    ```bash
+    pnpm remove lodash --filter=web
+    ```
 
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build --filter=docs
+  * **패키지 업데이트:**
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-```
+    모든 패키지를 한 번에 업데이트할 때는 루트 디렉토리에서 `pnpm update`를 사용합니다.
 
-### Develop
 
-To develop all apps and packages, run the following command:
 
-```
-cd my-turborepo
 
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev
+## 2. 스크립트(서버) 실행
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev
-yarn exec turbo dev
-pnpm exec turbo dev
-```
+TurboRepo의 가장 큰 장점 중 하나는 **한 번의 명령어로 여러 워크스페이스의 스크립트를 동시에 실행**할 수 있다는 점이에요. `turbo run` 명령어를 사용하면 됩니다.
 
-You can develop a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
+  * **모든 워크스페이스 서버 실행:**
 
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev --filter=web
+    `web`, `api`, `admin`, `worker` 등 모든 워크스페이스의 개발 서버를 동시에 실행하고 싶을 때 사용합니다.
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev --filter=web
-yarn exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-```
+    ```bash
+    turbo run dev
+    ```
 
-### Remote Caching
+  * **특정 워크스페이스 서버 실행:**
 
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
+    담당하고 있는 워크스페이스(`web` 등)의 서버만 실행하고 싶을 때는 `--filter` 옵션을 사용합니다.
 
-Turborepo can use a technique known as [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
+    ```bash
+    turbo run dev --filter=web
+    ```
 
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
+  * **의존성 실행:**
 
-```
-cd my-turborepo
+    만약 `web`이 `api`를 필요로 한다면, `web`만 실행해도 `api` 서버가 자동으로 먼저 실행됩니다. `dependsOn` 설정을 통해 의존성을 관리할 수 있어요.
 
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo login
+    ```json
+    // turbo.json
+    "pipeline": {
+      "dev": {
+        "dependsOn": ["^dev"]
+      }
+    }
+    ```
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo login
-yarn exec turbo login
-pnpm exec turbo login
-```
 
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
 
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
 
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo link
+## 3. 캐싱(Caching) 활용
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo link
-yarn exec turbo link
-pnpm exec turbo link
-```
+TurboRepo는 빌드나 테스트 결과를 **캐싱**하여, 변경되지 않은 작업은 다시 실행하지 않고 이전에 저장된 결과를 재사용합니다. 이는 빌드 시간을 획기적으로 줄여주는 매우 중요한 기능입니다.
 
-## Useful Links
+  * **캐싱의 이해:**
 
-Learn more about the power of Turborepo:
+      * TurboRepo는 **`터보.json`(`turbo.json`)** 파일에 정의된 대로 파일 변경 사항을 감지하여 캐시를 생성하고 재사용합니다.
+      * `build`, `test`, `lint` 등 반복되는 작업에서 캐싱 효과가 가장 크게 나타납니다.
 
-- [Tasks](https://turborepo.com/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.com/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.com/docs/reference/configuration)
-- [CLI Usage](https://turborepo.com/docs/reference/command-line-reference)
+  * **캐시 확인:**
+
+    명령어를 실행했을 때 `Full`이 아닌 `Cached`로 표시된다면, 캐시가 적용된 것입니다.
+
+    ```bash
+    > turbo run build
+    ...
+    ✔ web:build:cache [650ms]
+    ✔ api:build:cache [420ms]
+    ```
