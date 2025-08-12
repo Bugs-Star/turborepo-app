@@ -1,5 +1,7 @@
 "use client";
 
+import { Logo } from "@/components/ui";
+import { LoginForm } from "@/components/forms";
 import { BottomNavigation } from "@/components/layout";
 
 export default function LoginPage() {
@@ -7,8 +9,13 @@ export default function LoginPage() {
     <div className="min-h-screen bg-white flex flex-col pb-20">
       {/* Main Content */}
       <div className="flex-1 flex flex-col items-center justify-center px-6 py-8">
-        <h1 className="text-3xl font-bold mb-6 text-green-700">로그인</h1>
-        <p className="text-gray-600 text-center">로그인 페이지입니다.</p>
+        {/* Logo */}
+        <div className="mb-8">
+          <Logo size="lg" />
+        </div>
+
+        {/* Login Form */}
+        <LoginForm />
       </div>
 
       {/* Bottom Navigation */}
