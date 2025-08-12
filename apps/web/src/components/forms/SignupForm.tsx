@@ -1,8 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Input } from "@repo/ui/input";
-import { Button } from "@repo/ui/button";
+import { Input, Button } from "@repo/ui";
 import { Toast } from "@/components/ui";
 import { useFormValidation, useToast } from "@/hooks";
 
