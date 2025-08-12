@@ -4,7 +4,7 @@ import { ReactNode, ButtonHTMLAttributes } from "react";
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode;
-  variant?: "primary" | "secondary" | "outline" | "ghost";
+  variant?: "primary" | "secondary" | "outline" | "ghost" | "danger";
   size?: "sm" | "md" | "lg";
   fullWidth?: boolean;
 }
@@ -18,7 +18,7 @@ export const Button = ({
   ...props
 }: ButtonProps) => {
   const baseClasses =
-    "font-bold transition-colors focus:outline-none cursor-pointer";
+    "font-bold transition-colors focus:outline-none cursor-pointer flex items-center justify-center";
 
   const variantClasses = {
     primary: "bg-green-700 hover:bg-green-800 text-white",
@@ -26,6 +26,7 @@ export const Button = ({
     outline:
       "border-2 border-green-700 text-green-700 hover:bg-green-700 hover:text-white",
     ghost: "text-green-700 hover:bg-green-100",
+    danger: "bg-red-600 hover:bg-red-700 text-white",
   };
 
   const sizeClasses = {
