@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
+import { addToBlacklist } from '../config/redis.js';
 
 // JWT 토큰 생성
 const generateToken = (userId) => {
@@ -70,4 +71,24 @@ export const getProfile = async (req, res) => {
   res.json({
     user: req.user
   });
+};
+
+// 로그아웃
+export const logout = async (req, res) => {
+  try {
+    const token = req.header('Authorization')?.replace('Bearer ', '');
+    
+    if (!token) {
+      return res.status(400).json({ message: '토큰이 필요합니다.' });
+    }
+
+    // 토큰을 블랙리스트에 추가
+    await addToBlacklist(token);
+
+    res.json({
+      message: '로그아웃이 완료되었습니다.'
+    });
+  } catch (error) {
+    res.status(500).json({ message: '서버 오류가 발생했습니다.' });
+  }
 };
