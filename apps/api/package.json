@@ -5,7 +5,8 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon src/server.js"
+    "dev": "nodemon src/server.js",
+    "create-admin": "node src/scripts/createAdmin.js"
   },
   "keywords": [],
   "author": "",
