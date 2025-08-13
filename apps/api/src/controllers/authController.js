@@ -88,28 +88,53 @@ export const getProfile = async (req, res) => {
   }
 };
 
-// 내 정보 수정
+// 내 정보 수정 (이름, 비밀번호, 프로필 이미지) - 현재 비밀번호 확인 필요
 export const updateProfile = async (req, res) => {
   try {
-    const { name, newPassword } = req.body;
+    const { name, newPassword, currentPassword } = req.body;
     const userId = req.user._id;
+
+    console.log('프로필 수정 요청:', { 
+      name: !!name, 
+      newPassword: !!newPassword, 
+      hasImage: !!req.file,
+      hasCurrentPassword: !!currentPassword 
+    });
+
+    // 현재 비밀번호 확인
+    if (!currentPassword) {
+      return res.status(400).json({ message: '현재 비밀번호를 입력해주세요.' });
+    }
+
+    // 현재 사용자 정보 가져오기 (비밀번호 포함)
+    const currentUser = await User.findById(userId);
+    if (!currentUser) {
+      return res.status(404).json({ message: '사용자를 찾을 수 없습니다.' });
+    }
+
+    // 현재 비밀번호 검증
+    const isCurrentPasswordValid = await currentUser.comparePassword(currentPassword);
+    if (!isCurrentPasswordValid) {
+      return res.status(400).json({ message: '현재 비밀번호가 올바르지 않습니다.' });
+    }
 
     // 업데이트할 데이터 준비
     const updateData = {};
     
+    // 이름 수정
     if (name && name.trim()) {
       updateData.name = name.trim();
     }
 
+    // 비밀번호 수정
     if (newPassword && newPassword.trim()) {
       // 새 비밀번호 해싱
       const bcrypt = await import('bcryptjs');
       updateData.passwordHash = await bcrypt.hash(newPassword, 12);
     }
 
-    // 프로필 이미지 처리
+    // 프로필 이미지 수정
     if (req.file) {
-      // 업로드된 이미지의 URL 경로 설정
       updateData.profileImg = `/uploads/${req.file.filename}`;
     }
 
@@ -129,13 +154,17 @@ export const updateProfile = async (req, res) => {
       return res.status(404).json({ message: '사용자를 찾을 수 없습니다.' });
     }
 
+    console.log('프로필 수정 성공:', updatedUser._id);
+
     res.json({
-      message: '프로필이 성공적으로 업데이트되었습니다.',
-      user: updatedUser
+      message: '프로필이 성공적으로 업데이트되었습니다.'
     });
   } catch (error) {
     console.error('프로필 업데이트 오류:', error);
-    res.status(500).json({ message: '프로필 업데이트 중 오류가 발생했습니다.' });
+    res.status(500).json({ 
+      message: '프로필 업데이트 중 오류가 발생했습니다.',
+      error: error.message // 개발 중에만 사용
+    });
   }
 };
 
