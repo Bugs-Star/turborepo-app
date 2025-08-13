@@ -1,33 +1,26 @@
-import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { productService, Product } from "@/lib";
 
 export const useProductFetch = () => {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchProducts = async () => {
-    try {
-      setLoading(true);
-      setError(null);
+  const {
+    data: products = [],
+    isLoading: loading,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ["products"],
+    queryFn: async (): Promise<Product[]> => {
       const response = await productService.getProducts();
-      setProducts(response.products || []);
-    } catch (err) {
-      console.error("상품 데이터를 가져오는데 실패했습니다:", err);
-      setError("상품 데이터를 불러오는데 실패했습니다.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchProducts();
-  }, []);
+      return response.products || [];
+    },
+    staleTime: 5 * 60 * 1000, // 5분
+    gcTime: 10 * 60 * 1000, // 10분
+  });
 
   return {
     products,
     loading,
-    error,
-    refetch: fetchProducts,
+    error: error?.message || null,
+    refetch,
   };
 };
