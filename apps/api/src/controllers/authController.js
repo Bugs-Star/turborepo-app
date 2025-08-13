@@ -187,3 +187,33 @@ export const logout = async (req, res) => {
     res.status(500).json({ message: '서버 오류가 발생했습니다.' });
   }
 };
+
+// 회원탈퇴
+export const deleteAccount = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    console.log('회원탈퇴 요청:', { userId });
+
+    // 토큰을 블랙리스트에 추가 (로그아웃 처리)
+    const token = req.header('Authorization')?.replace('Bearer ', '');
+    if (token) {
+      await addToBlacklist(token);
+    }
+
+    // 사용자 계정 삭제
+    await User.findByIdAndDelete(userId);
+
+    console.log('회원탈퇴 성공:', userId);
+
+    res.json({
+      message: '회원탈퇴가 완료되었습니다.'
+    });
+  } catch (error) {
+    console.error('회원탈퇴 오류:', error);
+    res.status(500).json({ 
+      message: '회원탈퇴 중 오류가 발생했습니다.',
+      error: error.message // 개발 중에만 사용
+    });
+  }
+};
