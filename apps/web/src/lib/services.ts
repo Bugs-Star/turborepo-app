@@ -5,7 +5,7 @@ export interface User {
   _id: string;
   name: string;
   email: string;
-  profileImage?: string;
+  profileImg?: string;
 }
 
 export interface Product {
@@ -124,13 +124,12 @@ export const userService = {
   },
 
   // 사용자 프로필 수정
-  updateProfile: async (userData: Partial<User>): Promise<User> => {
+  updateProfile: async (formData: FormData): Promise<{ message: string }> => {
     const response = await api.put<{ message: string }>(
       "/auth/profile",
-      userData
+      formData
     );
-    // 프로필 수정 후 다시 프로필 정보를 가져옴
-    return await userService.getProfile();
+    return response;
   },
 
   // 비밀번호 변경

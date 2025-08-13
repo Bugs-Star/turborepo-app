@@ -1,16 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input, Button } from "@repo/ui";
 import { useProfileValidation } from "@/hooks";
+import { userService } from "@/lib/services";
+import { useToast } from "@/hooks";
 
 interface ProfileEditFormProps {
   onCancel: () => void;
 }
 
 export default function ProfileEditForm({ onCancel }: ProfileEditFormProps) {
-  const [profileImage, setProfileImage] = useState<File | null>(null);
+  const [profileImg, setProfileImg] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>("/images/user.png");
+  const [isLoading, setIsLoading] = useState(false);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const { showToast } = useToast();
 
   const {
     formData,
@@ -21,7 +26,39 @@ export default function ProfileEditForm({ onCancel }: ProfileEditFormProps) {
     setFieldError,
     validateForm,
     handleInputChange,
+    resetForm,
   } = useProfileValidation();
+
+  // 기존 사용자 정보 불러오기
+  useEffect(() => {
+    const loadUserProfile = async () => {
+      try {
+        const user = await userService.getProfile();
+
+        // 폼 데이터 초기화
+        resetForm();
+
+        // 기존 정보로 폼 채우기
+        handleInputChange("name", user.name || "");
+
+        // 프로필 이미지 설정
+        if (user.profileImg) {
+          setImagePreview(user.profileImg);
+        }
+      } catch (error: any) {
+        console.error("프로필 정보 로드 오류:", error);
+        showToast(
+          error.response?.data?.message ||
+            "프로필 정보를 불러오는데 실패했습니다.",
+          "error"
+        );
+      } finally {
+        setIsInitialLoading(false);
+      }
+    };
+
+    loadUserProfile();
+  }, []);
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -29,15 +66,15 @@ export default function ProfileEditForm({ onCancel }: ProfileEditFormProps) {
       // 파일 타입 검증
       const imageError = validateImage(file);
       if (imageError) {
-        setFieldError("profileImage", imageError);
+        setFieldError("profileImg", imageError);
         return;
       }
 
       // 에러 제거
-      clearFieldError("profileImage");
+      clearFieldError("profileImg");
 
       // 파일 저장
-      setProfileImage(file);
+      setProfileImg(file);
 
       // 미리보기 생성
       const reader = new FileReader();
@@ -48,32 +85,49 @@ export default function ProfileEditForm({ onCancel }: ProfileEditFormProps) {
     }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     // 전체 폼 유효성 검사
     const isValid = validateForm();
 
     if (isValid) {
-      // 저장 로직 구현
-      console.log("프로필 저장:", {
-        nickname: formData.nickname,
-        newPassword: formData.newPassword,
-        profileImage: profileImage ? profileImage.name : "변경 없음",
-      });
+      setIsLoading(true);
 
-      // FormData를 사용하여 이미지와 함께 서버로 전송
-      const formDataToSend = new FormData();
-      formDataToSend.append("nickname", formData.nickname);
-      if (formData.newPassword) {
-        formDataToSend.append("newPassword", formData.newPassword);
-      }
-      if (profileImage) {
-        formDataToSend.append("profileImage", profileImage);
-      }
+      try {
+        // FormData를 사용하여 이미지와 함께 서버로 전송
+        const formDataToSend = new FormData();
+        formDataToSend.append("name", formData.name);
+        if (formData.newPassword) {
+          formDataToSend.append("newPassword", formData.newPassword);
+        }
+        if (profileImg) {
+          formDataToSend.append("profileImg", profileImg);
+        }
 
-      // TODO: API 호출
-      // await updateProfile(formDataToSend);
+        // API 호출
+        await userService.updateProfile(formDataToSend);
+
+        showToast("프로필이 성공적으로 업데이트되었습니다.", "success");
+        onCancel(); // 성공 시 폼 닫기
+      } catch (error: any) {
+        console.error("프로필 업데이트 오류:", error);
+        showToast(
+          error.response?.data?.message ||
+            "프로필 업데이트 중 오류가 발생했습니다.",
+          "error"
+        );
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
+
+  if (isInitialLoading) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <div className="text-gray-500">프로필 정보를 불러오는 중...</div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -97,20 +151,20 @@ export default function ProfileEditForm({ onCancel }: ProfileEditFormProps) {
             />
           </label>
         </div>
-        {errors.profileImage && (
-          <p className="text-red-500 text-sm mt-2">{errors.profileImage}</p>
+        {errors.profileImg && (
+          <p className="text-red-500 text-sm mt-2">{errors.profileImg}</p>
         )}
       </div>
 
       {/* Form Fields */}
       <div className="space-y-6">
-        {/* Nickname Field */}
+        {/* Name Field */}
         <Input
-          label="닉네임"
-          placeholder="닉네임을 입력하세요"
-          value={formData.nickname}
-          onChange={(e) => handleInputChange("nickname", e.target.value)}
-          error={errors.nickname}
+          label="이름"
+          placeholder="이름을 입력하세요"
+          value={formData.name}
+          onChange={(e) => handleInputChange("name", e.target.value)}
+          error={errors.name}
         />
 
         {/* New Password Field */}
@@ -136,10 +190,20 @@ export default function ProfileEditForm({ onCancel }: ProfileEditFormProps) {
 
       {/* Action Buttons */}
       <div className="flex gap-4 mt-8">
-        <Button variant="green" fullWidth onClick={handleSave}>
-          저장
+        <Button
+          variant="green"
+          fullWidth
+          onClick={handleSave}
+          disabled={isLoading}
+        >
+          {isLoading ? "저장 중..." : "저장"}
         </Button>
-        <Button variant="white" fullWidth onClick={onCancel}>
+        <Button
+          variant="white"
+          fullWidth
+          onClick={onCancel}
+          disabled={isLoading}
+        >
           취소
         </Button>
       </div>

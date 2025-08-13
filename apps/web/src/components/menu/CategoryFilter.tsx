@@ -41,7 +41,7 @@ export default function CategoryFilter({
           <button
             key={category}
             onClick={() => handleCategoryChange(category)}
-            className={`text-sm font-medium transition-colors ${
+            className={`text-sm font-medium transition-colors cursor-pointer hover:text-gray-600 ${
               activeCategory === category ? "text-black" : "text-gray-400"
             }`}
           >

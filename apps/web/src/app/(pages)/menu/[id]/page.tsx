@@ -1,25 +1,46 @@
 "use client";
 
+import { useState } from "react";
+import { useParams } from "next/navigation";
 import { BottomNavigation } from "@/components/layout";
+import AsyncWrapper from "@/components/ui/AsyncWrapper";
+import AddToCartButton from "@/components/menu/AddToCartButton";
+import ProductHeader from "@/components/menu/ProductHeader";
+import ProductImage from "@/components/menu/ProductImage";
+import ProductDetails from "@/components/menu/ProductDetails";
+import { useProductDetailsFetch } from "@/hooks/useProductDetailsFetch";
 
-interface MenuItemDetailPageProps {
-  params: {
-    id: string;
+export default function MenuItemDetailPage() {
+  const params = useParams();
+  const productId = params.id as string;
+
+  const { product, loading, error } = useProductDetailsFetch(productId);
+  const [quantity, setQuantity] = useState(1);
+
+  const handleQuantityChange = (newQuantity: number) => {
+    setQuantity(newQuantity);
   };
-}
 
-export default function MenuItemDetailPage({ params }: MenuItemDetailPageProps) {
   return (
-    <div className="min-h-screen bg-white flex flex-col pb-20">
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col items-center justify-center px-6 py-8">
-        <h1 className="text-3xl font-bold mb-6 text-green-700">메뉴 상세</h1>
-        <p className="text-gray-600 text-center mb-4">메뉴 ID: {params.id}</p>
-        <p className="text-gray-600 text-center">메뉴 아이템 상세 페이지입니다.</p>
-      </div>
-
-      {/* Bottom Navigation */}
-      <BottomNavigation />
-    </div>
+    <AsyncWrapper
+      loading={loading}
+      error={error}
+      loadingMessage="상품 정보를 불러오는 중..."
+      errorMessage="다시 시도해주세요."
+    >
+      {product && (
+        <div className="min-h-screen bg-white flex flex-col pb-20">
+          <ProductHeader productName={product.productName} />
+          <ProductImage src={product.productImg} alt={product.productName} />
+          <ProductDetails
+            product={product}
+            quantity={quantity}
+            onQuantityChange={handleQuantityChange}
+          />
+          <AddToCartButton product={product} quantity={quantity} />
+          <BottomNavigation />
+        </div>
+      )}
+    </AsyncWrapper>
   );
 }

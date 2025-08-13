@@ -21,6 +21,11 @@ apiClient.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
 
+    // FormData인 경우 Content-Type을 자동으로 설정하지 않음 (브라우저가 자동 설정)
+    if (config.data instanceof FormData) {
+      delete config.headers["Content-Type"];
+    }
+
     console.log("🚀 API Request:", config.method?.toUpperCase(), config.url);
     return config;
   },

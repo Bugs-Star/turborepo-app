@@ -1,21 +1,21 @@
 import { useState } from "react";
 
 interface ProfileFormData {
-  nickname: string;
+  name: string;
   newPassword: string;
   confirmPassword: string;
-  profileImage?: File | null;
+  profileImg?: File | null;
 }
 
 interface ProfileFormErrors {
-  nickname?: string;
+  name?: string;
   newPassword?: string;
   confirmPassword?: string;
-  profileImage?: string;
+  profileImg?: string;
 }
 
 interface ValidationRules {
-  nickname: {
+  name: {
     minLength: number;
     maxLength: number;
   };
@@ -26,7 +26,7 @@ interface ValidationRules {
 }
 
 const validationRules: ValidationRules = {
-  nickname: {
+  name: {
     minLength: 2,
     maxLength: 15,
   },
@@ -38,10 +38,10 @@ const validationRules: ValidationRules = {
 
 export function useProfileValidation() {
   const [formData, setFormData] = useState<ProfileFormData>({
-    nickname: "",
+    name: "",
     newPassword: "",
     confirmPassword: "",
-    profileImage: null,
+    profileImg: null,
   });
 
   const [errors, setErrors] = useState<ProfileFormErrors>({});
@@ -54,15 +54,15 @@ export function useProfileValidation() {
     const data = currentFormData || formData;
 
     switch (field) {
-      case "nickname":
+      case "name":
         if (!value.trim()) {
-          return "닉네임을 입력해주세요.";
+          return "이름을 입력해주세요.";
         }
-        if (value.length < validationRules.nickname.minLength) {
-          return `닉네임은 ${validationRules.nickname.minLength}글자 이상 입력해주세요.`;
+        if (value.length < validationRules.name.minLength) {
+          return `이름은 ${validationRules.name.minLength}글자 이상 입력해주세요.`;
         }
-        if (value.length > validationRules.nickname.maxLength) {
-          return `닉네임은 ${validationRules.nickname.maxLength}글자 이하로 입력해주세요.`;
+        if (value.length > validationRules.name.maxLength) {
+          return `이름은 ${validationRules.name.maxLength}글자 이하로 입력해주세요.`;
         }
         break;
 
@@ -95,14 +95,14 @@ export function useProfileValidation() {
     const newErrors: ProfileFormErrors = {};
 
     // 각 필드별 유효성 검사
-    const nicknameError = validateField("nickname", formData.nickname);
+    const nameError = validateField("name", formData.name);
     const newPasswordError = validateField("newPassword", formData.newPassword);
     const confirmPasswordError = validateField(
       "confirmPassword",
       formData.confirmPassword
     );
 
-    if (nicknameError) newErrors.nickname = nicknameError;
+    if (nameError) newErrors.name = nameError;
     if (newPasswordError) newErrors.newPassword = newPasswordError;
     if (confirmPasswordError) newErrors.confirmPassword = confirmPasswordError;
 
@@ -148,10 +148,10 @@ export function useProfileValidation() {
 
   const resetForm = () => {
     setFormData({
-      nickname: "",
+      name: "",
       newPassword: "",
       confirmPassword: "",
-      profileImage: null,
+      profileImg: null,
     });
     setErrors({});
   };
