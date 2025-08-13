@@ -3,6 +3,7 @@ import { register, login, getProfile, updateProfile, logout, deleteAccount } fro
 import { auth } from '../middlewares/auth.js';
 import upload from '../middlewares/upload.js';
 
+
 const router = Router();
 
 // 인증 관련 라우트
