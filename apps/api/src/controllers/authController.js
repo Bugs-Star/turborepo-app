@@ -101,22 +101,7 @@ export const updateProfile = async (req, res) => {
       hasCurrentPassword: !!currentPassword 
     });
 
-    // 현재 비밀번호 확인
-    if (!currentPassword) {
-      return res.status(400).json({ message: '현재 비밀번호를 입력해주세요.' });
-    }
 
-    // 현재 사용자 정보 가져오기 (비밀번호 포함)
-    const currentUser = await User.findById(userId);
-    if (!currentUser) {
-      return res.status(404).json({ message: '사용자를 찾을 수 없습니다.' });
-    }
-
-    // 현재 비밀번호 검증
-    const isCurrentPasswordValid = await currentUser.comparePassword(currentPassword);
-    if (!isCurrentPasswordValid) {
-      return res.status(400).json({ message: '현재 비밀번호가 올바르지 않습니다.' });
-    }
 
     // 업데이트할 데이터 준비
     const updateData = {};
