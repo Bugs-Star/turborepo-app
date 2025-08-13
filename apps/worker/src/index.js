@@ -1,5 +1,10 @@
 // index.js
 
+import { aggregateSummaryStats } from "./aggregators/summaryStats.js";
+import { aggregateBestSellers } from "./aggregators/bestSellers.js";
+import { aggregateGoldenPath } from "./aggregators/goldenPath.js";
+import schedule from "node-schedule"; // cron 스타일 스케줄링
+
 // 설정 파일에서 이 워커의 고유 이름을 가져옵니다.
 // 각 워커는 고유한 이름을 가지며, 같은 Redis Consumer Group 안에서 중복 없이 메시지를 처리합니다.
 import { REDIS_CONSUMER_NAME } from "./config/config.js";
@@ -63,3 +68,39 @@ workerLoop().catch((err) => {
   logger.error("Worker fatal error:", err);
   process.exit(1); // 비정상 종료
 });
+
+// ---------------- 밑은 사전집계
+
+/**
+ * 모든 사전 집계 함수를 실행
+ */
+async function runAllAggregations() {
+  try {
+    console.log("[Worker] Aggregation started");
+
+    await aggregateSummaryStats("weekly");
+    await aggregateSummaryStats("monthly");
+
+    await aggregateBestSellers("weekly");
+    await aggregateBestSellers("monthly");
+
+    await aggregateGoldenPath("weekly");
+    await aggregateGoldenPath("monthly");
+
+    console.log("[Worker] All aggregations completed");
+  } catch (err) {
+    console.error("[Worker] Aggregation error:", err);
+  }
+}
+
+/**
+ * 스케줄러 설정
+ * 매일 새벽 3시에 실행
+ */
+schedule.scheduleJob("0 3 * * *", () => {
+  console.log("[Scheduler] Running scheduled aggregation");
+  runAllAggregations();
+});
+
+// 서버 시작 시 한 번 실행
+runAllAggregations();

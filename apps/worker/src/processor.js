@@ -73,7 +73,7 @@ export async function processMessages(messages) {
         user_id: data.user_id,
         session_id: data.session_id,
         event_type: data.event_type,
-        event_time: data.event_time, // ISO 문자열 (ex: 2025-08-08T23:10:00Z)
+        event_time: formatDateForCH(new Date(data.event_time)), // ISO 문자열 (ex: 2025-08-08T23:10:00Z)을 파싱
         store_id: data.store_id,
         metadata: data.metadata, // 다시 문자열로 변환하여 저장
         // metadata: JSON.stringify(data.metadata), // 다시 문자열로 변환하여 저장
@@ -90,8 +90,8 @@ export async function processMessages(messages) {
         price_per_item: Number(data.price_per_item),
         total_price: Number(data.total_price),
         status: data.status,
-        ordered_at: data.ordered_at, // ISO 문자열
-        updated_at: data.updated_at,
+        ordered_at: formatDateForCH(new Date(data.ordered_at)), // ISO 문자열을 T없이 파싱
+        updated_at: formatDateForCH(new Date(data.updated_at || Date.now())),
       });
     } else {
       // event_id도 order_id도 없는 메시지는 알 수 없는 형식으로 처리
@@ -103,4 +103,23 @@ export async function processMessages(messages) {
   // insertEvents / insertOrders는 내부적으로 batch insert를 수행함
   await insertEvents(events); // events.length가 0이어도 안전하게 동작하도록 구현되어야 함
   await insertOrders(orders);
+}
+
+/**
+ * Date 객체를 ClickHouse DateTime 형식 문자열로 변환
+ * 결과 예: "2025-08-13 19:20:30"
+ * @param {Date} date
+ * @returns {string}
+ */
+export function formatDateForCH(date) {
+  const pad = (n) => n.toString().padStart(2, "0");
+
+  const yyyy = date.getFullYear();
+  const mm = pad(date.getMonth() + 1);
+  const dd = pad(date.getDate());
+  const hh = pad(date.getHours());
+  const mi = pad(date.getMinutes());
+  const ss = pad(date.getSeconds());
+
+  return `${yyyy}-${mm}-${dd} ${hh}:${mi}:${ss}`;
 }
