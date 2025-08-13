@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { User, Clock } from "lucide-react";
 import {
   ProfileCard,
@@ -7,19 +8,49 @@ import {
   LogoutButton,
 } from "@/components/profile";
 import { BottomNavigation } from "@/components/layout";
-
-// 더미 데이터
-const dummyUser = {
-  name: "이정관",
-  email: "jungkwan.lee@example.com",
-  profileImage: "/images/user.png", // 기본 사용자 이미지
-};
+import { userService, User as UserType } from "@/lib";
 
 export default function ProfilePage() {
+  const [user, setUser] = useState<UserType | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchUserProfile();
+  }, []);
+
+  const fetchUserProfile = async () => {
+    try {
+      const userData = await userService.getProfile();
+      setUser(userData);
+    } catch (error) {
+      console.error("사용자 정보를 가져오는데 실패했습니다:", error);
+      // 에러 시 기본 사용자 정보 사용
+      setUser({
+        _id: "",
+        name: "사용자",
+        email: "user@example.com",
+        profileImage: "/images/user.png",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleLogout = () => {
-    // 로그아웃 로직
+    // 로그아웃 로직은 LogoutButton 컴포넌트에서 처리됨
     console.log("로그아웃 처리");
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col pb-20">
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-gray-600">로딩 중...</div>
+        </div>
+        <BottomNavigation />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col pb-20">
@@ -33,9 +64,9 @@ export default function ProfilePage() {
         {/* 프로필 카드 */}
         <div className="mb-6">
           <ProfileCard
-            name={dummyUser.name}
-            email={dummyUser.email}
-            profileImage={dummyUser.profileImage}
+            name={user?.name || "사용자"}
+            email={user?.email || "user@example.com"}
+            profileImage={user?.profileImage || "/images/user.png"}
           />
         </div>
 

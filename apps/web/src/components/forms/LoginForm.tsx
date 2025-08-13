@@ -4,19 +4,32 @@ import Link from "next/link";
 import { Input, Button } from "@repo/ui";
 import { Toast } from "@/components/ui";
 import { useLoginValidation, useToast } from "@/hooks";
+import { authService } from "@/lib";
 
 export default function LoginForm() {
   const { formData, errors, validateForm, handleInputChange } =
     useLoginValidation();
   const { toast, showSuccess, showError, hideToast } = useToast();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (validateForm()) {
-      showSuccess("로그인이 완료되었습니다!");
-      // 여기에 실제 로그인 API 호출 로직 추가
-      console.log("로그인 데이터:", formData);
+      try {
+        const response = await authService.login({
+          email: formData.email,
+          password: formData.password,
+        });
+
+        showSuccess(response.message || "로그인이 완료되었습니다!");
+
+        // 로그인 성공 후 홈 페이지로 리다이렉트
+        setTimeout(() => {
+          window.location.href = "/home";
+        }, 1500);
+      } catch (error: any) {
+        showError(error.response?.data?.message || "로그인에 실패했습니다.");
+      }
     } else {
       showError("입력 정보를 확인해주세요.");
     }
