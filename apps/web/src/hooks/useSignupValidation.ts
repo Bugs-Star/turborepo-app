@@ -1,13 +1,13 @@
 import { useState } from "react";
 
-interface FormData {
+interface SignupFormData {
   name: string;
   email: string;
   password: string;
   confirmPassword: string;
 }
 
-interface FormErrors {
+interface SignupFormErrors {
   name?: string;
   email?: string;
   password?: string;
@@ -42,22 +42,25 @@ const validationRules: ValidationRules = {
   },
 };
 
-export const useSignupValidation = () => {
-  const [formData, setFormData] = useState<FormData>({
+export function useSignupValidation() {
+  const [formData, setFormData] = useState<SignupFormData>({
     name: "",
     email: "",
     password: "",
     confirmPassword: "",
   });
 
-  const [errors, setErrors] = useState<FormErrors>({});
+  const [errors, setErrors] = useState<SignupFormErrors>({});
 
   const validateField = (
-    field: keyof FormData,
+    field: keyof SignupFormData,
     value: string
   ): string | undefined => {
     switch (field) {
       case "name":
+        if (!value.trim()) {
+          return "이름을 입력해주세요.";
+        }
         if (value.length < validationRules.name.minLength) {
           return `이름은 ${validationRules.name.minLength}글자 이상 입력해주세요.`;
         }
@@ -67,12 +70,18 @@ export const useSignupValidation = () => {
         break;
 
       case "email":
+        if (!value.trim()) {
+          return "이메일을 입력해주세요.";
+        }
         if (!validationRules.email.pattern.test(value)) {
           return "올바른 이메일 형식을 입력해주세요.";
         }
         break;
 
       case "password":
+        if (!value.trim()) {
+          return "비밀번호를 입력해주세요.";
+        }
         if (value.length < validationRules.password.minLength) {
           return `비밀번호는 ${validationRules.password.minLength}글자 이상 입력해주세요.`;
         }
@@ -82,6 +91,9 @@ export const useSignupValidation = () => {
         break;
 
       case "confirmPassword":
+        if (!value.trim()) {
+          return "비밀번호 확인을 입력해주세요.";
+        }
         if (value !== formData.password) {
           return "비밀번호가 일치하지 않습니다.";
         }
@@ -91,11 +103,11 @@ export const useSignupValidation = () => {
   };
 
   const validateForm = (): boolean => {
-    const newErrors: FormErrors = {};
+    const newErrors: SignupFormErrors = {};
 
     // 각 필드별 유효성 검사
     Object.keys(formData).forEach((field) => {
-      const key = field as keyof FormData;
+      const key = field as keyof SignupFormData;
       const error = validateField(key, formData[key]);
       if (error) {
         newErrors[key] = error;
@@ -106,7 +118,7 @@ export const useSignupValidation = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleInputChange = (field: keyof FormData, value: string) => {
+  const handleInputChange = (field: keyof SignupFormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
 
     // 실시간 에러 제거
@@ -124,7 +136,17 @@ export const useSignupValidation = () => {
     }
   };
 
-  const clearErrors = () => {
+  const clearFieldError = (field: keyof SignupFormErrors) => {
+    if (errors[field]) {
+      setErrors((prev) => ({ ...prev, [field]: undefined }));
+    }
+  };
+
+  const setFieldError = (field: keyof SignupFormErrors, error: string) => {
+    setErrors((prev) => ({ ...prev, [field]: error }));
+  };
+
+  const clearAllErrors = () => {
     setErrors({});
   };
 
@@ -141,9 +163,12 @@ export const useSignupValidation = () => {
   return {
     formData,
     errors,
+    validateField,
     validateForm,
     handleInputChange,
-    clearErrors,
+    clearFieldError,
+    setFieldError,
+    clearAllErrors,
     resetForm,
   };
-};
+}

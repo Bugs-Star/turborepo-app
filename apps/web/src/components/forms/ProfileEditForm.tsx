@@ -9,51 +9,19 @@ interface ProfileEditFormProps {
 }
 
 export default function ProfileEditForm({ onCancel }: ProfileEditFormProps) {
-  const [nickname, setNickname] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [profileImage, setProfileImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>("/images/user.png");
 
   const {
+    formData,
     errors,
     validateField,
     validateImage,
     clearFieldError,
     setFieldError,
     validateForm,
+    handleInputChange,
   } = useProfileValidation();
-
-  const handleInputChange = (field: string, value: string) => {
-    // 상태 업데이트
-    switch (field) {
-      case "nickname":
-        setNickname(value);
-        break;
-      case "newPassword":
-        setNewPassword(value);
-        break;
-      case "confirmPassword":
-        setConfirmPassword(value);
-        break;
-    }
-
-    // 실시간 에러 제거
-    clearFieldError(field as keyof typeof errors);
-
-    // 패스워드 확인 필드의 경우, 새 패스워드가 변경되면 다시 검증
-    if (field === "newPassword" && confirmPassword) {
-      const confirmError = validateField("confirmPassword", confirmPassword, {
-        nickname,
-        newPassword: value,
-        confirmPassword,
-        profileImage,
-      });
-      if (confirmError) {
-        setFieldError("confirmPassword", confirmError);
-      }
-    }
-  };
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -82,33 +50,28 @@ export default function ProfileEditForm({ onCancel }: ProfileEditFormProps) {
 
   const handleSave = () => {
     // 전체 폼 유효성 검사
-    const isValid = validateForm({
-      nickname,
-      newPassword,
-      confirmPassword,
-      profileImage,
-    });
+    const isValid = validateForm();
 
     if (isValid) {
       // 저장 로직 구현
       console.log("프로필 저장:", {
-        nickname,
-        newPassword,
+        nickname: formData.nickname,
+        newPassword: formData.newPassword,
         profileImage: profileImage ? profileImage.name : "변경 없음",
       });
 
       // FormData를 사용하여 이미지와 함께 서버로 전송
-      const formData = new FormData();
-      formData.append("nickname", nickname);
-      if (newPassword) {
-        formData.append("newPassword", newPassword);
+      const formDataToSend = new FormData();
+      formDataToSend.append("nickname", formData.nickname);
+      if (formData.newPassword) {
+        formDataToSend.append("newPassword", formData.newPassword);
       }
       if (profileImage) {
-        formData.append("profileImage", profileImage);
+        formDataToSend.append("profileImage", profileImage);
       }
 
       // TODO: API 호출
-      // await updateProfile(formData);
+      // await updateProfile(formDataToSend);
     }
   };
 
@@ -145,7 +108,7 @@ export default function ProfileEditForm({ onCancel }: ProfileEditFormProps) {
         <Input
           label="닉네임"
           placeholder="닉네임을 입력하세요"
-          value={nickname}
+          value={formData.nickname}
           onChange={(e) => handleInputChange("nickname", e.target.value)}
           error={errors.nickname}
         />
@@ -155,7 +118,7 @@ export default function ProfileEditForm({ onCancel }: ProfileEditFormProps) {
           label="새로운 패스워드"
           type="password"
           placeholder="패스워드를 입력하세요"
-          value={newPassword}
+          value={formData.newPassword}
           onChange={(e) => handleInputChange("newPassword", e.target.value)}
           error={errors.newPassword}
         />
@@ -165,7 +128,7 @@ export default function ProfileEditForm({ onCancel }: ProfileEditFormProps) {
           label="새로운 패스워드 확인"
           type="password"
           placeholder="같은 패스워드를 입력하세요"
-          value={confirmPassword}
+          value={formData.confirmPassword}
           onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
           error={errors.confirmPassword}
         />

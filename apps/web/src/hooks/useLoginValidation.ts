@@ -10,25 +10,19 @@ interface LoginFormErrors {
   password?: string;
 }
 
-interface LoginValidationRules {
+interface ValidationRules {
   email: {
     pattern: RegExp;
   };
-  password: {
-    minLength: number;
-  };
 }
 
-const loginValidationRules: LoginValidationRules = {
+const validationRules: ValidationRules = {
   email: {
     pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
   },
-  password: {
-    minLength: 1,
-  },
 };
 
-export const useLoginValidation = () => {
+export function useLoginValidation() {
   const [formData, setFormData] = useState<LoginFormData>({
     email: "",
     password: "",
@@ -45,7 +39,7 @@ export const useLoginValidation = () => {
         if (!value.trim()) {
           return "이메일을 입력해주세요.";
         }
-        if (!loginValidationRules.email.pattern.test(value)) {
+        if (!validationRules.email.pattern.test(value)) {
           return "올바른 이메일 형식을 입력해주세요.";
         }
         break;
@@ -84,7 +78,17 @@ export const useLoginValidation = () => {
     }
   };
 
-  const clearErrors = () => {
+  const clearFieldError = (field: keyof LoginFormErrors) => {
+    if (errors[field]) {
+      setErrors((prev) => ({ ...prev, [field]: undefined }));
+    }
+  };
+
+  const setFieldError = (field: keyof LoginFormErrors, error: string) => {
+    setErrors((prev) => ({ ...prev, [field]: error }));
+  };
+
+  const clearAllErrors = () => {
     setErrors({});
   };
 
@@ -99,9 +103,12 @@ export const useLoginValidation = () => {
   return {
     formData,
     errors,
+    validateField,
     validateForm,
     handleInputChange,
-    clearErrors,
+    clearFieldError,
+    setFieldError,
+    clearAllErrors,
     resetForm,
   };
-};
+}
