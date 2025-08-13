@@ -3,11 +3,11 @@
 import Link from "next/link";
 import { Input, Button } from "@repo/ui";
 import { Toast } from "@/components/ui";
-import { useFormValidation, useToast } from "@/hooks";
+import { useSignupValidation, useToast } from "@/hooks";
 
 export default function SignupForm() {
   const { formData, errors, validateForm, handleInputChange } =
-    useFormValidation();
+    useSignupValidation();
   const { toast, showSuccess, showError, hideToast } = useToast();
 
   const handleSubmit = (e: React.FormEvent) => {
