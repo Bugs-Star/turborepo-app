@@ -1,0 +1,45 @@
+import { ReactNode } from "react";
+import { BottomNavigation } from "@/components/layout";
+
+interface AsyncWrapperProps {
+  loading: boolean;
+  error: string | null;
+  children: ReactNode;
+  loadingMessage?: string;
+  errorMessage?: string;
+}
+
+export default function AsyncWrapper({
+  loading,
+  error,
+  children,
+  loadingMessage = "로딩 중...",
+  errorMessage = "잠시 후 다시 시도해주세요.",
+}: AsyncWrapperProps) {
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-white flex flex-col pb-20">
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-gray-600">{loadingMessage}</div>
+        </div>
+        <BottomNavigation />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-white flex flex-col pb-20">
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-red-600 text-center">
+            <p className="text-sm mb-2">{error}</p>
+            <p className="text-xs">{errorMessage}</p>
+          </div>
+        </div>
+        <BottomNavigation />
+      </div>
+    );
+  }
+
+  return <>{children}</>;
+}

@@ -11,7 +11,7 @@ export default function SignupPage() {
       <div className="flex-1 flex flex-col items-center justify-center px-6 py-8">
         {/* Logo */}
         <div className="mb-8">
-          <Logo subtitle="회원 가입" size="lg" />
+          <Logo size="lg" />
         </div>
 
         {/* Signup Form */}

@@ -1,23 +1,36 @@
 "use client";
 
 import Link from "next/link";
-import { Input } from "@repo/ui/input";
-import { Button } from "@repo/ui/button";
+import { Input, Button } from "@repo/ui";
 import { Toast } from "@/components/ui";
-import { useFormValidation, useToast } from "@/hooks";
+import { useSignupValidation, useToast } from "@/hooks";
+import { authService } from "@/lib";
 
 export default function SignupForm() {
   const { formData, errors, validateForm, handleInputChange } =
-    useFormValidation();
+    useSignupValidation();
   const { toast, showSuccess, showError, hideToast } = useToast();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (validateForm()) {
-      showSuccess("회원가입이 완료되었습니다!");
-      // 여기에 실제 회원가입 API 호출 로직 추가
-      console.log("회원가입 데이터:", formData);
+      try {
+        const response = await authService.signup({
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+        });
+
+        showSuccess(response.message || "회원가입이 완료되었습니다!");
+
+        // 회원가입 성공 후 로그인 페이지로 리다이렉트
+        setTimeout(() => {
+          window.location.href = "/login";
+        }, 1500);
+      } catch (error: any) {
+        showError(error.response?.data?.message || "회원가입에 실패했습니다.");
+      }
     } else {
       showError("입력 정보를 확인해주세요.");
     }
@@ -33,7 +46,7 @@ export default function SignupForm() {
         <Input
           label="이름"
           placeholder="이름을 입력하세요"
-          variant="rounded"
+          variant="default"
           size="md"
           value={formData.name}
           onChange={(e) => handleInputChange("name", e.target.value)}
@@ -44,7 +57,7 @@ export default function SignupForm() {
           label="이메일"
           type="email"
           placeholder="이메일 주소를 입력하세요"
-          variant="rounded"
+          variant="default"
           size="md"
           value={formData.email}
           onChange={(e) => handleInputChange("email", e.target.value)}
@@ -55,7 +68,7 @@ export default function SignupForm() {
           label="비밀번호"
           type="password"
           placeholder="비밀번호를 입력하세요"
-          variant="rounded"
+          variant="default"
           size="md"
           value={formData.password}
           onChange={(e) => handleInputChange("password", e.target.value)}
@@ -66,7 +79,7 @@ export default function SignupForm() {
           label="비밀번호 확인"
           type="password"
           placeholder="비밀번호를 다시 입력하세요"
-          variant="rounded"
+          variant="default"
           size="md"
           value={formData.confirmPassword}
           onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
@@ -75,7 +88,7 @@ export default function SignupForm() {
 
         <Button
           type="submit"
-          variant="primary"
+          variant="green"
           size="md"
           fullWidth
           className="rounded-full"
