@@ -3,11 +3,11 @@
 import Link from "next/link";
 import { Input, Button } from "@repo/ui";
 import { Toast } from "@/components/ui";
-import { useFormValidation, useToast } from "@/hooks";
+import { useSignupValidation, useToast } from "@/hooks";
 
 export default function SignupForm() {
   const { formData, errors, validateForm, handleInputChange } =
-    useFormValidation();
+    useSignupValidation();
   const { toast, showSuccess, showError, hideToast } = useToast();
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -32,7 +32,7 @@ export default function SignupForm() {
         <Input
           label="이름"
           placeholder="이름을 입력하세요"
-          variant="rounded"
+          variant="default"
           size="md"
           value={formData.name}
           onChange={(e) => handleInputChange("name", e.target.value)}
@@ -43,7 +43,7 @@ export default function SignupForm() {
           label="이메일"
           type="email"
           placeholder="이메일 주소를 입력하세요"
-          variant="rounded"
+          variant="default"
           size="md"
           value={formData.email}
           onChange={(e) => handleInputChange("email", e.target.value)}
@@ -54,7 +54,7 @@ export default function SignupForm() {
           label="비밀번호"
           type="password"
           placeholder="비밀번호를 입력하세요"
-          variant="rounded"
+          variant="default"
           size="md"
           value={formData.password}
           onChange={(e) => handleInputChange("password", e.target.value)}
@@ -65,7 +65,7 @@ export default function SignupForm() {
           label="비밀번호 확인"
           type="password"
           placeholder="비밀번호를 다시 입력하세요"
-          variant="rounded"
+          variant="default"
           size="md"
           value={formData.confirmPassword}
           onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
@@ -74,7 +74,7 @@ export default function SignupForm() {
 
         <Button
           type="submit"
-          variant="primary"
+          variant="green"
           size="md"
           fullWidth
           className="rounded-full"
