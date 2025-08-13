@@ -59,7 +59,7 @@ export const authService = {
 
   // 회원가입
   signup: async (userData: SignupRequest): Promise<AuthResponse> => {
-    const response = await api.post<AuthResponse>("/auth/signup", userData);
+    const response = await api.post<AuthResponse>("/auth/register", userData);
     if (response.token) {
       tokenManager.setToken(response.token);
     }
@@ -119,12 +119,18 @@ export const productService = {
 export const userService = {
   // 사용자 프로필 조회
   getProfile: async (): Promise<User> => {
-    return await api.get<User>("/users/profile");
+    const response = await api.get<{ user: User }>("/auth/profile");
+    return response.user;
   },
 
   // 사용자 프로필 수정
   updateProfile: async (userData: Partial<User>): Promise<User> => {
-    return await api.put<User>("/users/profile", userData);
+    const response = await api.put<{ message: string }>(
+      "/auth/profile",
+      userData
+    );
+    // 프로필 수정 후 다시 프로필 정보를 가져옴
+    return await userService.getProfile();
   },
 
   // 비밀번호 변경
@@ -132,7 +138,10 @@ export const userService = {
     currentPassword: string;
     newPassword: string;
   }): Promise<{ message: string }> => {
-    return await api.put<{ message: string }>("/users/password", passwords);
+    return await api.put<{ message: string }>("/auth/profile", {
+      currentPassword: passwords.currentPassword,
+      newPassword: passwords.newPassword,
+    });
   },
 };
 
