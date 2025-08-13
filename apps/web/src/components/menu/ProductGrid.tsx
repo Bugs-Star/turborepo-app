@@ -1,4 +1,5 @@
 import { Product } from "@/lib";
+import { useRouter } from "next/navigation";
 
 // 가격 포맷팅 함수
 const formatPrice = (price: number) => {
@@ -11,14 +12,23 @@ interface ProductCardProps {
 }
 
 function ProductCard({ product }: ProductCardProps) {
+  const router = useRouter();
+
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
     const target = e.target as HTMLImageElement;
     target.src =
       "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23f3f4f6'/%3E%3Ctext x='50' y='50' font-family='Arial' font-size='12' fill='%236b7280' text-anchor='middle' dy='.3em'%3E이미지%3C/text%3E%3C/svg%3E";
   };
 
+  const handleCardClick = () => {
+    router.push(`/menu/${product._id}`);
+  };
+
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+    <div
+      className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden cursor-pointer hover:shadow-md transition-shadow duration-200"
+      onClick={handleCardClick}
+    >
       {/* Product Image */}
       <div className="aspect-square bg-gray-100 relative overflow-hidden">
         <img
@@ -31,10 +41,10 @@ function ProductCard({ product }: ProductCardProps) {
 
       {/* Product Info */}
       <div className="p-3">
-        <h3 className="text-sm font-medium text-black mb-1 truncate">
+        <h3 className="text-sm font-bold text-black mb-1 truncate">
           {product.productName}
         </h3>
-        <p className="text-sm font-medium text-green-600">
+        <p className="text-sm font-semibold text-green-700">
           {formatPrice(product.price)}
         </p>
       </div>
