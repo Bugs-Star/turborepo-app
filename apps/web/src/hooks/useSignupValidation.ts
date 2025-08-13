@@ -42,7 +42,7 @@ const validationRules: ValidationRules = {
   },
 };
 
-export const useFormValidation = () => {
+export const useSignupValidation = () => {
   const [formData, setFormData] = useState<FormData>({
     name: "",
     email: "",

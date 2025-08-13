@@ -4,7 +4,7 @@ import { ReactNode, ButtonHTMLAttributes, useState } from "react";
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode;
-  variant?: "green" | "red";
+  variant?: "green" | "red" | "white";
   size?: "sm" | "md" | "lg";
   fullWidth?: boolean;
 }
@@ -42,6 +42,11 @@ export const Button = ({
         backgroundColor: "#dc2626", // red-600
         color: "white",
       },
+      white: {
+        backgroundColor: "white",
+        color: "#374151", // gray-700
+        border: "1px solid #e5e7eb", // gray-200
+      },
     };
 
     const hoverVariantStyles = {
@@ -50,6 +55,9 @@ export const Button = ({
       },
       red: {
         backgroundColor: "#b91c1c", // red-700
+      },
+      white: {
+        backgroundColor: "#f9fafb", // gray-50
       },
     };
 

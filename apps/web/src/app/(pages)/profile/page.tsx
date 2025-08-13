@@ -12,7 +12,7 @@ import { BottomNavigation } from "@/components/layout";
 const dummyUser = {
   name: "이정관",
   email: "jungkwan.lee@example.com",
-  profileImage: undefined, // 실제 이미지가 없으므로 undefined
+  profileImage: "/images/user.png", // 기본 사용자 이미지
 };
 
 export default function ProfilePage() {
