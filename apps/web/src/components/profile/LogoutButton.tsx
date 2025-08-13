@@ -20,7 +20,7 @@ export default function LogoutButton({ onLogout }: LogoutButtonProps) {
   return (
     <Button
       onClick={handleLogout}
-      variant="danger"
+      variant="red"
       size="md"
       fullWidth
       className="rounded-lg"

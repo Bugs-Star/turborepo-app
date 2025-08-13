@@ -33,7 +33,7 @@ export default function LoginForm() {
           label="이메일"
           type="email"
           placeholder="이메일"
-          variant="rounded"
+          variant="default"
           size="md"
           value={formData.email}
           onChange={(e) => handleInputChange("email", e.target.value)}
@@ -44,7 +44,7 @@ export default function LoginForm() {
           label="비밀번호"
           type="password"
           placeholder="비밀번호"
-          variant="rounded"
+          variant="default"
           size="md"
           value={formData.password}
           onChange={(e) => handleInputChange("password", e.target.value)}
@@ -53,7 +53,7 @@ export default function LoginForm() {
 
         <Button
           type="submit"
-          variant="primary"
+          variant="green"
           size="md"
           fullWidth
           className="rounded-full"
