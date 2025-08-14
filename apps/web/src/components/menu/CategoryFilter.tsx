@@ -25,6 +25,9 @@ export default function CategoryFilter({
 
   // 필터링된 상품들
   const filteredProducts = useMemo(() => {
+    if (!products || !Array.isArray(products)) {
+      return [];
+    }
     return products.filter((product) => product.category === activeCategory);
   }, [products, activeCategory]);
 
@@ -69,6 +72,9 @@ export const useCategoryFilter = (products: Product[]) => {
   const categories = Object.keys(categoryMapping);
 
   const filteredProducts = useMemo(() => {
+    if (!products || !Array.isArray(products)) {
+      return [];
+    }
     return products.filter((product) => product.category === activeCategory);
   }, [products, activeCategory]);
 
