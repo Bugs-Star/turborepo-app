@@ -12,3 +12,9 @@ export * from "./profile";
 
 // Home Components
 export * from "./home";
+
+// Cart Components
+export * from "./cart";
+
+// Order History Components
+export * from "./order-history";
