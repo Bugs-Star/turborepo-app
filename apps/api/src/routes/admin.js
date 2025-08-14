@@ -4,9 +4,7 @@ import { adminAuth } from '../middlewares/adminAuth.js';
 import {
   createProduct,
   updateProduct,
-  deleteProduct,
-  getAdminProducts,
-  getAdminProduct
+  deleteProduct
 } from '../controllers/productController.js';
 import {
   createEvent,
@@ -33,8 +31,6 @@ router.post('/logout', adminAuth, adminLogout);
 router.get('/profile', adminAuth, getAdminProfile);
 
 // 관리자용 상품 관리 라우트 (인증 필요)
-router.get('/products', adminAuth, getAdminProducts);                 // 상품 목록 조회 (생성자 정보 포함)
-router.get('/products/:id', adminAuth, getAdminProduct);              // 특정 상품 조회 (생성자 정보 포함)
 router.post('/products', adminAuth, createProduct);                   // 상품 등록
 router.put('/products/:id', adminAuth, updateProduct);                // 상품 수정
 router.delete('/products/:id', adminAuth, deleteProduct);             // 상품 삭제
