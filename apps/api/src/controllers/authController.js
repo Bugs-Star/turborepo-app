@@ -1,7 +1,11 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 import { addToBlacklist } from '../config/redis.js';
-import { generateAccessToken, generateRefreshToken, verifyToken } from '../utils/tokenUtils.js';
+import { generateAccessToken, generateRefreshToken, verifyToken, decodeToken } from '../utils/tokenUtils.js';
+import { compressImageWithComparison, compressionPresets } from '../utils/imageUtils.js';
+import fs from 'fs';
+import path from 'path';
+import os from 'os';
 
 // 회원가입
 export const register = async (req, res) => {
@@ -151,7 +155,37 @@ export const updateProfile = async (req, res) => {
 
     // 프로필 이미지 수정
     if (req.file) {
-      updateData.profileImg = `/uploads/${req.file.filename}`;
+      try {
+        console.log('프로필 이미지 압축 시작...');
+        
+        // 임시 파일 생성
+        const tempDir = os.tmpdir();
+        const tempFilePath = path.join(tempDir, `profile-${Date.now()}-${Math.random().toString(36).substr(2, 9)}.jpg`);
+        
+        // 메모리에서 임시 파일로 저장
+        fs.writeFileSync(tempFilePath, req.file.buffer);
+        
+        // 프로필 이미지용 압축 설정 사용
+        const compressionResult = await compressImageWithComparison(
+          tempFilePath, 
+          compressionPresets.thumbnail // 작은 크기로 압축
+        );
+
+        console.log('프로필 이미지 압축 완료:', {
+          원본크기: `${compressionResult.original.sizeKB}KB`,
+          압축크기: `${compressionResult.compressed.sizeKB}KB`,
+          압축률: `${compressionResult.compressionRatio}%`
+        });
+
+        updateData.profileImg = compressionResult.compressed.base64;
+
+        // 임시 파일 삭제
+        fs.unlinkSync(tempFilePath);
+        
+      } catch (compressionError) {
+        console.error('프로필 이미지 압축 실패:', compressionError);
+        return res.status(400).json({ message: '이미지 압축에 실패했습니다.' });
+      }
     }
 
     // 데이터가 없으면 에러

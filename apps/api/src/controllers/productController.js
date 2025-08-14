@@ -1,20 +1,65 @@
 import Product from '../models/Product.js';
+import { compressImageWithComparison, compressionPresets } from '../utils/imageUtils.js';
+import fs from 'fs';
+import path from 'path';
+import os from 'os';
 
 // 상품 등록
 export const createProduct = async (req, res) => {
   try {
-    const {
-      productCode,
-      productName,
-      productImg,
-      productContents,
-      category,
-      price,
-      currentStock,
-      optimalStock,
-      isRecommended,
-      recommendedOrder
-    } = req.body;
+    console.log('요청 데이터 확인:', {
+      body: req.body,
+      files: req.files,
+      file: req.file
+    });
+
+    // Form-data와 JSON 모두 처리 (배열이 아닌 문자열로 처리)
+    const getFieldValue = (fieldName) => {
+      const value = req.body?.[fieldName];
+      if (Array.isArray(value)) {
+        return value[0]; // 배열의 첫 번째 요소
+      }
+      return value; // 단일 값
+    };
+
+    const productCode = getFieldValue('productCode');
+    const productName = getFieldValue('productName');
+    const productImg = getFieldValue('productImg');
+    const productContents = getFieldValue('productContents');
+    const category = getFieldValue('category');
+    const price = getFieldValue('price');
+    const currentStock = getFieldValue('currentStock');
+    const optimalStock = getFieldValue('optimalStock');
+    const isRecommended = getFieldValue('isRecommended');
+    const recommendedOrder = getFieldValue('recommendedOrder');
+
+    // 이미지 파일 처리
+    const imageFile = req.files?.productImg?.[0] || req.file;
+
+    console.log('상품 등록 요청:', {
+      productCode: productCode,
+      productName: productName,
+      productContents: productContents?.substring(0, 50) + '...',
+      category: category,
+      price: price,
+      hasImage: !!imageFile,
+      bodyKeys: Object.keys(req.body || {}),
+      filesKeys: req.files ? Object.keys(req.files) : 'no files'
+    });
+
+    // 필수 필드 검증
+    if (!productCode || !productName || !productContents || !category || !price) {
+      return res.status(400).json({ 
+        message: '필수 필드가 누락되었습니다. (productCode, productName, productContents, category, price)',
+        receivedData: {
+          productCode: productCode,
+          productName: productName,
+          productContents: productContents?.substring(0, 30) + '...',
+          category: category,
+          price: price
+        }
+      });
+    }
 
     // 현재 로그인한 관리자 ID
     const adminId = req.admin._id;
@@ -25,31 +70,80 @@ export const createProduct = async (req, res) => {
       return res.status(400).json({ message: '중복된 메뉴 코드 입니다.' });
     }
 
+    let processedImage = productImg;
+
+    // 이미지 파일이 업로드된 경우 압축 처리
+    if (imageFile) {
+      try {
+        console.log('이미지 압축 시작...');
+        
+        // 임시 파일 생성
+        const tempDir = os.tmpdir();
+        const tempFilePath = path.join(tempDir, `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}.jpg`);
+        
+        // 메모리에서 임시 파일로 저장
+        fs.writeFileSync(tempFilePath, imageFile.buffer);
+        
+        // 상품 이미지용 압축 설정 사용
+        const compressionResult = await compressImageWithComparison(
+          tempFilePath, 
+          compressionPresets.product
+        );
+
+        console.log('이미지 압축 완료:', {
+          원본크기: `${compressionResult.original.sizeKB}KB`,
+          압축크기: `${compressionResult.compressed.sizeKB}KB`,
+          압축률: `${compressionResult.compressionRatio}%`,
+          절약공간: `${Math.round(compressionResult.savedSpace / 1024 * 100) / 100}KB`
+        });
+
+        processedImage = compressionResult.compressed.base64;
+
+        // 임시 파일 삭제
+        fs.unlinkSync(tempFilePath);
+        
+      } catch (compressionError) {
+        console.error('이미지 압축 실패:', compressionError);
+        return res.status(400).json({ message: '이미지 압축에 실패했습니다.' });
+      }
+    } else {
+      // 이미지가 없는 경우 에러
+      return res.status(400).json({ message: '상품 이미지가 필요합니다.' });
+    }
+
     const product = new Product({
       createdBy: adminId,
       productCode: productCode.toUpperCase(),
       productName,
-      productImg,
+      productImg: processedImage,
       productContents,
       category,
-      price,
-      currentStock: currentStock || 0,
-      optimalStock,
-      isRecommended: isRecommended || false,
-      recommendedOrder: recommendedOrder || 0
+      price: Number(price),
+      currentStock: Number(currentStock) || 0,
+      optimalStock: Number(optimalStock),
+      isRecommended: isRecommended === 'true' || isRecommended === true,
+      recommendedOrder: Number(recommendedOrder) || 0
     });
 
     await product.save();
+
+    console.log('상품 등록 성공:', product._id);
 
     res.status(201).json({
       message: '상품이 성공적으로 등록되었습니다.'
     });
   } catch (error) {
+    console.error('상품 등록 오류:', error);
+    
     // MongoDB unique constraint 에러 처리
     if (error.code === 11000 && error.keyPattern && error.keyPattern.productCode) {
       return res.status(400).json({ message: '중복된 메뉴 코드 입니다.' });
     }
-    res.status(500).json({ message: '서버 오류가 발생했습니다.' });
+    
+    res.status(500).json({ 
+      message: '서버 오류가 발생했습니다.',
+      error: error.message // 개발 중에만 사용
+    });
   }
 };
 
@@ -133,6 +227,40 @@ export const updateProduct = async (req, res) => {
         return res.status(400).json({ message: '중복된 메뉴 코드 입니다.' });
       }
       updateData.productCode = updateData.productCode.toUpperCase();
+    }
+
+    // 이미지 파일이 업로드된 경우 압축 처리
+    if (req.file) {
+      try {
+        console.log('이미지 압축 시작...');
+        
+        // 임시 파일 생성
+        const tempDir = os.tmpdir();
+        const tempFilePath = path.join(tempDir, `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}.jpg`);
+        
+        // 메모리에서 임시 파일로 저장
+        fs.writeFileSync(tempFilePath, req.file.buffer);
+        
+        const compressionResult = await compressImageWithComparison(
+          tempFilePath, 
+          compressionPresets.product
+        );
+
+        console.log('이미지 압축 완료:', {
+          원본크기: `${compressionResult.original.sizeKB}KB`,
+          압축크기: `${compressionResult.compressed.sizeKB}KB`,
+          압축률: `${compressionResult.compressionRatio}%`
+        });
+
+        updateData.productImg = compressionResult.compressed.base64;
+
+        // 임시 파일 삭제
+        fs.unlinkSync(tempFilePath);
+        
+      } catch (compressionError) {
+        console.error('이미지 압축 실패:', compressionError);
+        return res.status(400).json({ message: '이미지 압축에 실패했습니다.' });
+      }
     }
 
     // 업데이트 가능한 필드들
