@@ -8,7 +8,7 @@ import {
 } from "@/components/profile";
 import { BottomNavigation } from "@/components/layout";
 import { useProfileFetch } from "@/hooks";
-import AsyncWrapper from "@/components/ui/AsyncWrapper";
+import { AsyncWrapper, PageHeader } from "@/components/ui";
 
 export default function ProfilePage() {
   const { user, loading, error } = useProfileFetch();
@@ -21,13 +21,9 @@ export default function ProfilePage() {
       errorMessage="잠시 후 다시 시도해주세요."
     >
       <div className="min-h-screen bg-gray-50 flex flex-col pb-20">
+        <PageHeader title="내 프로필" />
         {/* Main Content */}
         <div className="flex-1 px-4 py-6">
-          {/* 제목 */}
-          <h1 className="text-2xl font-bold text-gray-900 mb-6 text-center">
-            내 프로필
-          </h1>
-
           {/* 프로필 카드 */}
           <div className="mb-6">
             <ProfileCard
