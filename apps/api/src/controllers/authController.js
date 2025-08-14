@@ -1,11 +1,9 @@
-import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
-import { addToBlacklist } from '../config/redis.js';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 import { generateAccessToken, generateRefreshToken, verifyToken, decodeToken } from '../utils/tokenUtils.js';
-import { compressImageWithComparison, compressionPresets } from '../utils/imageUtils.js';
-import fs from 'fs';
-import path from 'path';
-import os from 'os';
+import { compressMulterFile } from '../utils/imageUtils.js';
+import { addToBlacklist } from '../config/redis.js';
 
 // 회원가입
 export const register = async (req, res) => {
@@ -95,23 +93,16 @@ export const refresh = async (req, res) => {
       return res.status(401).json({ message: '유효하지 않은 Refresh Token입니다.' });
     }
 
-    // 새로운 Access Token과 Refresh Token 생성
-    const newAccessToken = generateAccessToken({ userId: user._id });
-    const newRefreshToken = generateRefreshToken({ userId: user._id });
-
-    // 새로운 Refresh Token을 DB에 저장
-    user.refreshToken = newRefreshToken;
-    await user.save();
-
+    // 새로운 Access Token 생성
+    const newAccessToken = generateAccessToken(user._id);
+    
     res.json({
       accessToken: newAccessToken,
-      refreshToken: newRefreshToken
+      message: '토큰이 성공적으로 갱신되었습니다.'
     });
   } catch (error) {
-    if (error.name === 'TokenExpiredError') {
-      return res.status(401).json({ message: 'Refresh Token이 만료되었습니다. 다시 로그인해주세요.' });
-    }
-    res.status(500).json({ message: '서버 오류가 발생했습니다.' });
+    console.error('토큰 갱신 오류:', error);
+    res.status(401).json({ message: '토큰 갱신에 실패했습니다.' });
   }
 };
 
@@ -132,25 +123,23 @@ export const updateProfile = async (req, res) => {
     const { name, newPassword } = req.body;
     const userId = req.user._id;
 
-    console.log('프로필 수정 요청:', { 
-      name: !!name, 
-      newPassword: !!newPassword, 
+    console.log('프로필 업데이트 요청:', {
+      hasName: !!name,
+      hasNewPassword: !!newPassword,
       hasImage: !!req.file
     });
 
-    // 업데이트할 데이터 준비
     const updateData = {};
-    
+
     // 이름 수정
-    if (name && name.trim()) {
-      updateData.name = name.trim();
+    if (name) {
+      updateData.name = name;
     }
 
     // 비밀번호 수정
-    if (newPassword && newPassword.trim()) {
-      // 새 비밀번호 해싱
-      const bcrypt = await import('bcryptjs');
-      updateData.passwordHash = await bcrypt.hash(newPassword, 12);
+    if (newPassword) {
+      const hashedPassword = await bcrypt.hash(newPassword, 12);
+      updateData.passwordHash = hashedPassword;
     }
 
     // 프로필 이미지 수정
@@ -158,30 +147,20 @@ export const updateProfile = async (req, res) => {
       try {
         console.log('프로필 이미지 압축 시작...');
         
-        // 임시 파일 생성
-        const tempDir = os.tmpdir();
-        const tempFilePath = path.join(tempDir, `profile-${Date.now()}-${Math.random().toString(36).substr(2, 9)}.jpg`);
-        
-        // 메모리에서 임시 파일로 저장
-        fs.writeFileSync(tempFilePath, req.file.buffer);
-        
-        // 프로필 이미지용 압축 설정 사용
-        const compressionResult = await compressImageWithComparison(
-          tempFilePath, 
-          compressionPresets.thumbnail // 작은 크기로 압축
+        const compressionResult = await compressMulterFile(
+          req.file, 
+          { maxWidth: 300, maxHeight: 300, quality: 85 }, 
+          'profile'
         );
 
         console.log('프로필 이미지 압축 완료:', {
           원본크기: `${compressionResult.original.sizeKB}KB`,
           압축크기: `${compressionResult.compressed.sizeKB}KB`,
-          압축률: `${compressionResult.compressionRatio}%`
+          압축률: `${compressionResult.compressionRatio}%`,
+          절약공간: `${Math.round(compressionResult.savedSpace / 1024 * 100) / 100}KB`
         });
 
         updateData.profileImg = compressionResult.compressed.base64;
-
-        // 임시 파일 삭제
-        fs.unlinkSync(tempFilePath);
-        
       } catch (compressionError) {
         console.error('프로필 이미지 압축 실패:', compressionError);
         return res.status(400).json({ message: '이미지 압축에 실패했습니다.' });
@@ -224,26 +203,23 @@ export const logout = async (req, res) => {
     const accessToken = req.header('Authorization')?.replace('Bearer ', '');
     const { refreshToken } = req.body;
     
-    if (!accessToken) {
-      return res.status(400).json({ message: 'Access Token이 필요합니다.' });
-    }
-
     // Access Token을 블랙리스트에 추가
-    await addToBlacklist(accessToken);
+    if (accessToken) {
+      await addToBlacklist(accessToken);
+    }
 
     // Refresh Token 무효화 (DB에서 제거)
     if (refreshToken) {
-      const decoded = verifyToken(refreshToken); // verifyToken 사용
+      const decoded = verifyToken(refreshToken);
       if (decoded && decoded.userId) {
         await User.findByIdAndUpdate(decoded.userId, { refreshToken: null });
       }
     }
 
-    res.json({
-      message: '로그아웃이 완료되었습니다.'
-    });
+    res.json({ message: '로그아웃되었습니다.' });
   } catch (error) {
-    res.status(500).json({ message: '서버 오류가 발생했습니다.' });
+    console.error('로그아웃 오류:', error);
+    res.status(500).json({ message: '로그아웃 처리 중 오류가 발생했습니다.' });
   }
 };
 
@@ -251,31 +227,19 @@ export const logout = async (req, res) => {
 export const deleteAccount = async (req, res) => {
   try {
     const userId = req.user._id;
-
-    console.log('회원탈퇴 요청:', { userId });
-
-    // 토큰을 블랙리스트에 추가 (로그아웃 처리)
     const accessToken = req.header('Authorization')?.replace('Bearer ', '');
+
+    // Access Token을 블랙리스트에 추가
     if (accessToken) {
       await addToBlacklist(accessToken);
     }
 
-    // Refresh Token 무효화
-    await User.findByIdAndUpdate(userId, { refreshToken: null });
-
-    // 사용자 계정 삭제
+    // 유저 삭제
     await User.findByIdAndDelete(userId);
 
-    console.log('회원탈퇴 성공:', userId);
-
-    res.json({
-      message: '회원탈퇴가 완료되었습니다.'
-    });
+    res.json({ message: '회원탈퇴가 완료되었습니다.' });
   } catch (error) {
     console.error('회원탈퇴 오류:', error);
-    res.status(500).json({ 
-      message: '회원탈퇴 중 오류가 발생했습니다.',
-      error: error.message // 개발 중에만 사용
-    });
+    res.status(500).json({ message: '회원탈퇴 처리 중 오류가 발생했습니다.' });
   }
 };

@@ -1,4 +1,5 @@
 import Event from '../models/Event.js';
+import { compressMulterFile } from '../utils/imageUtils.js';
 
 // 이벤트 등록
 export const createEvent = async (req, res) => {
@@ -15,10 +16,35 @@ export const createEvent = async (req, res) => {
     // 현재 로그인한 관리자 ID
     const adminId = req.admin._id;
 
-    // 배너 이미지 처리
-    const bannerImg = req.file ? `/uploads/${req.file.filename}` : null;
+    // 배너 이미지 처리 (압축 + Base64)
+    let processedBannerImg = null;
 
-    if (!bannerImg) {
+    if (req.file) {
+      try {
+        console.log('이벤트 배너 이미지 압축 시작...');
+        
+        const compressionResult = await compressMulterFile(
+          req.file, 
+          { maxWidth: 1200, maxHeight: 400, quality: 85 }, 
+          'event-banner'
+        );
+
+        console.log('이벤트 배너 이미지 압축 완료:', {
+          원본크기: `${compressionResult.original.sizeKB}KB`,
+          압축크기: `${compressionResult.compressed.sizeKB}KB`,
+          압축률: `${compressionResult.compressionRatio}%`,
+          절약공간: `${Math.round(compressionResult.savedSpace / 1024 * 100) / 100}KB`
+        });
+
+        processedBannerImg = compressionResult.compressed.base64;
+        
+      } catch (compressionError) {
+        console.error('이벤트 배너 이미지 압축 실패:', compressionError);
+        return res.status(400).json({ message: '이미지 압축에 실패했습니다.' });
+      }
+    }
+
+    if (!processedBannerImg) {
       return res.status(400).json({ message: '배너 이미지가 필요합니다.' });
     }
 
@@ -26,7 +52,7 @@ export const createEvent = async (req, res) => {
       createdBy: adminId,
       title,
       description,
-      bannerImg,
+      bannerImg: processedBannerImg, // Base64 문자열로 저장
       startDate,
       endDate,
       isActive: isActive !== undefined ? isActive : true,
@@ -141,9 +167,41 @@ export const updateEvent = async (req, res) => {
       }
     });
 
-    // 배너 이미지 업데이트
+    // 배너 이미지 업데이트 (압축 + Base64)
     if (req.file) {
-      event.bannerImg = `/uploads/${req.file.filename}`;
+      try {
+        console.log('이벤트 배너 이미지 압축 시작...');
+        
+        // 임시 파일 생성
+        const tempDir = os.tmpdir();
+        const tempFilePath = path.join(tempDir, `event-banner-update-${Date.now()}-${Math.random().toString(36).substr(2, 9)}.jpg`);
+        
+        // 메모리에서 임시 파일로 저장
+        fs.writeFileSync(tempFilePath, req.file.buffer);
+        
+        // 이벤트 배너용 압축 설정 사용
+        const compressionResult = await compressMulterFile(
+          req.file, 
+          { maxWidth: 1200, maxHeight: 400, quality: 85 }, 
+          'event-banner'
+        );
+
+        console.log('이벤트 배너 이미지 압축 완료:', {
+          원본크기: `${compressionResult.original.sizeKB}KB`,
+          압축크기: `${compressionResult.compressed.sizeKB}KB`,
+          압축률: `${compressionResult.compressionRatio}%`,
+          절약공간: `${Math.round(compressionResult.savedSpace / 1024 * 100) / 100}KB`
+        });
+
+        event.bannerImg = compressionResult.compressed.base64;
+
+        // 임시 파일 삭제
+        fs.unlinkSync(tempFilePath);
+        
+      } catch (compressionError) {
+        console.error('이벤트 배너 이미지 압축 실패:', compressionError);
+        return res.status(400).json({ message: '이미지 압축에 실패했습니다.' });
+      }
     }
 
     await event.save();

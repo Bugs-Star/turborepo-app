@@ -1,23 +1,26 @@
 // src/routes/index.js
 import { Router } from 'express';
 import authRoutes from './auth.js';
-import userRoutes from './users.js';
 import adminRoutes from './admin.js';
 import productRoutes from './products.js';
 import eventRoutes from './events.js';
-import advertisementRoutes from './advertisements.js';
+import promotionRoutes from './promotions.js';
 
 const router = Router();
 
-router.get('/', (req, res) => {
-  res.send('Hello from the API!');
-});
-
+// 인증 관련 라우트
 router.use('/auth', authRoutes);
-router.use('/users', userRoutes);
+
+// 관리자 관련 라우트
 router.use('/admin', adminRoutes);
+
+// 상품 관련 라우트
 router.use('/products', productRoutes);
+
+// 이벤트 관련 라우트
 router.use('/events', eventRoutes);
-router.use('/advertisements', advertisementRoutes);
+
+// 프로모션 관련 라우트
+router.use('/promotions', promotionRoutes);
 
 export default router;

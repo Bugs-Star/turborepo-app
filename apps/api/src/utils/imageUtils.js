@@ -1,5 +1,39 @@
 import sharp from 'sharp';
 import fs from 'fs';
+import path from 'path';
+import os from 'os';
+
+/**
+ * Multer 파일 버퍼를 압축하고 Base64로 변환
+ * @param {Object} file - Multer 파일 객체 (buffer 포함)
+ * @param {Object} options - 압축 옵션
+ * @param {string} prefix - 임시 파일명 접두사
+ * @returns {Promise<Object>} 압축 결과 (base64, 압축 정보)
+ */
+export const compressMulterFile = async (file, options = {}, prefix = 'image') => {
+  if (!file || !file.buffer) {
+    throw new Error('유효한 파일이 제공되지 않았습니다.');
+  }
+
+  // 임시 파일 생성
+  const tempDir = os.tmpdir();
+  const tempFilePath = path.join(tempDir, `${prefix}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}.jpg`);
+  
+  try {
+    // 메모리에서 임시 파일로 저장
+    fs.writeFileSync(tempFilePath, file.buffer);
+    
+    // 이미지 압축 및 Base64 변환
+    const compressionResult = await compressImageWithComparison(tempFilePath, options);
+    
+    return compressionResult;
+  } finally {
+    // 임시 파일 삭제
+    if (fs.existsSync(tempFilePath)) {
+      fs.unlinkSync(tempFilePath);
+    }
+  }
+};
 
 /**
  * 이미지를 압축하고 Base64로 변환 (비율 유지)

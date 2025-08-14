@@ -1,8 +1,5 @@
 import Product from '../models/Product.js';
-import { compressImageWithComparison, compressionPresets } from '../utils/imageUtils.js';
-import fs from 'fs';
-import path from 'path';
-import os from 'os';
+import { compressMulterFile } from '../utils/imageUtils.js';
 
 // 상품 등록
 export const createProduct = async (req, res) => {
@@ -75,22 +72,15 @@ export const createProduct = async (req, res) => {
     // 이미지 파일이 업로드된 경우 압축 처리
     if (imageFile) {
       try {
-        console.log('이미지 압축 시작...');
+        console.log('상품 이미지 압축 시작...');
         
-        // 임시 파일 생성
-        const tempDir = os.tmpdir();
-        const tempFilePath = path.join(tempDir, `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}.jpg`);
-        
-        // 메모리에서 임시 파일로 저장
-        fs.writeFileSync(tempFilePath, imageFile.buffer);
-        
-        // 상품 이미지용 압축 설정 사용
-        const compressionResult = await compressImageWithComparison(
-          tempFilePath, 
-          compressionPresets.product
+        const compressionResult = await compressMulterFile(
+          imageFile, 
+          { maxWidth: 800, maxHeight: 600, quality: 80 }, 
+          'product'
         );
 
-        console.log('이미지 압축 완료:', {
+        console.log('상품 이미지 압축 완료:', {
           원본크기: `${compressionResult.original.sizeKB}KB`,
           압축크기: `${compressionResult.compressed.sizeKB}KB`,
           압축률: `${compressionResult.compressionRatio}%`,
@@ -98,12 +88,9 @@ export const createProduct = async (req, res) => {
         });
 
         processedImage = compressionResult.compressed.base64;
-
-        // 임시 파일 삭제
-        fs.unlinkSync(tempFilePath);
         
       } catch (compressionError) {
-        console.error('이미지 압축 실패:', compressionError);
+        console.error('상품 이미지 압축 실패:', compressionError);
         return res.status(400).json({ message: '이미지 압축에 실패했습니다.' });
       }
     } else {
@@ -241,9 +228,10 @@ export const updateProduct = async (req, res) => {
         // 메모리에서 임시 파일로 저장
         fs.writeFileSync(tempFilePath, req.file.buffer);
         
-        const compressionResult = await compressImageWithComparison(
-          tempFilePath, 
-          compressionPresets.product
+        const compressionResult = await compressMulterFile(
+          req.file, 
+          { maxWidth: 800, maxHeight: 600, quality: 80 }, 
+          'product'
         );
 
         console.log('이미지 압축 완료:', {
@@ -253,9 +241,6 @@ export const updateProduct = async (req, res) => {
         });
 
         updateData.productImg = compressionResult.compressed.base64;
-
-        // 임시 파일 삭제
-        fs.unlinkSync(tempFilePath);
         
       } catch (compressionError) {
         console.error('이미지 압축 실패:', compressionError);
@@ -324,5 +309,3 @@ export const getRecommendedProducts = async (req, res) => {
     res.status(500).json({ message: '서버 오류가 발생했습니다.' });
   }
 };
-
-
