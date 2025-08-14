@@ -67,12 +67,6 @@ promotionSchema.index({ isActive: 1, startDate: 1, endDate: 1 });
 promotionSchema.index({ displayLocation: 1, targetAudience: 1 });
 promotionSchema.index({ priority: -1, createdAt: -1 });
 
-// 가상 필드: 현재 활성 상태
-promotionSchema.virtual('isCurrentlyActive').get(function() {
-  const now = new Date();
-  return this.isActive && this.startDate <= now && this.endDate >= now;
-});
-
 // 인스턴스 메서드
 promotionSchema.methods.isCurrentlyActive = function() {
   const now = new Date();
