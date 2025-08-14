@@ -23,8 +23,7 @@ export default function HomePage() {
   };
 
   const handleNewsClick = (news: any) => {
-    // 뉴스 상세 페이지로 이동 (향후 구현)
-    console.log("뉴스 상세 페이지로 이동", news);
+    router.push(`/event/${news.id}`);
   };
 
   return (
