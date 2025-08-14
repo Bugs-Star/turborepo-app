@@ -4,6 +4,7 @@ import Product from '../models/Product.js';
 export const createProduct = async (req, res) => {
   try {
     const {
+      productCode,
       productName,
       productImg,
       productContents,
@@ -18,8 +19,15 @@ export const createProduct = async (req, res) => {
     // 현재 로그인한 관리자 ID
     const adminId = req.admin._id;
 
+    // productCode 중복 확인
+    const existingProduct = await Product.findOne({ productCode: productCode.toUpperCase() });
+    if (existingProduct) {
+      return res.status(400).json({ message: '중복된 메뉴 코드 입니다.' });
+    }
+
     const product = new Product({
       createdBy: adminId,
+      productCode: productCode.toUpperCase(),
       productName,
       productImg,
       productContents,
@@ -37,6 +45,10 @@ export const createProduct = async (req, res) => {
       message: '상품이 성공적으로 등록되었습니다.'
     });
   } catch (error) {
+    // MongoDB unique constraint 에러 처리
+    if (error.code === 11000 && error.keyPattern && error.keyPattern.productCode) {
+      return res.status(400).json({ message: '중복된 메뉴 코드 입니다.' });
+    }
     res.status(500).json({ message: '서버 오류가 발생했습니다.' });
   }
 };
@@ -111,9 +123,21 @@ export const updateProduct = async (req, res) => {
       return res.status(404).json({ message: '상품을 찾을 수 없습니다.' });
     }
 
+    // productCode 변경 시 중복 확인
+    if (updateData.productCode && updateData.productCode !== product.productCode) {
+      const existingProduct = await Product.findOne({ 
+        productCode: updateData.productCode.toUpperCase(),
+        _id: { $ne: id } // 현재 상품 제외
+      });
+      if (existingProduct) {
+        return res.status(400).json({ message: '중복된 메뉴 코드 입니다.' });
+      }
+      updateData.productCode = updateData.productCode.toUpperCase();
+    }
+
     // 업데이트 가능한 필드들
     const allowedFields = [
-      'productName', 'productImg', 'productContents', 'category', 'price',
+      'productCode', 'productName', 'productImg', 'productContents', 'category', 'price',
       'currentStock', 'optimalStock', 'isRecommended', 'recommendedOrder'
     ];
 
@@ -129,6 +153,10 @@ export const updateProduct = async (req, res) => {
       message: '상품이 성공적으로 수정되었습니다.'
     });
   } catch (error) {
+    // MongoDB unique constraint 에러 처리
+    if (error.code === 11000 && error.keyPattern && error.keyPattern.productCode) {
+      return res.status(400).json({ message: '중복된 메뉴 코드 입니다.' });
+    }
     res.status(500).json({ message: '서버 오류가 발생했습니다.' });
   }
 };

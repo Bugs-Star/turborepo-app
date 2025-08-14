@@ -6,6 +6,13 @@ const productSchema = new mongoose.Schema({
     ref: 'Admin',
     required: true
   },
+  productCode: {
+    type: String,
+    required: true,
+    unique: true,
+    trim: true,
+    uppercase: true
+  },
   productName: {
     type: String,
     required: true,
