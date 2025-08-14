@@ -40,6 +40,7 @@ export interface Product {
   _id: string;
   productName: string;
   productImg: string;
+  productContents: string;
   category: string;
   price: number;
   currentStock: number;
