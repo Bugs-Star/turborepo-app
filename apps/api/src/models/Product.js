@@ -1,19 +1,22 @@
 import mongoose from 'mongoose';
 
 const productSchema = new mongoose.Schema({
-  managedIds: [{
-    adminId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Admin',
-      required: true
-    }
-  }],
+  createdBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Admin',
+    required: true
+  },
   productName: {
     type: String,
     required: true,
     trim: true
   },
   productImg: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  productContents: {
     type: String,
     required: true,
     trim: true
@@ -66,11 +69,6 @@ productSchema.methods.getStockStatus = function() {
   } else {
     return 'in_stock';
   }
-};
-
-// 관리자 권한 확인 메서드
-productSchema.methods.canManage = function(adminId) {
-  return this.managedIds.some(managed => managed.adminId.toString() === adminId.toString());
 };
 
 export default mongoose.model('Product', productSchema);

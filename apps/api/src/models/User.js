@@ -9,7 +9,6 @@ const userSchema = new mongoose.Schema({
     lowercase: true,
     trim: true
   },
-
   passwordHash: {
     type: String,
     required: true
@@ -20,6 +19,10 @@ const userSchema = new mongoose.Schema({
     trim: true
   },
   profileImg: {
+    type: String,
+    default: null
+  },
+  refreshToken: {
     type: String,
     default: null
   },

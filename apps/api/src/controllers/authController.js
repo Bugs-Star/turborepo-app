@@ -1,14 +1,7 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 import { addToBlacklist } from '../config/redis.js';
-
-// JWT 토큰 생성
-const generateToken = (userId) => {
-  if (!process.env.JWT_SECRET) {
-    throw new Error('JWT_SECRET이 설정되지 않았습니다.');
-  }
-  return jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: '7d' });
-};
+import { generateAccessToken, generateRefreshToken, verifyToken } from '../utils/tokenUtils.js';
 
 // 회원가입
 export const register = async (req, res) => {
@@ -32,9 +25,6 @@ export const register = async (req, res) => {
     await user.save();
 
     console.log('유저 생성 성공:', user._id); // 디버깅용
-
-    // 토큰 생성
-    const token = generateToken(user._id);
 
     res.status(201).json({
       message: '회원가입이 완료되었습니다. 로그인해주세요.'
@@ -65,14 +55,58 @@ export const login = async (req, res) => {
       return res.status(400).json({ message: '이메일 또는 비밀번호가 잘못되었습니다.' });
     }
 
-    // 토큰 생성
-    const token = generateToken(user._id);
+    // Access Token과 Refresh Token 생성
+    const accessToken = generateAccessToken({ userId: user._id });
+    const refreshToken = generateRefreshToken({ userId: user._id });
+
+    // Refresh Token을 DB에 저장
+    user.refreshToken = refreshToken;
+    await user.save();
 
     res.json({
-      token,
+      accessToken,
+      refreshToken,
       _id: user._id
     });
   } catch (error) {
+    res.status(500).json({ message: '서버 오류가 발생했습니다.' });
+  }
+};
+
+// 토큰 갱신
+export const refresh = async (req, res) => {
+  try {
+    const { refreshToken } = req.body;
+
+    if (!refreshToken) {
+      return res.status(400).json({ message: 'Refresh Token이 필요합니다.' });
+    }
+
+    // Refresh Token 검증
+    const decoded = verifyToken(refreshToken);
+    
+    // 유저 찾기 및 Refresh Token 확인
+    const user = await User.findById(decoded.userId);
+    if (!user || user.refreshToken !== refreshToken) {
+      return res.status(401).json({ message: '유효하지 않은 Refresh Token입니다.' });
+    }
+
+    // 새로운 Access Token과 Refresh Token 생성
+    const newAccessToken = generateAccessToken({ userId: user._id });
+    const newRefreshToken = generateRefreshToken({ userId: user._id });
+
+    // 새로운 Refresh Token을 DB에 저장
+    user.refreshToken = newRefreshToken;
+    await user.save();
+
+    res.json({
+      accessToken: newAccessToken,
+      refreshToken: newRefreshToken
+    });
+  } catch (error) {
+    if (error.name === 'TokenExpiredError') {
+      return res.status(401).json({ message: 'Refresh Token이 만료되었습니다. 다시 로그인해주세요.' });
+    }
     res.status(500).json({ message: '서버 오류가 발생했습니다.' });
   }
 };
@@ -88,20 +122,17 @@ export const getProfile = async (req, res) => {
   }
 };
 
-// 내 정보 수정 (이름, 비밀번호, 프로필 이미지) - 현재 비밀번호 확인 필요
+// 내 정보 수정 (이름, 비밀번호, 프로필 이미지)
 export const updateProfile = async (req, res) => {
   try {
-    const { name, newPassword, currentPassword } = req.body;
+    const { name, newPassword } = req.body;
     const userId = req.user._id;
 
     console.log('프로필 수정 요청:', { 
       name: !!name, 
       newPassword: !!newPassword, 
-      hasImage: !!req.file,
-      hasCurrentPassword: !!currentPassword 
+      hasImage: !!req.file
     });
-
-
 
     // 업데이트할 데이터 준비
     const updateData = {};
@@ -156,14 +187,23 @@ export const updateProfile = async (req, res) => {
 // 로그아웃
 export const logout = async (req, res) => {
   try {
-    const token = req.header('Authorization')?.replace('Bearer ', '');
+    const accessToken = req.header('Authorization')?.replace('Bearer ', '');
+    const { refreshToken } = req.body;
     
-    if (!token) {
-      return res.status(400).json({ message: '토큰이 필요합니다.' });
+    if (!accessToken) {
+      return res.status(400).json({ message: 'Access Token이 필요합니다.' });
     }
 
-    // 토큰을 블랙리스트에 추가
-    await addToBlacklist(token);
+    // Access Token을 블랙리스트에 추가
+    await addToBlacklist(accessToken);
+
+    // Refresh Token 무효화 (DB에서 제거)
+    if (refreshToken) {
+      const decoded = verifyToken(refreshToken); // verifyToken 사용
+      if (decoded && decoded.userId) {
+        await User.findByIdAndUpdate(decoded.userId, { refreshToken: null });
+      }
+    }
 
     res.json({
       message: '로그아웃이 완료되었습니다.'
@@ -181,10 +221,13 @@ export const deleteAccount = async (req, res) => {
     console.log('회원탈퇴 요청:', { userId });
 
     // 토큰을 블랙리스트에 추가 (로그아웃 처리)
-    const token = req.header('Authorization')?.replace('Bearer ', '');
-    if (token) {
-      await addToBlacklist(token);
+    const accessToken = req.header('Authorization')?.replace('Bearer ', '');
+    if (accessToken) {
+      await addToBlacklist(accessToken);
     }
+
+    // Refresh Token 무효화
+    await User.findByIdAndUpdate(userId, { refreshToken: null });
 
     // 사용자 계정 삭제
     await User.findByIdAndDelete(userId);

@@ -22,6 +22,10 @@ const adminSchema = new mongoose.Schema({
     type: String,
     default: null
   },
+  refreshToken: {
+    type: String,
+    default: null
+  },
   status: {
     type: String,
     enum: ['active', 'inactive', 'suspended'],
@@ -40,7 +44,7 @@ adminSchema.pre('save', async function(next) {
 
 // 비밀번호 검증 메서드
 adminSchema.methods.comparePassword = async function(candidatePassword) {
-  return await bcrypt.compare(candidatePassword, this.passwordHash);
+  return bcrypt.compare(candidatePassword, this.passwordHash);
 };
 
 export default mongoose.model('Admin', adminSchema);

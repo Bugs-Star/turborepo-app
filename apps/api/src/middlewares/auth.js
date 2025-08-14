@@ -26,6 +26,12 @@ export const auth = async (req, res, next) => {
     req.user = user;
     next();
   } catch (error) {
+    if (error.name === 'TokenExpiredError') {
+      return res.status(401).json({ 
+        message: '토큰이 만료되었습니다. 토큰을 갱신해주세요.',
+        code: 'TOKEN_EXPIRED'
+      });
+    }
     res.status(401).json({ message: '인증에 실패했습니다.' });
   }
 };
