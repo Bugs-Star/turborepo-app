@@ -1,5 +1,8 @@
 import Event from '../models/Event.js';
 import { compressMulterFile } from '../utils/imageUtils.js';
+import fs from 'fs';
+import path from 'path';
+import os from 'os';
 
 // 이벤트 등록
 export const createEvent = async (req, res) => {
@@ -10,8 +13,11 @@ export const createEvent = async (req, res) => {
       startDate,
       endDate,
       isActive,
-      priority
+      eventOrder
     } = req.body;
+
+    console.log('요청 바디:', req.body);
+    console.log('추출된 필드들:', { title, description, startDate, endDate, isActive, eventOrder });
 
     // 현재 로그인한 관리자 ID
     const adminId = req.admin._id;
@@ -19,12 +25,12 @@ export const createEvent = async (req, res) => {
     // 이벤트 이미지 처리 (압축 + Base64)
     let processedEventImg = null;
 
-    if (req.file) {
+    if (req.files && req.files.eventImg) {
       try {
         console.log('이벤트 이미지 압축 시작...');
         
         const compressionResult = await compressMulterFile(
-          req.file, 
+          req.files.eventImg[0], 
           { maxWidth: 1200, maxHeight: 400, quality: 85 }, 
           'event-image'
         );
@@ -56,7 +62,7 @@ export const createEvent = async (req, res) => {
       startDate,
       endDate,
       isActive: isActive !== undefined ? isActive : true,
-      priority: priority || 0
+      eventOrder: eventOrder || 0
     });
 
     await event.save();
@@ -89,7 +95,7 @@ export const getEvents = async (req, res) => {
 
     const events = await Event.find(query)
       .select('-createdBy') // 생성자 정보는 제외 (공통)
-      .sort({ priority: -1, createdAt: -1 })
+      .sort({ eventOrder: -1, createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit));
 
@@ -123,7 +129,7 @@ export const getActiveEvents = async (req, res) => {
       endDate: { $gte: now }
     })
     .select('-createdBy') // 생성자 정보는 제외 (공통)
-    .sort({ priority: -1, createdAt: -1 });
+    .sort({ eventOrder: -1, createdAt: -1 });
 
     res.json({ events });
   } catch (error) {
@@ -164,7 +170,7 @@ export const updateEvent = async (req, res) => {
     // 업데이트 가능한 필드들
     const allowedFields = [
       'title', 'description', 'startDate', 'endDate', 
-      'isActive', 'priority'
+      'isActive', 'eventOrder'
     ];
 
     allowedFields.forEach(field => {
@@ -174,7 +180,7 @@ export const updateEvent = async (req, res) => {
     });
 
     // 이벤트 이미지 업데이트 (압축 + Base64)
-    if (req.file) {
+    if (req.files && req.files.eventImg) {
       try {
         console.log('이벤트 이미지 압축 시작...');
         
@@ -183,11 +189,11 @@ export const updateEvent = async (req, res) => {
         const tempFilePath = path.join(tempDir, `event-image-update-${Date.now()}-${Math.random().toString(36).substr(2, 9)}.jpg`);
         
         // 메모리에서 임시 파일로 저장
-        fs.writeFileSync(tempFilePath, req.file.buffer);
+        fs.writeFileSync(tempFilePath, req.files.eventImg[0].buffer);
         
         // 이벤트 이미지용 압축 설정 사용
         const compressionResult = await compressMulterFile(
-          req.file, 
+          req.files.eventImg[0], 
           { maxWidth: 1200, maxHeight: 400, quality: 85 }, 
           'event-image'
         );
@@ -257,7 +263,7 @@ export const getAdminEvents = async (req, res) => {
 
     const events = await Event.find(query)
       .populate('createdBy', 'name email') // 생성자 정보 포함
-      .sort({ priority: -1, createdAt: -1 })
+      .sort({ eventOrder: -1, createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit));
 

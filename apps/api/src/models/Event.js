@@ -32,7 +32,7 @@ const eventSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   },
-  priority: {
+  eventOrder: {
     type: Number,
     default: 0
   }
@@ -42,7 +42,7 @@ const eventSchema = new mongoose.Schema({
 
 // 인덱스 설정
 eventSchema.index({ isActive: 1, startDate: 1, endDate: 1 });
-eventSchema.index({ priority: -1, createdAt: -1 });
+eventSchema.index({ eventOrder: -1, createdAt: -1 });
 
 // 정적 메서드: 만료된 이벤트 자동 비활성화
 eventSchema.statics.deactivateExpiredEvents = async function() {

@@ -41,7 +41,7 @@ export const uploadFields = baseMulter.fields([
   { name: 'startDate', maxCount: 1 },
   { name: 'endDate', maxCount: 1 },
   { name: 'isActive', maxCount: 1 },
-  { name: 'priority', maxCount: 1 },
+  { name: 'eventOrder', maxCount: 1 },
   { name: 'linkUrl', maxCount: 1 },
   { name: 'targetAudience', maxCount: 1 },
   { name: 'displayLocation', maxCount: 1 }
