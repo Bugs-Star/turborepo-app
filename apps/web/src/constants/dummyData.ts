@@ -82,3 +82,38 @@ export const promoBanners: Record<string, PromotionItem> = {
     endDate: "2024-09-15",
   },
 };
+
+export interface CartItem {
+  id: string;
+  name: string;
+  price: number;
+  quantity: number;
+  imageUrl: string;
+}
+
+export const dummyCartItems: CartItem[] = [
+  {
+    id: "1",
+    name: "아이스 카페 아메리카노",
+    price: 4500,
+    quantity: 1,
+    imageUrl:
+      "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=200&h=200&fit=crop&crop=center",
+  },
+  {
+    id: "2",
+    name: "카라멜 마키아또",
+    price: 5900,
+    quantity: 2,
+    imageUrl:
+      "https://images.unsplash.com/photo-1541167760496-1628856ab772?w=200&h=200&fit=crop&crop=center",
+  },
+  {
+    id: "3",
+    name: "초코 크루아상",
+    price: 3800,
+    quantity: 1,
+    imageUrl:
+      "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=200&h=200&fit=crop&crop=center",
+  },
+];

@@ -12,3 +12,6 @@ export * from "./profile";
 
 // Home Components
 export * from "./home";
+
+// Cart Components
+export * from "./cart";
