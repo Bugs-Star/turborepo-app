@@ -117,3 +117,100 @@ export const dummyCartItems: CartItem[] = [
       "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=200&h=200&fit=crop&crop=center",
   },
 ];
+
+export interface OrderHistoryItem {
+  id: string;
+  orderNumber: string;
+  orderDate: string;
+  totalAmount: number;
+  items: {
+    id: string;
+    name: string;
+    price: number;
+    quantity: number;
+    imageUrl: string;
+  }[];
+}
+
+export const dummyOrderHistory: OrderHistoryItem[] = [
+  {
+    id: "1",
+    orderNumber: "ORD-2024-001",
+    orderDate: "2024-01-15",
+    totalAmount: 20100,
+    items: [
+      {
+        id: "1",
+        name: "아이스 카페 아메리카노",
+        price: 4500,
+        quantity: 1,
+        imageUrl:
+          "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=200&h=200&fit=crop&crop=center",
+      },
+      {
+        id: "2",
+        name: "카라멜 마키아또",
+        price: 5900,
+        quantity: 2,
+        imageUrl:
+          "https://images.unsplash.com/photo-1541167760496-1628856ab772?w=200&h=200&fit=crop&crop=center",
+      },
+      {
+        id: "3",
+        name: "초코 크루아상",
+        price: 3800,
+        quantity: 1,
+        imageUrl:
+          "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=200&h=200&fit=crop&crop=center",
+      },
+    ],
+  },
+  {
+    id: "2",
+    orderNumber: "ORD-2024-002",
+    orderDate: "2024-01-10",
+    totalAmount: 8900,
+    items: [
+      {
+        id: "4",
+        name: "바닐라 라떼",
+        price: 5200,
+        quantity: 1,
+        imageUrl:
+          "https://images.unsplash.com/photo-1578314675249-a6910f80cc4e?w=200&h=200&fit=crop&crop=center",
+      },
+      {
+        id: "5",
+        name: "블루베리 머핀",
+        price: 3700,
+        quantity: 1,
+        imageUrl:
+          "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=200&h=200&fit=crop&crop=center",
+      },
+    ],
+  },
+  {
+    id: "3",
+    orderNumber: "ORD-2024-003",
+    orderDate: "2024-01-05",
+    totalAmount: 15600,
+    items: [
+      {
+        id: "6",
+        name: "에스프레소",
+        price: 3500,
+        quantity: 2,
+        imageUrl:
+          "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=200&h=200&fit=crop&crop=center",
+      },
+      {
+        id: "7",
+        name: "티라미수",
+        price: 8600,
+        quantity: 1,
+        imageUrl:
+          "https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?w=200&h=200&fit=crop&crop=center",
+      },
+    ],
+  },
+];
