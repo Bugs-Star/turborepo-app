@@ -1,14 +1,65 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { BottomNavigation } from "@/components/layout";
+import {
+  GreetingSection,
+  PromoBanner,
+  RecommendedMenu,
+  NewsSection,
+} from "@/components/home";
+import { dummyNews, promoBanners } from "@/constants/dummyData";
+import { Product } from "@/lib/services";
 
 export default function HomePage() {
+  const router = useRouter();
+
+  const handleProductClick = (product: Product) => {
+    router.push(`/menu/${product._id}`);
+  };
+
+  const handlePromoClick = () => {
+    // 프로모션 상세 페이지로 이동 (향후 구현)
+    console.log("프로모션 상세 페이지로 이동");
+  };
+
+  const handleNewsClick = (news: any) => {
+    // 뉴스 상세 페이지로 이동 (향후 구현)
+    console.log("뉴스 상세 페이지로 이동", news);
+  };
+
   return (
-    <div className="min-h-screen bg-white flex flex-col pb-20">
+    <div className="min-h-screen bg-gray-50 flex flex-col pb-20">
       {/* Main Content */}
-      <div className="flex-1 flex flex-col items-center justify-center px-6 py-8">
-        <h1 className="text-3xl font-bold mb-6 text-green-700">홈</h1>
-        <p className="text-gray-600 text-center">홈 페이지입니다.</p>
+      <div className="flex-1">
+        {/* 상단 인사말 */}
+        <GreetingSection />
+
+        {/* 시즌 음료 프로모션 배너 */}
+        <PromoBanner
+          title={promoBanners.seasonal.title}
+          subtitle={promoBanners.seasonal.subtitle}
+          buttonText={promoBanners.seasonal.buttonText}
+          bgColor={promoBanners.seasonal.bgColor}
+          imageUrl={promoBanners.seasonal.imageUrl}
+          onButtonClick={handlePromoClick}
+        />
+
+        {/* 오늘의 추천 메뉴 */}
+        <RecommendedMenu onProductClick={handleProductClick} />
+
+        {/* 썸머 프로모션 배너 */}
+        <PromoBanner
+          title={promoBanners.summer.title}
+          subtitle={promoBanners.summer.subtitle}
+          buttonText={promoBanners.summer.buttonText}
+          bgColor={promoBanners.summer.bgColor}
+          imageUrl={promoBanners.summer.imageUrl}
+          onButtonClick={handlePromoClick}
+        />
+
+        {/* 새로운 소식 */}
+        <NewsSection news={dummyNews} onNewsClick={handleNewsClick} />
       </div>
 
       {/* Bottom Navigation */}

@@ -9,3 +9,6 @@ export * from "./layout";
 
 // Profile Components
 export * from "./profile";
+
+// Home Components
+export * from "./home";
