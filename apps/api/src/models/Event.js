@@ -16,10 +16,9 @@ const eventSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
-  bannerImg: {
+  eventImg: {
     type: String,
-    required: true,
-    trim: true
+    required: true
   },
   startDate: {
     type: Date,
@@ -35,34 +34,55 @@ const eventSchema = new mongoose.Schema({
   },
   priority: {
     type: Number,
-    min: 0,
     default: 0
   }
 }, {
   timestamps: true
 });
 
-// 이벤트 활성 상태 확인 메서드
-eventSchema.methods.isCurrentlyActive = function() {
-  const now = new Date();
-  return this.isActive && now >= this.startDate && now <= this.endDate;
+// 인덱스 설정
+eventSchema.index({ isActive: 1, startDate: 1, endDate: 1 });
+eventSchema.index({ priority: -1, createdAt: -1 });
+
+// 정적 메서드: 만료된 이벤트 자동 비활성화
+eventSchema.statics.deactivateExpiredEvents = async function() {
+  try {
+    const now = new Date();
+    const result = await this.updateMany(
+      {
+        isActive: true,
+        endDate: { $lt: now }
+      },
+      {
+        $set: { isActive: false }
+      }
+    );
+    
+    if (result.modifiedCount > 0) {
+      console.log(`✅ ${result.modifiedCount}개의 만료된 이벤트가 자동으로 비활성화되었습니다.`);
+    }
+    
+    return result.modifiedCount;
+  } catch (error) {
+    console.error('❌ 만료된 이벤트 비활성화 실패:', error);
+    throw error;
+  }
 };
 
-// 이벤트 상태를 반환하는 메서드
+// 인스턴스 메서드: 현재 활성 상태 확인
+eventSchema.methods.isCurrentlyActive = function() {
+  const now = new Date();
+  return this.isActive && this.startDate <= now && this.endDate >= now;
+};
+
+// 인스턴스 메서드: 이벤트 상태 반환
 eventSchema.methods.getStatus = function() {
   const now = new Date();
   
-  if (!this.isActive) {
-    return 'inactive';
-  }
-  
-  if (now < this.startDate) {
-    return 'upcoming';
-  } else if (now > this.endDate) {
-    return 'expired';
-  } else {
-    return 'active';
-  }
+  if (!this.isActive) return 'inactive';
+  if (this.startDate > now) return 'scheduled';
+  if (this.endDate < now) return 'expired';
+  return 'active';
 };
 
 export default mongoose.model('Event', eventSchema);

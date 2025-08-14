@@ -22,10 +22,10 @@ const baseMulter = multer({
 // 단일 파일 업로드 (프로필 이미지용)
 export const uploadSingle = baseMulter.single('profileImg');
 
-// 다중 필드 업로드 (상품, 이벤트, 광고용)
+// 다중 필드 업로드 (상품, 이벤트, 프로모션용)
 export const uploadFields = baseMulter.fields([
   { name: 'productImg', maxCount: 1 },
-  { name: 'bannerImg', maxCount: 1 },
+  { name: 'eventImg', maxCount: 1 },
   { name: 'imageUrl', maxCount: 1 },
   { name: 'productCode', maxCount: 1 },
   { name: 'productName', maxCount: 1 },
