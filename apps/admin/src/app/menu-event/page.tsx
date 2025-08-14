@@ -1,13 +1,13 @@
 import AddEvent from "./AddEvent";
-import AddMenu from "./AddMenu";
+import EventList from "./EventList";
 import RecommendMenu from "./RecommendedMenu";
 
 const MenuEvent = () => {
   return (
     <div>
-      <AddMenu />
-      <RecommendMenu />
       <AddEvent />
+      <EventList />
+      <RecommendMenu />
     </div>
   );
 };
