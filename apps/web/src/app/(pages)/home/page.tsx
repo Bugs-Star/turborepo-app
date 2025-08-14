@@ -18,9 +18,8 @@ export default function HomePage() {
     router.push(`/menu/${product._id}`);
   };
 
-  const handlePromoClick = () => {
-    // 프로모션 상세 페이지로 이동 (향후 구현)
-    console.log("프로모션 상세 페이지로 이동");
+  const handlePromoClick = (promotionId: string) => {
+    router.push(`/promotion/${promotionId}`);
   };
 
   const handleNewsClick = (news: any) => {
@@ -40,9 +39,8 @@ export default function HomePage() {
           title={promoBanners.seasonal.title}
           subtitle={promoBanners.seasonal.subtitle}
           buttonText={promoBanners.seasonal.buttonText}
-          bgColor={promoBanners.seasonal.bgColor}
           imageUrl={promoBanners.seasonal.imageUrl}
-          onButtonClick={handlePromoClick}
+          onButtonClick={() => handlePromoClick(promoBanners.seasonal.id)}
         />
 
         {/* 오늘의 추천 메뉴 */}
@@ -53,9 +51,8 @@ export default function HomePage() {
           title={promoBanners.summer.title}
           subtitle={promoBanners.summer.subtitle}
           buttonText={promoBanners.summer.buttonText}
-          bgColor={promoBanners.summer.bgColor}
           imageUrl={promoBanners.summer.imageUrl}
-          onButtonClick={handlePromoClick}
+          onButtonClick={() => handlePromoClick(promoBanners.summer.id)}
         />
 
         {/* 새로운 소식 */}
