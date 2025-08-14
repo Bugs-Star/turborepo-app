@@ -1,8 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import { userService, User } from "@/lib";
 import { tokenManager } from "@/lib/api";
 
 export function useProfileFetch() {
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   const {
     data: user,
     isLoading: loading,
@@ -37,15 +44,22 @@ export function useProfileFetch() {
     },
     staleTime: 5 * 60 * 1000, // 5분간 데이터를 fresh로 유지
     gcTime: 10 * 60 * 1000, // 10분간 캐시 유지
-    retry: 2, // 실패 시 2번 재시도
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // 지수 백오프
-    // 토큰이 없을 때는 쿼리를 비활성화
-    enabled: tokenManager.hasTokens(),
+    retry: 1, // 실패 시 1번만 재시도
+    retryDelay: 1000, // 1초 후 재시도
+    // 클라이언트에서만 쿼리 활성화
+    enabled: isClient && tokenManager.hasTokens(),
+    // 네트워크 에러나 서버 에러 시에도 기본값 반환
+    throwOnError: false,
   });
 
   return {
-    user: user || null,
-    loading,
+    user: user || {
+      _id: "",
+      name: "고객",
+      email: "",
+      profileImg: "/images/user.png",
+    },
+    loading: !isClient || loading,
     error: error ? "사용자 정보를 불러오는데 실패했습니다." : null,
     refetch,
   };
