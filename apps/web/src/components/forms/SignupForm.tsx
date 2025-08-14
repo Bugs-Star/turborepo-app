@@ -22,7 +22,7 @@ export default function SignupForm() {
           password: formData.password,
         });
 
-        showSuccess(response.message || "회원가입이 완료되었습니다!");
+        showSuccess("회원가입이 완료되었습니다!");
 
         // 회원가입 성공 후 로그인 페이지로 리다이렉트
         setTimeout(() => {

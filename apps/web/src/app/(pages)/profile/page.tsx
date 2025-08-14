@@ -27,9 +27,14 @@ export default function ProfilePage() {
           {/* 프로필 카드 */}
           <div className="mb-6">
             <ProfileCard
-              name={user?.name || "사용자"}
-              email={user?.email || "user@example.com"}
-              profileImage={user?.profileImg || "/images/user.png"}
+              user={
+                user || {
+                  _id: "",
+                  name: "사용자",
+                  email: "user@example.com",
+                  profileImg: "/images/user.png",
+                }
+              }
             />
           </div>
 

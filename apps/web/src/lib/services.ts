@@ -59,9 +59,11 @@ export interface SignupRequest {
 }
 
 export interface AuthResponse {
-  message: string;
-  token?: string;
+  message?: string;
+  accessToken?: string;
+  refreshToken?: string;
   user?: User;
+  _id?: string;
 }
 
 export interface ProductsResponse {
@@ -79,8 +81,11 @@ export const authService = {
   // 로그인
   login: async (credentials: LoginRequest): Promise<AuthResponse> => {
     const response = await api.post<AuthResponse>("/auth/login", credentials);
-    if (response.token) {
-      tokenManager.setToken(response.token);
+    if (response.accessToken) {
+      tokenManager.setAccessToken(response.accessToken);
+    }
+    if (response.refreshToken) {
+      tokenManager.setRefreshToken(response.refreshToken);
     }
     return response;
   },
@@ -88,15 +93,29 @@ export const authService = {
   // 회원가입
   signup: async (userData: SignupRequest): Promise<AuthResponse> => {
     const response = await api.post<AuthResponse>("/auth/register", userData);
-    if (response.token) {
-      tokenManager.setToken(response.token);
+    if (response.accessToken) {
+      tokenManager.setAccessToken(response.accessToken);
+    }
+    if (response.refreshToken) {
+      tokenManager.setRefreshToken(response.refreshToken);
     }
     return response;
   },
 
   // 로그아웃
-  logout: () => {
-    tokenManager.removeToken();
+  logout: async () => {
+    try {
+      // 서버에 로그아웃 요청 (리프레시 토큰 무효화)
+      const refreshToken = tokenManager.getRefreshToken();
+      if (refreshToken) {
+        await api.post("/auth/logout", { refreshToken });
+      }
+    } catch (error) {
+      console.error("로그아웃 요청 실패:", error);
+    } finally {
+      // 클라이언트에서 모든 토큰 삭제
+      tokenManager.removeAllTokens();
+    }
   },
 
   // 현재 사용자 정보 조회

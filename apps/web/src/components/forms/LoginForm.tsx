@@ -21,7 +21,7 @@ export default function LoginForm() {
           password: formData.password,
         });
 
-        showSuccess(response.message || "로그인이 완료되었습니다!");
+        showSuccess("로그인이 완료되었습니다!");
 
         // 로그인 성공 후 홈 페이지로 리다이렉트
         setTimeout(() => {
