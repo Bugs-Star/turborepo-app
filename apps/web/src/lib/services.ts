@@ -1,5 +1,33 @@
 import { api, tokenManager } from "./api";
 
+// 이미지 URL 포트 수정 유틸리티 함수
+const fixImageUrl = (url: string): string => {
+  // 상대 경로인 경우 API 서버의 완전한 URL로 변환
+  if (url && url.startsWith("/uploads/")) {
+    return `http://localhost:3002${url}`;
+  }
+
+  // localhost:3001인 경우 3002로 변경
+  if (url && url.includes("localhost:3001")) {
+    return url.replace("localhost:3001", "localhost:3002");
+  }
+
+  return url;
+};
+
+// 상품 데이터의 이미지 URL 수정
+const fixProductImageUrl = (product: any): any => {
+  return {
+    ...product,
+    productImg: fixImageUrl(product.productImg),
+  };
+};
+
+// 상품 배열의 이미지 URL 수정
+const fixProductsImageUrls = (products: any[]): any[] => {
+  return products.map(fixProductImageUrl);
+};
+
 // 타입 정의
 export interface User {
   _id: string;
@@ -31,9 +59,11 @@ export interface SignupRequest {
 }
 
 export interface AuthResponse {
-  message: string;
-  token?: string;
+  message?: string;
+  accessToken?: string;
+  refreshToken?: string;
   user?: User;
+  _id?: string;
 }
 
 export interface ProductsResponse {
@@ -51,8 +81,11 @@ export const authService = {
   // 로그인
   login: async (credentials: LoginRequest): Promise<AuthResponse> => {
     const response = await api.post<AuthResponse>("/auth/login", credentials);
-    if (response.token) {
-      tokenManager.setToken(response.token);
+    if (response.accessToken) {
+      tokenManager.setAccessToken(response.accessToken);
+    }
+    if (response.refreshToken) {
+      tokenManager.setRefreshToken(response.refreshToken);
     }
     return response;
   },
@@ -60,15 +93,29 @@ export const authService = {
   // 회원가입
   signup: async (userData: SignupRequest): Promise<AuthResponse> => {
     const response = await api.post<AuthResponse>("/auth/register", userData);
-    if (response.token) {
-      tokenManager.setToken(response.token);
+    if (response.accessToken) {
+      tokenManager.setAccessToken(response.accessToken);
+    }
+    if (response.refreshToken) {
+      tokenManager.setRefreshToken(response.refreshToken);
     }
     return response;
   },
 
   // 로그아웃
-  logout: () => {
-    tokenManager.removeToken();
+  logout: async () => {
+    try {
+      // 서버에 로그아웃 요청 (리프레시 토큰 무효화)
+      const refreshToken = tokenManager.getRefreshToken();
+      if (refreshToken) {
+        await api.post("/auth/logout", { refreshToken });
+      }
+    } catch (error) {
+      console.error("로그아웃 요청 실패:", error);
+    } finally {
+      // 클라이언트에서 모든 토큰 삭제
+      tokenManager.removeAllTokens();
+    }
   },
 
   // 현재 사용자 정보 조회
@@ -94,17 +141,31 @@ export const productService = {
     if (params?.limit) queryParams.append("limit", params.limit.toString());
 
     const url = `/products${queryParams.toString() ? `?${queryParams.toString()}` : ""}`;
-    return await api.get<ProductsResponse>(url);
+    const response = await api.get<ProductsResponse>(url);
+    return {
+      ...response,
+      products: fixProductsImageUrls(response.products),
+    };
   },
 
   // 특정 상품 조회
   getProduct: async (id: string): Promise<{ product: Product }> => {
-    return await api.get<{ product: Product }>(`/products/${id}`);
+    const response = await api.get<{ product: Product }>(`/products/${id}`);
+    return {
+      ...response,
+      product: fixProductImageUrl(response.product),
+    };
   },
 
   // 추천 상품 목록 조회
   getRecommendedProducts: async (): Promise<{ products: Product[] }> => {
-    return await api.get<{ products: Product[] }>("/products/recommended");
+    const response = await api.get<{ products: Product[] }>(
+      "/products/recommended"
+    );
+    return {
+      ...response,
+      products: fixProductsImageUrls(response.products),
+    };
   },
 
   // 카테고리별 상품 조회

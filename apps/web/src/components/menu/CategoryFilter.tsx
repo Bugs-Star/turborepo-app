@@ -39,7 +39,7 @@ export default function CategoryFilter({
   return (
     <>
       {/* Category Navigation */}
-      <div className="flex justify-center space-x-8 mb-6">
+      <div className="flex justify-center space-x-8 mb-6 pt-4">
         {categories.map((category) => (
           <button
             key={category}
