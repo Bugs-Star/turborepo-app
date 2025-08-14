@@ -197,53 +197,78 @@ export const api = {
 export const tokenManager = {
   // 액세스 토큰 저장
   setAccessToken: (token: string) => {
-    localStorage.setItem("accessToken", token);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("accessToken", token);
+    }
   },
 
   // 리프레시 토큰 저장
   setRefreshToken: (token: string) => {
-    localStorage.setItem("refreshToken", token);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("refreshToken", token);
+    }
   },
 
   // 액세스 토큰 가져오기
   getAccessToken: () => {
-    return localStorage.getItem("accessToken");
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("accessToken");
+    }
+    return null;
   },
 
   // 리프레시 토큰 가져오기
   getRefreshToken: () => {
-    return localStorage.getItem("refreshToken");
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("refreshToken");
+    }
+    return null;
   },
 
   // 모든 토큰 삭제
   removeAllTokens: () => {
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+    }
   },
 
   // 토큰 존재 여부 확인
   hasTokens: () => {
-    return !!(
-      localStorage.getItem("accessToken") &&
-      localStorage.getItem("refreshToken")
-    );
+    if (typeof window !== "undefined") {
+      return !!(
+        localStorage.getItem("accessToken") &&
+        localStorage.getItem("refreshToken")
+      );
+    }
+    return false;
   },
 
   // 기존 호환성을 위한 함수들
   setToken: (token: string) => {
-    localStorage.setItem("accessToken", token);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("accessToken", token);
+    }
   },
 
   getToken: () => {
-    return localStorage.getItem("accessToken");
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("accessToken");
+    }
+    return null;
   },
 
   removeToken: () => {
-    localStorage.removeItem("accessToken");
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("accessToken");
+    }
   },
 
   hasToken: () => {
-    return !!localStorage.getItem("accessToken");
+    if (typeof window !== "undefined") {
+      return !!localStorage.getItem("accessToken");
+    }
+    return false;
   },
 };
 

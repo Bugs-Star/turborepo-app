@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { X } from "lucide-react";
 
 interface ToastProps {
@@ -20,17 +20,21 @@ export const Toast = ({
 }: ToastProps) => {
   const [isShowing, setIsShowing] = useState(false);
 
+  const handleClose = useCallback(() => {
+    setIsShowing(false);
+    setTimeout(onClose, 300);
+  }, [onClose]);
+
   useEffect(() => {
     if (isVisible) {
       setIsShowing(true);
       const timer = setTimeout(() => {
-        setIsShowing(false);
-        setTimeout(onClose, 300); // 애니메이션 완료 후 제거
+        handleClose();
       }, duration);
 
       return () => clearTimeout(timer);
     }
-  }, [isVisible, duration, onClose]);
+  }, [isVisible, duration, handleClose]);
 
   const typeClasses = {
     success: "bg-green-500 text-white",
@@ -61,10 +65,7 @@ export const Toast = ({
         <span className="font-bold">{iconClasses[type]}</span>
         <span className="flex-1">{message}</span>
         <button
-          onClick={() => {
-            setIsShowing(false);
-            setTimeout(onClose, 300);
-          }}
+          onClick={handleClose}
           className="ml-2 hover:opacity-70 transition-opacity"
         >
           <X size={16} />
