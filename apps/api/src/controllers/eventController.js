@@ -16,8 +16,8 @@ export const createEvent = async (req, res) => {
       eventOrder
     } = req.body;
 
-    console.log('요청 바디:', req.body);
-    console.log('추출된 필드들:', { title, description, startDate, endDate, isActive, eventOrder });
+    // console.log('요청 바디:', req.body);
+    // console.log('추출된 필드들:', { title, description, startDate, endDate, isActive, eventOrder });
 
     // 현재 로그인한 관리자 ID
     const adminId = req.admin._id;
@@ -27,7 +27,7 @@ export const createEvent = async (req, res) => {
 
     if (req.files && req.files.eventImg) {
       try {
-        console.log('이벤트 이미지 압축 시작...');
+        // console.log('이벤트 이미지 압축 시작...');
         
         const compressionResult = await compressMulterFile(
           req.files.eventImg[0], 
@@ -35,12 +35,12 @@ export const createEvent = async (req, res) => {
           'event-image'
         );
 
-        console.log('이벤트 이미지 압축 완료:', {
-          원본크기: `${compressionResult.original.sizeKB}KB`,
-          압축크기: `${compressionResult.compressed.sizeKB}KB`,
-          압축률: `${compressionResult.compressionRatio}%`,
-          절약공간: `${Math.round(compressionResult.savedSpace / 1024 * 100) / 100}KB`
-        });
+        // console.log('이벤트 이미지 압축 완료:', {
+        //   원본크기: `${compressionResult.original.sizeKB}KB`,
+        //   압축크기: `${compressionResult.compressed.sizeKB}KB`,
+        //   압축률: `${compressionResult.compressionRatio}%`,
+        //   절약공간: `${Math.round(compressionResult.savedSpace / 1024 * 100) / 100}KB`
+        // });
 
         processedEventImg = compressionResult.compressed.base64;
         
@@ -182,7 +182,7 @@ export const updateEvent = async (req, res) => {
     // 이벤트 이미지 업데이트 (압축 + Base64)
     if (req.files && req.files.eventImg) {
       try {
-        console.log('이벤트 이미지 압축 시작...');
+        // console.log('이벤트 이미지 압축 시작...');
         
         // 임시 파일 생성
         const tempDir = os.tmpdir();
@@ -198,12 +198,12 @@ export const updateEvent = async (req, res) => {
           'event-image'
         );
 
-        console.log('이벤트 이미지 압축 완료:', {
-          원본크기: `${compressionResult.original.sizeKB}KB`,
-          압축크기: `${compressionResult.compressed.sizeKB}KB`,
-          압축률: `${compressionResult.compressionRatio}%`,
-          절약공간: `${Math.round(compressionResult.savedSpace / 1024 * 100) / 100}KB`
-        });
+        // console.log('이벤트 이미지 압축 완료:', {
+        //   원본크기: `${compressionResult.original.sizeKB}KB`,
+        //   압축크기: `${compressionResult.compressed.sizeKB}KB`,
+        //   압축률: `${compressionResult.compressionRatio}%`,
+        //   절약공간: `${Math.round(compressionResult.savedSpace / 1024 * 100) / 100}KB`
+        // });
 
         event.eventImg = compressionResult.compressed.base64;
 
