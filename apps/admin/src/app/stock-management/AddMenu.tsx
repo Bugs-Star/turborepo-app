@@ -23,24 +23,26 @@ const AddMenu = () => {
       uploadLabel="메뉴 이미지"
       onSubmit={() => console.log("메뉴 업로드")}
       buttonLabel="메뉴 추가"
+      headerExtra={
+        <div className="flex gap-3 mb-6">
+          {categoryOptions.map(({ key, icon: Icon }) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => setCategory(key)}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg border ${
+                category === key
+                  ? "bg-[#005C14] text-white"
+                  : "bg-white border-gray-300"
+              }`}
+            >
+              <Icon className="cursor-pointer" />
+            </button>
+          ))}
+        </div>
+      }
     >
       {/* children → 카테고리 선택 */}
-      <div className="flex gap-3 mb-6">
-        {categoryOptions.map(({ key, icon: Icon }) => (
-          <button
-            key={key}
-            type="button"
-            onClick={() => setCategory(key)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg border ${
-              category === key
-                ? "bg-[#005C14] text-white"
-                : "bg-white border-gray-300"
-            }`}
-          >
-            <Icon className="cursor-pointer" />
-          </button>
-        ))}
-      </div>
 
       {/* 가격 */}
       <div>
