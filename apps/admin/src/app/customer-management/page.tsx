@@ -1,7 +1,13 @@
+import CustomerInfo from "./CustomerInfo";
 import CustomerList from "./CustomerList";
 
 const CustomerManagement = () => {
-  return <CustomerList />;
+  return (
+    <>
+      <CustomerInfo />
+      <CustomerList />
+    </>
+  );
 };
 
 export default CustomerManagement;
