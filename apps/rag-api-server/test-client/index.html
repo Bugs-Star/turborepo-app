@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RAG Agent Test Client</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      body {
+        font-family: "Pretendard", sans-serif;
+      }
+      .source-doc {
+        border-left: 3px solid #10b981;
+        background-color: #f3f4f6;
+        padding: 12px;
+        margin-bottom: 12px;
+        border-radius: 6px;
+        font-size: 0.875rem;
+        white-space: pre-wrap;
+        word-break: break-all;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-100">
+    <div class="container mx-auto max-w-3xl p-4 md:p-8">
+      <div class="bg-white rounded-lg shadow-lg p-6">
+        <h1 class="text-2xl font-bold text-gray-800 mb-4">
+          🤖 RAG Agent Test Client
+        </h1>
+        <p class="text-gray-600 mb-6">
+          ClickHouse 데이터를 기반으로 AI 에이전트에게 질문해보세요.
+        </p>
+
+        <form id="query-form" class="flex flex-col sm:flex-row gap-2 mb-6">
+          <input
+            type="text"
+            id="question-input"
+            placeholder="예: 7월달에 제일 잘 팔린 메뉴는 뭐야?"
+            class="flex-grow p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"
+            required
+          />
+          <button
+            type="submit"
+            id="submit-button"
+            class="bg-emerald-500 text-white font-bold py-3 px-6 rounded-md hover:bg-emerald-600 transition disabled:bg-gray-400"
+          >
+            질문하기
+          </button>
+        </form>
+
+        <div id="loading-indicator" class="hidden text-center my-4">
+          <p class="text-gray-500">⏳ 답변을 생성하는 중입니다...</p>
+        </div>
+
+        <div id="result-container" class="space-y-6">
+          <div>
+            <h2 class="text-xl font-semibold text-gray-700 mb-2">💬 AI 답변</h2>
+            <div
+              id="answer"
+              class="p-4 bg-emerald-50 rounded-md text-gray-800 min-h-[50px]"
+            ></div>
+          </div>
+          <div>
+            <h2 class="text-xl font-semibold text-gray-700 mb-2">
+              📚 근거 데이터
+            </h2>
+            <div id="sources" class="text-gray-600">
+              <p class="text-sm text-gray-400">
+                답변의 근거가 된 데이터가 여기에 표시됩니다.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="/app.js"></script>
+  </body>
+</html>

@@ -1,6 +1,8 @@
 // config.js
 // 이 파일은 Redis와 ClickHouse 관련 설정값들을 모아놓은 모듈입니다.
 // 주로 워커(worker) 서버에서 Redis 스트림을 읽고, ClickHouse에 데이터를 저장할 때 사용합니다.
+import dotenv from "dotenv";
+dotenv.config(); // .env 파일 읽어서 process.env에 반영
 
 // REDIS_STREAM_KEY: Redis 스트림의 이름입니다.
 // Redis 스트림은 메시지 큐 같은 역할을 하며, 이 이름으로 이벤트들이 쌓입니다.
@@ -24,9 +26,14 @@ export const REDIS_CONSUMER_NAME = `worker_${Math.random()
 // basicAuth: 기본 인증 정보(아이디: default, 비밀번호는 빈 문자열).
 // debug: 디버그 모드 여부 (false면 로그 출력 최소화).
 export const CLICKHOUSE_CONFIG = {
-  url: "http://localhost:8123",
-  basicAuth: { username: "default", password: "" },
-  debug: false,
+  url: "http://default:1234@localhost:8123", // HTTP URL 형식
+  debug: true,
+  // url: process.env.CLICKHOUSE_HOST,
+  // basicAuth: {
+  //   username: process.env.CLICKHOUSE_USERNAME,
+  //   password: process.env.CLICKHOUSE_PASSWORD,
+  // },
+  // debug: false,
 };
 
 // 개념 정리
