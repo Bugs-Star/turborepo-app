@@ -3,6 +3,9 @@ import bodyParser from "body-parser";
 import { generateDummyEvents, generateDummyOrders } from "./dummyData.js";
 import redis from "../redis/redisClient.js";
 
+import dotenv from "dotenv";
+dotenv.config(); // .env 파일 읽어서 process.env에 반영
+
 const app = express();
 app.use(bodyParser.json());
 
@@ -80,7 +83,7 @@ app.post("/orders/dummy", async (req, res) => {
   }
 });
 
-const PORT = 4000;
+const PORT = process.env.API_PORT;
 app.listen(PORT, () => {
   console.log(`Dummy API server running on http://localhost:${PORT}`);
 });

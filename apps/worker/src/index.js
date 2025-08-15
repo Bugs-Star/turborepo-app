@@ -3,6 +3,9 @@
 import { aggregateSummaryStats } from "./aggregators/summaryStats.js";
 import { aggregateBestSellers } from "./aggregators/bestSellers.js";
 import { aggregateGoldenPath } from "./aggregators/goldenPath.js";
+// 새로 만든 RAG 집계 함수를 import
+import { aggregateRagUnifiedSummary } from "./aggregators/ragUnifiedSummary.js";
+
 import schedule from "node-schedule"; // cron 스타일 스케줄링
 
 // 설정 파일에서 이 워커의 고유 이름을 가져옵니다.
@@ -78,6 +81,7 @@ async function runAllAggregations() {
   try {
     console.log("[Worker] Aggregation started");
 
+    // 1. 개별 사전 집계 테이블들을 먼저 생성합니다.
     await aggregateSummaryStats("weekly");
     await aggregateSummaryStats("monthly");
 
@@ -87,7 +91,15 @@ async function runAllAggregations() {
     await aggregateGoldenPath("weekly");
     await aggregateGoldenPath("monthly");
 
-    console.log("[Worker] All aggregations completed");
+    console.log(
+      "[Worker] Individual aggregations completed. Starting RAG unified aggregation..."
+    );
+
+    // 2. 위 테이블들을 기반으로 최종 RAG 통합 테이블을 생성합니다.
+    await aggregateRagUnifiedSummary("weekly");
+    await aggregateRagUnifiedSummary("monthly");
+
+    console.log("[Worker] All aggregations completed successfully");
   } catch (err) {
     console.error("[Worker] Aggregation error:", err);
   }
