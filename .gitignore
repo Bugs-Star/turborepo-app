@@ -12,6 +12,7 @@ node_modules
 .env.test.local
 .env.production.local
 env.example
+hf_env/
 
 # Testing
 coverage
@@ -39,3 +40,7 @@ yarn-error.log*
 *.pem
 
 .vscode
+
+# python
+__pycache__/
+

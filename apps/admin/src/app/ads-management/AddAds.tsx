@@ -1,23 +1,56 @@
 "use client";
-import { useState } from "react";
-import { Calendar } from "lucide-react";
-import BaseForm from "@/components/BaseForm";
 
-const AddEvent = () => {
+import BaseForm from "@/components/BaseForm";
+import { ArrowDown, ArrowUp, Calendar } from "lucide-react";
+import { useState } from "react";
+
+type CategoryType = "topPosition" | "bottomPosition";
+
+const categoryOptions: {
+  key: CategoryType;
+  icon: React.ElementType;
+  label: string;
+}[] = [
+  { key: "topPosition", icon: ArrowUp, label: "상단 위치" },
+  { key: "bottomPosition", icon: ArrowDown, label: "하단 위치" },
+];
+
+const AddAds = () => {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
+  const [category, setCategory] = useState<CategoryType>("topPosition");
+
   return (
     <BaseForm
-      title="새 이벤트 업로드"
-      uploadLabel="이벤트 배너 이미지"
-      onSubmit={() => console.log("이벤트 업로드")}
-      buttonLabel="이벤트 등록"
+      title="새 광고 항목 추가"
+      uploadLabel="광고 이미지"
+      onSubmit={() => console.log("광고 업로드")}
+      buttonLabel="광고 등록"
+      headerExtra={
+        <div className="flex gap-3 mb-6">
+          {categoryOptions.map(({ key, icon: Icon, label }) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => setCategory(key)}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg border cursor-pointer ${
+                category === key
+                  ? "bg-[#005C14] text-white"
+                  : "bg-white border-gray-300"
+              }`}
+            >
+              <span>{label}</span>
+              <Icon />
+            </button>
+          ))}
+        </div>
+      }
     >
       {/* children → 이벤트 기간 */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          이벤트 기간
+          광고 기간
         </label>
         <div className="flex items-center gap-2">
           <div className="relative flex-1">
@@ -45,4 +78,4 @@ const AddEvent = () => {
   );
 };
 
-export default AddEvent;
+export default AddAds;
