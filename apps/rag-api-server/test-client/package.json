@@ -1,0 +1,13 @@
+{
+  "name": "rag-test-client",
+  "version": "1.0.0",
+  "description": "A simple frontend client to test the RAG API server.",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}

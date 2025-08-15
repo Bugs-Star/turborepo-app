@@ -43,7 +43,7 @@ const userSchema = new mongoose.Schema({
     }
   }]
 }, {
-  timestamps: { createdAt: true, updatedAt: false }
+  timestamps: true
 });
 
 // 비밀번호 해싱 미들웨어

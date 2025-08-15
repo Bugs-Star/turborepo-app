@@ -32,6 +32,6 @@ async function sendDummyOrders(count = 30) {
 
 // 🔹 실행
 (async () => {
-  //   await sendDummyEvents(50);
+  await sendDummyEvents(50);
   await sendDummyOrders(30);
 })();

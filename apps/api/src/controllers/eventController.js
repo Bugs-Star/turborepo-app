@@ -1,5 +1,8 @@
 import Event from '../models/Event.js';
 import { compressMulterFile } from '../utils/imageUtils.js';
+import fs from 'fs';
+import path from 'path';
+import os from 'os';
 
 // 이벤트 등록
 export const createEvent = async (req, res) => {
@@ -10,53 +13,56 @@ export const createEvent = async (req, res) => {
       startDate,
       endDate,
       isActive,
-      priority
+      eventOrder
     } = req.body;
+
+    // console.log('요청 바디:', req.body);
+    // console.log('추출된 필드들:', { title, description, startDate, endDate, isActive, eventOrder });
 
     // 현재 로그인한 관리자 ID
     const adminId = req.admin._id;
 
-    // 배너 이미지 처리 (압축 + Base64)
-    let processedBannerImg = null;
+    // 이벤트 이미지 처리 (압축 + Base64)
+    let processedEventImg = null;
 
-    if (req.file) {
+    if (req.files && req.files.eventImg) {
       try {
-        console.log('이벤트 배너 이미지 압축 시작...');
+        // console.log('이벤트 이미지 압축 시작...');
         
         const compressionResult = await compressMulterFile(
-          req.file, 
+          req.files.eventImg[0], 
           { maxWidth: 1200, maxHeight: 400, quality: 85 }, 
-          'event-banner'
+          'event-image'
         );
 
-        console.log('이벤트 배너 이미지 압축 완료:', {
-          원본크기: `${compressionResult.original.sizeKB}KB`,
-          압축크기: `${compressionResult.compressed.sizeKB}KB`,
-          압축률: `${compressionResult.compressionRatio}%`,
-          절약공간: `${Math.round(compressionResult.savedSpace / 1024 * 100) / 100}KB`
-        });
+        // console.log('이벤트 이미지 압축 완료:', {
+        //   원본크기: `${compressionResult.original.sizeKB}KB`,
+        //   압축크기: `${compressionResult.compressed.sizeKB}KB`,
+        //   압축률: `${compressionResult.compressionRatio}%`,
+        //   절약공간: `${Math.round(compressionResult.savedSpace / 1024 * 100) / 100}KB`
+        // });
 
-        processedBannerImg = compressionResult.compressed.base64;
+        processedEventImg = compressionResult.compressed.base64;
         
       } catch (compressionError) {
-        console.error('이벤트 배너 이미지 압축 실패:', compressionError);
+        console.error('이벤트 이미지 압축 실패:', compressionError);
         return res.status(400).json({ message: '이미지 압축에 실패했습니다.' });
       }
     }
 
-    if (!processedBannerImg) {
-      return res.status(400).json({ message: '배너 이미지가 필요합니다.' });
+    if (!processedEventImg) {
+      return res.status(400).json({ message: '이벤트 이미지가 필요합니다.' });
     }
 
     const event = new Event({
       createdBy: adminId,
       title,
       description,
-      bannerImg: processedBannerImg, // Base64 문자열로 저장
+      eventImg: processedEventImg, // Base64 문자열로 저장
       startDate,
       endDate,
       isActive: isActive !== undefined ? isActive : true,
-      priority: priority || 0
+      eventOrder: eventOrder || 0
     });
 
     await event.save();
@@ -73,6 +79,9 @@ export const createEvent = async (req, res) => {
 // 이벤트 목록 조회 (공통 - 관리자/일반 사용자)
 export const getEvents = async (req, res) => {
   try {
+    // 만료된 이벤트 자동 비활성화
+    await Event.deactivateExpiredEvents();
+
     const { isActive, page = 1, limit = 10 } = req.query;
 
     // 쿼리 조건 구성
@@ -86,7 +95,7 @@ export const getEvents = async (req, res) => {
 
     const events = await Event.find(query)
       .select('-createdBy') // 생성자 정보는 제외 (공통)
-      .sort({ priority: -1, createdAt: -1 })
+      .sort({ eventOrder: -1, createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit));
 
@@ -109,6 +118,9 @@ export const getEvents = async (req, res) => {
 // 활성 이벤트 목록 조회 (공통 - 관리자/일반 사용자)
 export const getActiveEvents = async (req, res) => {
   try {
+    // 만료된 이벤트 자동 비활성화
+    await Event.deactivateExpiredEvents();
+    
     const now = new Date();
     
     const events = await Event.find({
@@ -117,7 +129,7 @@ export const getActiveEvents = async (req, res) => {
       endDate: { $gte: now }
     })
     .select('-createdBy') // 생성자 정보는 제외 (공통)
-    .sort({ priority: -1, createdAt: -1 });
+    .sort({ eventOrder: -1, createdAt: -1 });
 
     res.json({ events });
   } catch (error) {
@@ -158,7 +170,7 @@ export const updateEvent = async (req, res) => {
     // 업데이트 가능한 필드들
     const allowedFields = [
       'title', 'description', 'startDate', 'endDate', 
-      'isActive', 'priority'
+      'isActive', 'eventOrder'
     ];
 
     allowedFields.forEach(field => {
@@ -167,39 +179,39 @@ export const updateEvent = async (req, res) => {
       }
     });
 
-    // 배너 이미지 업데이트 (압축 + Base64)
-    if (req.file) {
+    // 이벤트 이미지 업데이트 (압축 + Base64)
+    if (req.files && req.files.eventImg) {
       try {
-        console.log('이벤트 배너 이미지 압축 시작...');
+        // console.log('이벤트 이미지 압축 시작...');
         
         // 임시 파일 생성
         const tempDir = os.tmpdir();
-        const tempFilePath = path.join(tempDir, `event-banner-update-${Date.now()}-${Math.random().toString(36).substr(2, 9)}.jpg`);
+        const tempFilePath = path.join(tempDir, `event-image-update-${Date.now()}-${Math.random().toString(36).substr(2, 9)}.jpg`);
         
         // 메모리에서 임시 파일로 저장
-        fs.writeFileSync(tempFilePath, req.file.buffer);
+        fs.writeFileSync(tempFilePath, req.files.eventImg[0].buffer);
         
-        // 이벤트 배너용 압축 설정 사용
+        // 이벤트 이미지용 압축 설정 사용
         const compressionResult = await compressMulterFile(
-          req.file, 
+          req.files.eventImg[0], 
           { maxWidth: 1200, maxHeight: 400, quality: 85 }, 
-          'event-banner'
+          'event-image'
         );
 
-        console.log('이벤트 배너 이미지 압축 완료:', {
-          원본크기: `${compressionResult.original.sizeKB}KB`,
-          압축크기: `${compressionResult.compressed.sizeKB}KB`,
-          압축률: `${compressionResult.compressionRatio}%`,
-          절약공간: `${Math.round(compressionResult.savedSpace / 1024 * 100) / 100}KB`
-        });
+        // console.log('이벤트 이미지 압축 완료:', {
+        //   원본크기: `${compressionResult.original.sizeKB}KB`,
+        //   압축크기: `${compressionResult.compressed.sizeKB}KB`,
+        //   압축률: `${compressionResult.compressionRatio}%`,
+        //   절약공간: `${Math.round(compressionResult.savedSpace / 1024 * 100) / 100}KB`
+        // });
 
-        event.bannerImg = compressionResult.compressed.base64;
+        event.eventImg = compressionResult.compressed.base64;
 
         // 임시 파일 삭제
         fs.unlinkSync(tempFilePath);
         
       } catch (compressionError) {
-        console.error('이벤트 배너 이미지 압축 실패:', compressionError);
+        console.error('이벤트 이미지 압축 실패:', compressionError);
         return res.status(400).json({ message: '이미지 압축에 실패했습니다.' });
       }
     }
@@ -251,7 +263,7 @@ export const getAdminEvents = async (req, res) => {
 
     const events = await Event.find(query)
       .populate('createdBy', 'name email') // 생성자 정보 포함
-      .sort({ priority: -1, createdAt: -1 })
+      .sort({ eventOrder: -1, createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit));
 
@@ -266,24 +278,6 @@ export const getAdminEvents = async (req, res) => {
         itemsPerPage: parseInt(limit)
       }
     });
-  } catch (error) {
-    res.status(500).json({ message: '서버 오류가 발생했습니다.' });
-  }
-};
-
-// 관리자용 특정 이벤트 조회 (생성자 정보 포함)
-export const getAdminEvent = async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    const event = await Event.findById(id)
-      .populate('createdBy', 'name email'); // 생성자 정보 포함
-
-    if (!event) {
-      return res.status(404).json({ message: '이벤트를 찾을 수 없습니다.' });
-    }
-
-    res.json({ event });
   } catch (error) {
     res.status(500).json({ message: '서버 오류가 발생했습니다.' });
   }

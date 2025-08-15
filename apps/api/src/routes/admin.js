@@ -10,7 +10,7 @@ import {
   updateEvent, 
   deleteEvent, 
   getAdminEvents, 
-  getAdminEvent 
+  getEvent 
 } from '../controllers/eventController.js';
 import { 
   createPromotion, 
@@ -36,7 +36,7 @@ router.delete('/products/:id', adminAuth, deleteProduct); // 상품 삭제
 
 // 이벤트 관리 라우트
 router.get('/events', adminAuth, getAdminEvents);     // 이벤트 목록 조회 (생성자 정보 포함)
-router.get('/events/:id', adminAuth, getAdminEvent);  // 특정 이벤트 조회 (생성자 정보 포함)
+router.get('/events/:id', adminAuth, getEvent);       // 특정 이벤트 조회
 router.post('/events', adminAuth, uploadFields, createEvent);      // 이벤트 등록
 router.put('/events/:id', adminAuth, uploadFields, updateEvent);   // 이벤트 수정
 router.delete('/events/:id', adminAuth, deleteEvent); // 이벤트 삭제
