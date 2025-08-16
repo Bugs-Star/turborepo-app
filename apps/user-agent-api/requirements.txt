@@ -1,0 +1,10 @@
+langchain
+langchain-core
+langchain-community
+langchain-google-genai
+python-dotenv
+faiss-cpu
+fastapi
+uvicorn[standard]
+
+pymongo[srv]
