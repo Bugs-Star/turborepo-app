@@ -1,0 +1,248 @@
+import { api, tokenManager } from "./api";
+
+// 이미지 URL 포트 수정 유틸리티 함수
+const fixImageUrl = (url: string): string => {
+  // 상대 경로인 경우 API 서버의 완전한 URL로 변환
+  if (url && url.startsWith("/uploads/")) {
+    return `http://localhost:3002${url}`;
+  }
+
+  // localhost:3001인 경우 3002로 변경
+  if (url && url.includes("localhost:3001")) {
+    return url.replace("localhost:3001", "localhost:3002");
+  }
+
+  return url;
+};
+
+// 상품 데이터의 이미지 URL 수정
+const fixProductImageUrl = (product: any): any => {
+  return {
+    ...product,
+    productImg: fixImageUrl(product.productImg),
+  };
+};
+
+// 상품 배열의 이미지 URL 수정
+const fixProductsImageUrls = (products: any[]): any[] => {
+  return products.map(fixProductImageUrl);
+};
+
+// 타입 정의
+export interface User {
+  _id: string;
+  name: string;
+  email: string;
+  profileImg?: string;
+}
+
+export interface Product {
+  _id: string;
+  productName: string;
+  productImg: string;
+  productContents: string;
+  category: string;
+  price: number;
+  currentStock: number;
+  isRecommended: boolean;
+  optimalStock: number;
+}
+
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface SignupRequest {
+  name: string;
+  email: string;
+  password: string;
+}
+
+export interface AuthResponse {
+  message?: string;
+  accessToken?: string;
+  refreshToken?: string;
+  user?: User;
+  _id?: string;
+}
+
+export interface ProductsResponse {
+  products: Product[];
+  pagination?: {
+    currentPage: number;
+    totalPages: number;
+    totalItems: number;
+    itemsPerPage: number;
+  };
+}
+
+// 인증 관련 API
+export const authService = {
+  // 로그인
+  login: async (credentials: LoginRequest): Promise<AuthResponse> => {
+    const response = await api.post<AuthResponse>("/auth/login", credentials);
+    if (response.accessToken) {
+      tokenManager.setAccessToken(response.accessToken);
+    }
+    if (response.refreshToken) {
+      tokenManager.setRefreshToken(response.refreshToken);
+    }
+    return response;
+  },
+
+  // 회원가입
+  signup: async (userData: SignupRequest): Promise<AuthResponse> => {
+    const response = await api.post<AuthResponse>("/auth/register", userData);
+    if (response.accessToken) {
+      tokenManager.setAccessToken(response.accessToken);
+    }
+    if (response.refreshToken) {
+      tokenManager.setRefreshToken(response.refreshToken);
+    }
+    return response;
+  },
+
+  // 로그아웃
+  logout: async () => {
+    try {
+      // 서버에 로그아웃 요청 (리프레시 토큰 무효화)
+      const refreshToken = tokenManager.getRefreshToken();
+      if (refreshToken) {
+        await api.post("/auth/logout", { refreshToken });
+      }
+    } catch (error) {
+      console.error("로그아웃 요청 실패:", error);
+    } finally {
+      // 클라이언트에서 모든 토큰 삭제
+      tokenManager.removeAllTokens();
+    }
+  },
+
+  // 현재 사용자 정보 조회
+  getCurrentUser: async (): Promise<User> => {
+    return await api.get<User>("/auth/me");
+  },
+};
+
+// 상품 관련 API
+export const productService = {
+  // 전체 상품 목록 조회
+  getProducts: async (params?: {
+    category?: string;
+    isRecommended?: boolean;
+    page?: number;
+    limit?: number;
+  }): Promise<ProductsResponse> => {
+    const queryParams = new URLSearchParams();
+    if (params?.category) queryParams.append("category", params.category);
+    if (params?.isRecommended !== undefined)
+      queryParams.append("isRecommended", params.isRecommended.toString());
+    if (params?.page) queryParams.append("page", params.page.toString());
+    if (params?.limit) queryParams.append("limit", params.limit.toString());
+
+    const url = `/products${queryParams.toString() ? `?${queryParams.toString()}` : ""}`;
+    const response = await api.get<ProductsResponse>(url);
+    return {
+      ...response,
+      products: fixProductsImageUrls(response.products),
+    };
+  },
+
+  // 특정 상품 조회
+  getProduct: async (id: string): Promise<{ product: Product }> => {
+    const response = await api.get<{ product: Product }>(`/products/${id}`);
+    return {
+      ...response,
+      product: fixProductImageUrl(response.product),
+    };
+  },
+
+  // 추천 상품 목록 조회
+  getRecommendedProducts: async (): Promise<{ products: Product[] }> => {
+    const response = await api.get<{ products: Product[] }>(
+      "/products/recommended"
+    );
+    return {
+      ...response,
+      products: fixProductsImageUrls(response.products),
+    };
+  },
+
+  // 카테고리별 상품 조회
+  getProductsByCategory: async (
+    category: string
+  ): Promise<ProductsResponse> => {
+    return await productService.getProducts({ category });
+  },
+};
+
+// 사용자 관련 API
+export const userService = {
+  // 사용자 프로필 조회
+  getProfile: async (): Promise<User> => {
+    const response = await api.get<{ user: User }>("/auth/profile");
+    return response.user;
+  },
+
+  // 사용자 프로필 수정
+  updateProfile: async (formData: FormData): Promise<{ message: string }> => {
+    const response = await api.put<{ message: string }>(
+      "/auth/profile",
+      formData
+    );
+    return response;
+  },
+
+  // 비밀번호 변경
+  changePassword: async (passwords: {
+    currentPassword: string;
+    newPassword: string;
+  }): Promise<{ message: string }> => {
+    return await api.put<{ message: string }>("/auth/profile", {
+      currentPassword: passwords.currentPassword,
+      newPassword: passwords.newPassword,
+    });
+  },
+};
+
+// 장바구니 관련 API (향후 구현 예정)
+export const cartService = {
+  // 장바구니 조회
+  getCart: async () => {
+    return await api.get("/cart");
+  },
+
+  // 장바구니에 상품 추가
+  addToCart: async (productId: string, quantity: number = 1) => {
+    return await api.post("/cart/items", { productId, quantity });
+  },
+
+  // 장바구니에서 상품 제거
+  removeFromCart: async (itemId: string) => {
+    return await api.delete(`/cart/items/${itemId}`);
+  },
+
+  // 장바구니 상품 수량 변경
+  updateCartItemQuantity: async (itemId: string, quantity: number) => {
+    return await api.put(`/cart/items/${itemId}`, { quantity });
+  },
+};
+
+// 주문 관련 API (향후 구현 예정)
+export const orderService = {
+  // 주문 내역 조회
+  getOrderHistory: async () => {
+    return await api.get("/orders");
+  },
+
+  // 주문 생성
+  createOrder: async (orderData: any) => {
+    return await api.post("/orders", orderData);
+  },
+
+  // 주문 상세 조회
+  getOrderDetail: async (orderId: string) => {
+    return await api.get(`/orders/${orderId}`);
+  },
+};
