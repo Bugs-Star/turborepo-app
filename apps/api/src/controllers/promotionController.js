@@ -7,27 +7,52 @@ export const createPromotion = async (req, res) => {
     const {
       title,
       description,
-      linkUrl,
       startDate,
       endDate,
-      isActive,
-      priority,
-      targetAudience,
-      displayLocation
+      position
     } = req.body;
 
     // 현재 로그인한 관리자 ID
     const adminId = req.admin._id;
 
+    // 필수 필드 검증
+    if (!title) {
+      return res.status(400).json({ message: '제목이 필요합니다.' });
+    }
+
+    if (!description) {
+      return res.status(400).json({ message: '설명이 필요합니다.' });
+    }
+
+    if (!startDate) {
+      return res.status(400).json({ message: '시작 날짜가 필요합니다.' });
+    }
+
+    if (!endDate) {
+      return res.status(400).json({ message: '종료 날짜가 필요합니다.' });
+    }
+
+    // 날짜 유효성 검증
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    
+    if (start >= end) {
+      return res.status(400).json({ message: '종료 날짜는 시작 날짜보다 늦어야 합니다.' });
+    }
+
+    // position 값 검증
+    const validPositions = ['up', 'down'];
+    const validatedPosition = position && validPositions.includes(position) ? position : 'up';
+
     // 프로모션 이미지 처리 (압축 + Base64)
     let processedImageUrl = null;
 
-    if (req.file) {
+    if (req.files && req.files.promotionImg) {
       try {
         console.log('프로모션 이미지 압축 시작...');
         
         const compressionResult = await compressMulterFile(
-          req.file, 
+          req.files.promotionImg[0], 
           { maxWidth: 1200, maxHeight: 400, quality: 85 }, 
           'promotion-image'
         );
@@ -52,17 +77,14 @@ export const createPromotion = async (req, res) => {
     }
 
     const promotion = new Promotion({
-      createdBy: adminId,
+      adminId: adminId,
       title,
       description,
-      imageUrl: processedImageUrl, // Base64 문자열로 저장
-      linkUrl,
-      startDate,
-      endDate,
-      isActive: isActive !== undefined ? isActive : true,
-      priority: priority || 0,
-      targetAudience: targetAudience || 'all',
-      displayLocation: displayLocation || 'home'
+      promotionImg: processedImageUrl, // Base64 문자열로 저장
+      startDate: start,
+      endDate: end,
+      isActive: true,
+      position: validatedPosition
     });
 
     await promotion.save();
@@ -79,7 +101,7 @@ export const createPromotion = async (req, res) => {
 // 프로모션 목록 조회 (공통 - 관리자/일반 사용자)
 export const getPromotions = async (req, res) => {
   try {
-    const { isActive, displayLocation, targetAudience, page = 1, limit = 10 } = req.query;
+    const { isActive, page = 1, limit = 10 } = req.query;
 
     // 쿼리 조건 구성
     const query = {};
@@ -88,19 +110,11 @@ export const getPromotions = async (req, res) => {
       query.isActive = isActive === 'true';
     }
 
-    if (displayLocation) {
-      query.displayLocation = displayLocation;
-    }
-
-    if (targetAudience) {
-      query.targetAudience = targetAudience;
-    }
-
     const skip = (page - 1) * limit;
 
     const promotions = await Promotion.find(query)
-      .select('-createdBy') // 생성자 정보는 제외 (공통)
-      .sort({ priority: -1, createdAt: -1 })
+      .select('-adminId') // 생성자 정보는 제외 (공통)
+      .sort({ position: -1, createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit));
 
@@ -123,7 +137,6 @@ export const getPromotions = async (req, res) => {
 // 활성 프로모션 목록 조회 (공통 - 관리자/일반 사용자)
 export const getActivePromotions = async (req, res) => {
   try {
-    const { displayLocation, targetAudience } = req.query;
     const now = new Date();
 
     // 쿼리 조건 구성
@@ -132,18 +145,10 @@ export const getActivePromotions = async (req, res) => {
       startDate: { $lte: now },
       endDate: { $gte: now }
     };
-
-    if (displayLocation) {
-      query.displayLocation = displayLocation;
-    }
-
-    if (targetAudience) {
-      query.targetAudience = targetAudience;
-    }
     
     const promotions = await Promotion.find(query)
-      .select('-createdBy') // 생성자 정보는 제외 (공통)
-      .sort({ priority: -1, createdAt: -1 });
+      .select('-adminId') // 생성자 정보는 제외 (공통)
+      .sort({ position: -1, createdAt: -1 });
 
     res.json({ promotions });
   } catch (error) {
@@ -157,7 +162,7 @@ export const getPromotion = async (req, res) => {
     const { id } = req.params;
 
     const promotion = await Promotion.findById(id)
-      .select('-createdBy'); // 생성자 정보는 제외 (공통)
+      .select('-adminId'); // 생성자 정보는 제외 (공통)
 
     if (!promotion) {
       return res.status(404).json({ message: '프로모션을 찾을 수 없습니다.' });
@@ -183,8 +188,8 @@ export const updatePromotion = async (req, res) => {
 
     // 업데이트 가능한 필드들
     const allowedFields = [
-      'title', 'description', 'linkUrl', 'startDate', 'endDate', 
-      'isActive', 'priority', 'targetAudience', 'displayLocation'
+      'title', 'description', 'startDate', 'endDate', 
+      'isActive', 'position'
     ];
 
     allowedFields.forEach(field => {
@@ -194,12 +199,12 @@ export const updatePromotion = async (req, res) => {
     });
 
     // 프로모션 이미지 업데이트 (압축 + Base64)
-    if (req.file) {
+    if (req.files && req.files.promotionImg) {
       try {
         console.log('프로모션 이미지 압축 시작...');
         
         const compressionResult = await compressMulterFile(
-          req.file, 
+          req.files.promotionImg[0], 
           { maxWidth: 1200, maxHeight: 400, quality: 85 }, 
           'promotion-image'
         );
@@ -211,7 +216,7 @@ export const updatePromotion = async (req, res) => {
           절약공간: `${Math.round(compressionResult.savedSpace / 1024 * 100) / 100}KB`
         });
 
-        promotion.imageUrl = compressionResult.compressed.base64;
+        promotion.promotionImg = compressionResult.compressed.base64;
         
       } catch (compressionError) {
         console.error('프로모션 이미지 압축 실패:', compressionError);
@@ -253,7 +258,7 @@ export const deletePromotion = async (req, res) => {
 // 관리자용 프로모션 목록 조회 (생성자 정보 포함)
 export const getAdminPromotions = async (req, res) => {
   try {
-    const { isActive, displayLocation, targetAudience, page = 1, limit = 10 } = req.query;
+    const { isActive, page = 1, limit = 10 } = req.query;
 
     // 쿼리 조건 구성
     const query = {};
@@ -262,19 +267,11 @@ export const getAdminPromotions = async (req, res) => {
       query.isActive = isActive === 'true';
     }
 
-    if (displayLocation) {
-      query.displayLocation = displayLocation;
-    }
-
-    if (targetAudience) {
-      query.targetAudience = targetAudience;
-    }
-
     const skip = (page - 1) * limit;
 
     const promotions = await Promotion.find(query)
-      .populate('createdBy', 'name email') // 생성자 정보 포함
-      .sort({ priority: -1, createdAt: -1 })
+      .populate('adminId', 'name email') // 생성자 정보 포함
+      .sort({ position: -1, createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit));
 
@@ -300,7 +297,7 @@ export const getAdminPromotion = async (req, res) => {
     const { id } = req.params;
 
     const promotion = await Promotion.findById(id)
-      .populate('createdBy', 'name email'); // 생성자 정보 포함
+      .populate('adminId', 'name email'); // 생성자 정보 포함
 
     if (!promotion) {
       return res.status(404).json({ message: '프로모션을 찾을 수 없습니다.' });

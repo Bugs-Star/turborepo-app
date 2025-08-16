@@ -55,7 +55,7 @@ export const createEvent = async (req, res) => {
     }
 
     const event = new Event({
-      createdBy: adminId,
+      adminId: adminId,
       title,
       description,
       eventImg: processedEventImg, // Base64 문자열로 저장
@@ -94,7 +94,7 @@ export const getEvents = async (req, res) => {
     const skip = (page - 1) * limit;
 
     const events = await Event.find(query)
-      .select('-createdBy') // 생성자 정보는 제외 (공통)
+      .select('-adminId') // 생성자 정보는 제외 (공통)
       .sort({ eventOrder: -1, createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit));
@@ -128,7 +128,7 @@ export const getActiveEvents = async (req, res) => {
       startDate: { $lte: now },
       endDate: { $gte: now }
     })
-    .select('-createdBy') // 생성자 정보는 제외 (공통)
+    .select('-adminId') // 생성자 정보는 제외 (공통)
     .sort({ eventOrder: -1, createdAt: -1 });
 
     res.json({ events });
@@ -143,7 +143,7 @@ export const getEvent = async (req, res) => {
     const { id } = req.params;
 
     const event = await Event.findById(id)
-      .select('-createdBy'); // 생성자 정보는 제외 (공통)
+      .select('-adminId'); // 생성자 정보는 제외 (공통)
 
     if (!event) {
       return res.status(404).json({ message: '이벤트를 찾을 수 없습니다.' });
@@ -262,7 +262,7 @@ export const getAdminEvents = async (req, res) => {
     const skip = (page - 1) * limit;
 
     const events = await Event.find(query)
-      .populate('createdBy', 'name email') // 생성자 정보 포함
+      .populate('adminId', 'name email') // 생성자 정보 포함
       .sort({ eventOrder: -1, createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit));

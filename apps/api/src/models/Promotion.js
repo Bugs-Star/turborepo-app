@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 const promotionSchema = new mongoose.Schema({
-  createdBy: {
+  adminId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Admin',
     required: true
@@ -16,13 +16,9 @@ const promotionSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
-  imageUrl: {
+  promotionImg: {
     type: String,
     required: true
-  },
-  linkUrl: {
-    type: String,
-    trim: true
   },
   startDate: {
     type: Date,
@@ -36,27 +32,10 @@ const promotionSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   },
-  priority: {
-    type: Number,
-    default: 0
-  },
-  targetAudience: {
+  position: {
     type: String,
-    enum: ['all', 'new', 'existing', 'vip'],
-    default: 'all'
-  },
-  displayLocation: {
-    type: String,
-    enum: ['home', 'menu', 'cart', 'profile'],
-    default: 'home'
-  },
-  clickCount: {
-    type: Number,
-    default: 0
-  },
-  viewCount: {
-    type: Number,
-    default: 0
+    enum: ['up', 'down'],
+    default: 'up'
   }
 }, {
   timestamps: true
@@ -64,8 +43,7 @@ const promotionSchema = new mongoose.Schema({
 
 // 인덱스 설정
 promotionSchema.index({ isActive: 1, startDate: 1, endDate: 1 });
-promotionSchema.index({ displayLocation: 1, targetAudience: 1 });
-promotionSchema.index({ priority: -1, createdAt: -1 });
+promotionSchema.index({ position: -1, createdAt: -1 });
 
 // 인스턴스 메서드
 promotionSchema.methods.isCurrentlyActive = function() {

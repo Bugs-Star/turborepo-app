@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 const eventSchema = new mongoose.Schema({
-  createdBy: {
+  adminId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Admin',
     required: true

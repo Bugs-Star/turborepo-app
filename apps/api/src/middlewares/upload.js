@@ -26,6 +26,7 @@ export const uploadSingle = baseMulter.single('profileImg');
 export const uploadFields = baseMulter.fields([
   { name: 'productImg', maxCount: 1 },
   { name: 'eventImg', maxCount: 1 },
+  { name: 'promotionImg', maxCount: 1 },
   { name: 'imageUrl', maxCount: 1 },
   { name: 'productCode', maxCount: 1 },
   { name: 'productName', maxCount: 1 },
