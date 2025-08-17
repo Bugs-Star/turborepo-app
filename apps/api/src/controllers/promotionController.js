@@ -92,6 +92,8 @@ export const createPromotion = async (req, res) => {
         console.error('프로모션 이미지 압축 실패:', compressionError);
         return res.status(400).json({ message: '이미지 압축에 실패했습니다.' });
       }
+    } else {
+      console.log('이미지 파일이 없습니다.');
     }
 
     if (!processedImageUrl) {

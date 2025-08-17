@@ -66,8 +66,8 @@ const calculateSummary = (cartItems) => {
 // 카트 조회
 export const getCart = async (req, res) => {
   try {
-    const userId = req.user.id;
-    const user = await User.findById(userId).populate('cart.productId');
+    const userId = req.user._id;  // .id → ._id로 수정
+    const user = await User.findById(userId);
     
     if (!user) {
       return res.status(404).json({ message: '사용자를 찾을 수 없습니다.' });
@@ -90,7 +90,7 @@ export const getCart = async (req, res) => {
 // 카트 개수 조회 (하단 네브바용)
 export const getCartCount = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user._id;  // .id → ._id로 수정
     const user = await User.findById(userId).select('cart');
     
     if (!user) {
@@ -112,7 +112,7 @@ export const getCartCount = async (req, res) => {
 // 상품 추가
 export const addToCart = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user._id;  // .id → ._id로 수정
     const { productId, quantity = 1 } = req.body;
 
     if (!productId) {
@@ -184,7 +184,7 @@ export const addToCart = async (req, res) => {
 // 수량 변경
 export const updateCartItem = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user._id;  // .id → ._id로 수정
     const { itemId } = req.params;
     const { quantity } = req.body;
 
@@ -231,7 +231,7 @@ export const updateCartItem = async (req, res) => {
 // 상품 제거
 export const removeFromCart = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user._id;  // .id → ._id로 수정
     const { itemId } = req.params;
 
     // ObjectId 형식 검증
@@ -269,7 +269,7 @@ export const removeFromCart = async (req, res) => {
 // 장바구니 비우기
 export const clearCart = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user._id;  // .id → ._id로 수정
 
     const user = await User.findById(userId);
     if (!user) {

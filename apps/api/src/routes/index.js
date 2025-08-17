@@ -31,4 +31,10 @@ router.use('/cart', cartRoutes);
 // 주문 관련 라우트
 router.use('/order', orderRoutes);
 
+// 테스트 라우트 (메인 라우터에 직접 추가)
+router.get('/order-test', (req, res) => {
+  console.log('=== /order-test 라우트 진입 ===');
+  res.json({ message: 'order-test route works from main router' });
+});
+
 export default router;

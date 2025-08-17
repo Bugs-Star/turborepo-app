@@ -55,18 +55,25 @@ const orderSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// 주문번호 자동 생성 (YYYYMMDD-XXXXX 형식)
+// 주문번호 자동 생성 (YYYYMMDD-XXXXX 형식) - 세션이 있는 경우에만
 orderSchema.pre('save', async function(next) {
-  if (this.isNew) {
+  if (this.isNew && !this.orderNumber) {
     const today = new Date();
     const dateStr = today.getFullYear().toString() +
                    (today.getMonth() + 1).toString().padStart(2, '0') +
                    today.getDate().toString().padStart(2, '0');
     
-    // 오늘 날짜의 마지막 주문번호 찾기
-    const lastOrder = await this.constructor.findOne({
+    // 세션이 있는 경우 세션 사용, 없는 경우 일반 조회
+    const query = this.constructor.findOne({
       orderNumber: new RegExp(`^${dateStr}-`)
     }).sort({ orderNumber: -1 });
+    
+    // 현재 세션 확인 (트랜잭션 중인지)
+    if (this.$session) {
+      query.session(this.$session);
+    }
+    
+    const lastOrder = await query;
     
     let sequence = 1;
     if (lastOrder) {
