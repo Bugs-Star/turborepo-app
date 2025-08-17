@@ -94,7 +94,7 @@ export const refresh = async (req, res) => {
     }
 
     // 새로운 Access Token 생성
-    const newAccessToken = generateAccessToken(user._id);
+    const newAccessToken = generateAccessToken({ userId: user._id });
     
     res.json({
       accessToken: newAccessToken,
@@ -110,7 +110,13 @@ export const refresh = async (req, res) => {
 export const getProfile = async (req, res) => {
   try {
     res.json({
-        user: req.user
+        user: {
+            _id: req.user._id,
+            name: req.user.name,
+            email: req.user.email,
+            profileImg: req.user.profileImg,
+            // refreshToken 필드 제외
+        }
     });
   } catch (error) {
     res.status(401).json({ message: 'Unauthorized - Invalid or missing token' });

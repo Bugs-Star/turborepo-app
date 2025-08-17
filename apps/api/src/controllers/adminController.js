@@ -77,25 +77,45 @@ export const adminLogout = async (req, res) => {
     const accessToken = req.header('Authorization')?.replace('Bearer ', '');
     const { refreshToken } = req.body;
     
+    console.log('관리자 로그아웃 요청:', {
+      hasAccessToken: !!accessToken,
+      hasRefreshToken: !!refreshToken,
+      adminId: req.admin?._id
+    });
+
     if (!accessToken) {
       return res.status(400).json({ message: 'Access Token이 필요합니다.' });
     }
 
     // Access Token을 블랙리스트에 추가
-    await addToBlacklist(accessToken);
+    try {
+      await addToBlacklist(accessToken);
+      console.log('Access Token 블랙리스트 추가 완료');
+    } catch (blacklistError) {
+      console.error('블랙리스트 추가 실패:', blacklistError);
+      // 블랙리스트 실패해도 로그아웃은 계속 진행
+    }
 
     // Refresh Token 무효화 (DB에서 제거)
     if (refreshToken) {
-      const decoded = decodeToken(refreshToken);
-      if (decoded && decoded.adminId) {
-        await Admin.findByIdAndUpdate(decoded.adminId, { refreshToken: null });
+      try {
+        const decoded = decodeToken(refreshToken);
+        if (decoded && decoded.adminId) {
+          await Admin.findByIdAndUpdate(decoded.adminId, { refreshToken: null });
+          console.log('Refresh Token DB에서 제거 완료');
+        }
+      } catch (refreshError) {
+        console.error('Refresh Token 제거 실패:', refreshError);
+        // Refresh Token 제거 실패해도 로그아웃은 계속 진행
       }
     }
 
+    console.log('관리자 로그아웃 완료');
     res.json({
       message: '관리자 로그아웃이 완료되었습니다.'
     });
   } catch (error) {
+    console.error('관리자 로그아웃 오류:', error);
     res.status(500).json({ message: '서버 오류가 발생했습니다.' });
   }
 };
