@@ -56,17 +56,12 @@ export const adminRefresh = async (req, res) => {
       return res.status(401).json({ message: '유효하지 않은 Refresh Token입니다.' });
     }
 
-    // 새로운 Access Token과 Refresh Token 생성
+    // 새로운 Access Token 생성
     const newAccessToken = generateAccessToken({ adminId: admin._id });
-    const newRefreshToken = generateRefreshToken({ adminId: admin._id });
-
-    // 새로운 Refresh Token을 DB에 저장
-    admin.refreshToken = newRefreshToken;
-    await admin.save();
-
+    
     res.json({
       accessToken: newAccessToken,
-      refreshToken: newRefreshToken
+      message: '토큰이 성공적으로 갱신되었습니다.'
     });
   } catch (error) {
     if (error.name === 'TokenExpiredError') {

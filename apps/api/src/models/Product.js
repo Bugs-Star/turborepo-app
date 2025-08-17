@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 const productSchema = new mongoose.Schema({
-  createdBy: {
+  adminId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Admin',
     required: true
@@ -31,6 +31,7 @@ const productSchema = new mongoose.Schema({
   category: {
     type: String,
     required: true,
+    enum: ['beverage', 'food', 'goods'],
     trim: true
   },
   price: {

@@ -203,14 +203,16 @@ export const logout = async (req, res) => {
     const accessToken = req.header('Authorization')?.replace('Bearer ', '');
     const { refreshToken } = req.body;
     
-    // Access Token을 블랙리스트에 추가
-    if (accessToken) {
-      await addToBlacklist(accessToken);
+    if (!accessToken) {
+      return res.status(400).json({ message: 'Access Token이 필요합니다.' });
     }
+
+    // Access Token을 블랙리스트에 추가
+    await addToBlacklist(accessToken);
 
     // Refresh Token 무효화 (DB에서 제거)
     if (refreshToken) {
-      const decoded = verifyToken(refreshToken);
+      const decoded = decodeToken(refreshToken);
       if (decoded && decoded.userId) {
         await User.findByIdAndUpdate(decoded.userId, { refreshToken: null });
       }

@@ -9,15 +9,12 @@ import {
   createEvent, 
   updateEvent, 
   deleteEvent, 
-  getAdminEvents, 
-  getEvent 
+  reorderEvents
 } from '../controllers/eventController.js';
 import { 
   createPromotion, 
   updatePromotion, 
-  deletePromotion, 
-  getAdminPromotions, 
-  getAdminPromotion 
+  deletePromotion
 } from '../controllers/promotionController.js';
 import { adminAuth } from '../middlewares/adminAuth.js';
 import { uploadFields } from '../middlewares/upload.js';
@@ -35,15 +32,12 @@ router.put('/products/:id', adminAuth, uploadFields, updateProduct);   // 상품
 router.delete('/products/:id', adminAuth, deleteProduct); // 상품 삭제
 
 // 이벤트 관리 라우트
-router.get('/events', adminAuth, getAdminEvents);     // 이벤트 목록 조회 (생성자 정보 포함)
-router.get('/events/:id', adminAuth, getEvent);       // 특정 이벤트 조회
 router.post('/events', adminAuth, uploadFields, createEvent);      // 이벤트 등록
 router.put('/events/:id', adminAuth, uploadFields, updateEvent);   // 이벤트 수정
 router.delete('/events/:id', adminAuth, deleteEvent); // 이벤트 삭제
+router.post('/events/reorder', adminAuth, reorderEvents); // 이벤트 순서 변경
 
 // 프로모션 관리 라우트
-router.get('/promotions', adminAuth, getAdminPromotions);     // 프로모션 목록 조회 (생성자 정보 포함)
-router.get('/promotions/:id', adminAuth, getAdminPromotion);  // 특정 프로모션 조회 (생성자 정보 포함)
 router.post('/promotions', adminAuth, uploadFields, createPromotion);      // 프로모션 등록
 router.put('/promotions/:id', adminAuth, uploadFields, updatePromotion);   // 프로모션 수정
 router.delete('/promotions/:id', adminAuth, deletePromotion); // 프로모션 삭제
