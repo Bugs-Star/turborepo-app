@@ -16,6 +16,10 @@ import {
   updatePromotion, 
   deletePromotion
 } from '../controllers/promotionController.js';
+import { 
+  getAllOrders, 
+  getUserOrders
+} from '../controllers/adminOrderController.js';
 import { adminAuth } from '../middlewares/adminAuth.js';
 import { uploadFields } from '../middlewares/upload.js';
 
@@ -41,5 +45,9 @@ router.post('/events/reorder', adminAuth, reorderEvents); // 이벤트 순서 �
 router.post('/promotions', adminAuth, uploadFields, createPromotion);      // 프로모션 등록
 router.put('/promotions/:id', adminAuth, uploadFields, updatePromotion);   // 프로모션 수정
 router.delete('/promotions/:id', adminAuth, deletePromotion); // 프로모션 삭제
+
+// 주문 관리 라우트
+router.get('/order', adminAuth, getAllOrders);                    // 모든 주문 목록 조회
+router.get('/order/:userId', adminAuth, getUserOrders);           // 특정 사용자 주문 목록 조회
 
 export default router;

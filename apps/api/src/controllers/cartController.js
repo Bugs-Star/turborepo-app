@@ -261,7 +261,7 @@ export const removeFromCart = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('카트 제거 오류:', error);
+    console.error('장바구니 제거 오류:', error);
     res.status(500).json({ message: '서버 오류가 발생했습니다.' });
   }
 };
