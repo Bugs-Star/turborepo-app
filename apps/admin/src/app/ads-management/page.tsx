@@ -1,4 +1,5 @@
 import AddAds from "./AddAds";
+import AdsAnalysis from "./AdsAnalysis";
 import FirstBanner from "./FirstBanner";
 import SecondBanner from "./SecondBanner";
 
@@ -8,6 +9,7 @@ const AdsManagement = () => {
       <AddAds />
       <FirstBanner />
       <SecondBanner />
+      <AdsAnalysis />
     </div>
   );
 };
