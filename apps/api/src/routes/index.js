@@ -5,6 +5,7 @@ import adminRoutes from './admin.js';
 import productRoutes from './products.js';
 import eventRoutes from './events.js';
 import promotionRoutes from './promotions.js';
+import cartRoutes from './cart.js';
 
 const router = Router();
 
@@ -22,5 +23,8 @@ router.use('/events', eventRoutes);
 
 // 프로모션 관련 라우트
 router.use('/promotions', promotionRoutes);
+
+// 카트 관련 라우트
+router.use('/cart', cartRoutes);
 
 export default router;
