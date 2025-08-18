@@ -62,11 +62,14 @@ apiClient.interceptors.response.use(
     return response;
   },
   async (error) => {
-    console.error(
-      "❌ Response Error:",
-      error.response?.status,
-      error.config?.url
-    );
+    // 401 에러는 토큰 갱신 과정에서 발생하는 정상적인 현상이므로 조용히 처리
+    if (error.response?.status !== 401) {
+      console.error(
+        "❌ Response Error:",
+        error.response?.status,
+        error.config?.url
+      );
+    }
 
     const originalRequest = error.config;
 

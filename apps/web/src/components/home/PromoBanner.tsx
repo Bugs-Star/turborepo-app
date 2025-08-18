@@ -31,7 +31,9 @@ export default function PromoBanner({
       <div className="relative z-10">
         <div className="flex-1 pr-4">
           <h2 className="text-xl font-bold text-black mb-2">{title}</h2>
-          <p className="text-sm text-black mb-4 leading-relaxed">{subtitle}</p>
+          <p className="text-sm text-black mb-4 leading-relaxed line-clamp-1 overflow-hidden text-ellipsis">
+            {subtitle}
+          </p>
           <button
             onClick={onButtonClick}
             className="bg-white text-gray-900 px-4 py-2 rounded-lg text-sm font-medium shadow-sm hover:shadow-md transition-shadow cursor-pointer"

@@ -18,3 +18,7 @@ export * from "./cart";
 
 // Order History Components
 export * from "./order-history";
+
+export * from "./promotion";
+
+export * from "./event";
