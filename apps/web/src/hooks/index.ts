@@ -5,3 +5,7 @@ export { useProfileValidation } from "./useProfileValidation";
 export { useProfileFetch } from "./useProfileFetch";
 export { useProductFetch } from "./useProductFetch";
 export { useRecommendedMenuFetch } from "./useRecommendedMenuFetch";
+export { usePromotionFetch } from "./usePromotionFetch";
+export { usePromotionDetailFetch } from "./usePromotionDetailFetch";
+export { useEventFetch } from "./useEventFetch";
+export { useEventDetailFetch } from "./useEventDetailFetch";

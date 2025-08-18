@@ -246,3 +246,115 @@ export const orderService = {
     return await api.get(`/orders/${orderId}`);
   },
 };
+
+// 프로모션 관련 API
+export interface Promotion {
+  _id: string;
+  title: string;
+  description: string;
+  promotionImg: string;
+  startDate: string;
+  endDate: string;
+  isActive: boolean;
+  position: "up" | "down";
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PromotionsResponse {
+  promotions: Promotion[];
+}
+
+export const promotionService = {
+  // 전체 프로모션 목록 조회
+  getPromotions: async (params?: {
+    isActive?: boolean;
+    position?: "up" | "down";
+  }): Promise<PromotionsResponse> => {
+    const queryParams = new URLSearchParams();
+    if (params?.isActive !== undefined)
+      queryParams.append("isActive", params.isActive.toString());
+    if (params?.position) queryParams.append("position", params.position);
+
+    const url = `/promotions${queryParams.toString() ? `?${queryParams.toString()}` : ""}`;
+    return await api.get<PromotionsResponse>(url);
+  },
+
+  // 특정 프로모션 조회
+  getPromotion: async (id: string): Promise<{ promotion: Promotion }> => {
+    return await api.get<{ promotion: Promotion }>(`/promotions/${id}`);
+  },
+
+  // 활성화된 프로모션만 조회
+  getActivePromotions: async (): Promise<PromotionsResponse> => {
+    return await promotionService.getPromotions({ isActive: true });
+  },
+
+  // 위치별 프로모션 조회
+  getPromotionsByPosition: async (
+    position: "up" | "down"
+  ): Promise<PromotionsResponse> => {
+    return await promotionService.getPromotions({ position, isActive: true });
+  },
+};
+
+// 이벤트 관련 API
+export interface Event {
+  _id: string;
+  title: string;
+  description: string;
+  eventImg: string;
+  startDate: string;
+  endDate: string;
+  isActive: boolean;
+  eventOrder: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface EventsResponse {
+  events: Event[];
+  pagination: {
+    currentPage: number;
+    totalPages: number;
+    totalItems: number;
+    itemsPerPage: number;
+  };
+}
+
+export interface EventResponse {
+  event: Event;
+}
+
+export const eventService = {
+  // 전체 이벤트 목록 조회
+  getEvents: async (params?: {
+    isActive?: boolean;
+    current?: boolean;
+    page?: number;
+    limit?: number;
+  }): Promise<EventsResponse> => {
+    const queryParams = new URLSearchParams();
+
+    if (params?.isActive !== undefined) {
+      queryParams.append("isActive", params.isActive.toString());
+    }
+    if (params?.current !== undefined) {
+      queryParams.append("current", params.current.toString());
+    }
+    if (params?.page) {
+      queryParams.append("page", params.page.toString());
+    }
+    if (params?.limit) {
+      queryParams.append("limit", params.limit.toString());
+    }
+
+    const url = `/events${queryParams.toString() ? `?${queryParams.toString()}` : ""}`;
+    return await api.get(url);
+  },
+
+  // 특정 이벤트 조회
+  getEvent: async (id: string): Promise<EventResponse> => {
+    return await api.get(`/events/${id}`);
+  },
+};

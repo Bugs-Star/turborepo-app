@@ -3,9 +3,8 @@
 import { useRouter } from "next/navigation";
 import { use } from "react";
 import { BottomNavigation } from "@/components/layout";
-import { PageHeader } from "@/components/ui";
-import { promoBanners } from "@/constants/dummyData";
-import { notFound } from "next/navigation";
+import { PageHeader, PromotionDetailContent, AsyncWrapper } from "@/components";
+import { usePromotionDetailFetch } from "@/hooks";
 
 interface PromotionDetailPageProps {
   params: Promise<{
@@ -18,63 +17,26 @@ export default function PromotionDetailPage({
 }: PromotionDetailPageProps) {
   const router = useRouter();
   const { id } = use(params);
-
-  // 프로모션 데이터 찾기
-  const promotion = Object.values(promoBanners).find(
-    (promo) => promo.id === id
-  );
-
-  if (!promotion) {
-    notFound();
-  }
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("ko-KR", {
-      year: "numeric",
-      month: "numeric",
-      day: "numeric",
-    });
-  };
+  const { promotion, loading, error } = usePromotionDetailFetch(id);
 
   return (
     <div className="min-h-screen bg-white flex flex-col pb-20">
-      {/* Header */}
+      {/* Header - 로딩 중에도 표시 */}
       <PageHeader
-        title={promotion.title}
+        title={promotion?.title || "프로모션"}
         showBackButton={true}
         onBackClick={() => router.back()}
       />
 
-      {/* Main Content */}
-      <div className="flex-1">
-        {/* 상단 이미지 섹션 - 이미지를 배경으로 사용 */}
-        <div className="h-64 relative">
-          <img
-            src={promotion.imageUrl}
-            alt={promotion.title}
-            className="w-full h-full object-cover"
-          />
-        </div>
-
-        {/* 하단 상세 정보 섹션 - 흰색 배경 */}
-        <div className="px-6 py-6 bg-white">
-          {/* 프로모션 제목 */}
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">
-            {promotion.title}
-          </h2>
-
-          {/* 이벤트 기간 */}
-          <p className="text-green-700 font-semibold text-sm mb-6">
-            이벤트 기간: {formatDate(promotion.startDate)} ~{" "}
-            {formatDate(promotion.endDate)}
-          </p>
-
-          {/* 상세 설명 */}
-          <div className="text-gray-900 leading-relaxed space-y-4">
-            <p>{promotion.detailedDescription}</p>
-          </div>
-        </div>
-      </div>
+      {/* Main Content - AsyncWrapper로 로딩/에러 처리 */}
+      <AsyncWrapper
+        loading={loading}
+        error={error}
+        loadingMessage="프로모션 정보를 불러오는 중..."
+        errorMessage="프로모션 정보를 불러오는데 실패했습니다."
+      >
+        {promotion && <PromotionDetailContent promotion={promotion} />}
+      </AsyncWrapper>
 
       {/* Bottom Navigation */}
       <BottomNavigation />
