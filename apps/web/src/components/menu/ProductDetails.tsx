@@ -16,6 +16,8 @@ export default function ProductDetails({
   quantity,
   onQuantityChange,
 }: ProductDetailsProps) {
+  const isOutOfStock = product.currentStock <= 0;
+
   const handleQuantityChange = (newQuantity: number) => {
     if (newQuantity >= 1 && newQuantity <= 99) {
       onQuantityChange(newQuantity);
@@ -35,28 +37,30 @@ export default function ProductDetails({
         {product.productContents}
       </p>
 
-      {/* Quantity Selector */}
-      <div className="flex items-center justify-center mb-8">
-        <button
-          onClick={() => handleQuantityChange(quantity - 1)}
-          className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-50 transition-colors"
-          disabled={quantity <= 1}
-        >
-          <span className="text-lg font-medium">-</span>
-        </button>
+      {/* Quantity Selector - 재고가 있을 때만 표시 */}
+      {!isOutOfStock && (
+        <div className="flex items-center justify-center mb-8">
+          <button
+            onClick={() => handleQuantityChange(quantity - 1)}
+            className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-50 transition-colors"
+            disabled={quantity <= 1}
+          >
+            <span className="text-lg font-medium">-</span>
+          </button>
 
-        <span className="mx-8 text-lg font-semibold text-black min-w-[2rem] text-center">
-          {quantity}
-        </span>
+          <span className="mx-8 text-lg font-semibold text-black min-w-[2rem] text-center">
+            {quantity}
+          </span>
 
-        <button
-          onClick={() => handleQuantityChange(quantity + 1)}
-          className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-50 transition-colors"
-          disabled={quantity >= 99}
-        >
-          <span className="text-lg font-medium">+</span>
-        </button>
-      </div>
+          <button
+            onClick={() => handleQuantityChange(quantity + 1)}
+            className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-50 transition-colors"
+            disabled={quantity >= 99}
+          >
+            <span className="text-lg font-medium">+</span>
+          </button>
+        </div>
+      )}
     </div>
   );
 }
