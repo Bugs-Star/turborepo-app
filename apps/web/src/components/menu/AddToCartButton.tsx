@@ -50,7 +50,7 @@ export default function AddToCartButton({
             cursor: "not-allowed",
           }}
         >
-          <span>Sold Out</span>
+          <span>SOLD OUT</span>
         </Button>
       </div>
     );

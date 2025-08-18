@@ -13,6 +13,7 @@ interface ProductCardProps {
 
 function ProductCard({ product }: ProductCardProps) {
   const router = useRouter();
+  const isOutOfStock = product.currentStock <= 0;
 
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
     const target = e.target as HTMLImageElement;
@@ -26,7 +27,7 @@ function ProductCard({ product }: ProductCardProps) {
 
   return (
     <div
-      className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden cursor-pointer hover:shadow-md transition-shadow duration-200"
+      className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden cursor-pointer hover:shadow-md transition-shadow duration-200 relative"
       onClick={handleCardClick}
     >
       {/* Product Image */}
@@ -48,6 +49,13 @@ function ProductCard({ product }: ProductCardProps) {
           {formatPrice(product.price)}
         </p>
       </div>
+
+      {/* 투명한 오버레이 - 재고가 없을 때만 카드 전체를 덮음 */}
+      {isOutOfStock && (
+        <div className="absolute inset-0 bg-white/50 flex items-center justify-center">
+          <div className="text-lg font-bold text-black">SOLD OUT</div>
+        </div>
+      )}
     </div>
   );
 }
