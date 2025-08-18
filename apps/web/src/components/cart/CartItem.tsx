@@ -8,17 +8,25 @@ interface CartItemProps {
   item: CartItemType;
   onQuantityChange: (id: string, quantity: number) => void;
   onRemove: (id: string) => void;
+  disabled?: boolean;
 }
 
 export default function CartItem({
   item,
   onQuantityChange,
   onRemove,
+  disabled = false,
 }: CartItemProps) {
   const handleQuantityChange = (newQuantity: number) => {
+    if (disabled) return;
     if (newQuantity >= 1) {
       onQuantityChange(item.id, newQuantity);
     }
+  };
+
+  const handleRemove = () => {
+    if (disabled) return;
+    onRemove(item.id);
   };
 
   return (
@@ -47,7 +55,10 @@ export default function CartItem({
             <div className="flex items-center border border-gray-200 rounded-lg">
               <button
                 onClick={() => handleQuantityChange(item.quantity - 1)}
-                className="px-3 py-1 text-gray-600 hover:bg-gray-50 rounded-l-lg transition-colors"
+                disabled={disabled}
+                className={`px-3 py-1 text-gray-600 hover:bg-gray-50 rounded-l-lg transition-colors ${
+                  disabled ? "opacity-50 cursor-not-allowed" : ""
+                }`}
               >
                 -
               </button>
@@ -56,7 +67,10 @@ export default function CartItem({
               </span>
               <button
                 onClick={() => handleQuantityChange(item.quantity + 1)}
-                className="px-3 py-1 text-gray-600 hover:bg-gray-50 rounded-r-lg transition-colors"
+                disabled={disabled}
+                className={`px-3 py-1 text-gray-600 hover:bg-gray-50 rounded-r-lg transition-colors ${
+                  disabled ? "opacity-50 cursor-not-allowed" : ""
+                }`}
               >
                 +
               </button>
@@ -64,8 +78,11 @@ export default function CartItem({
 
             {/* Remove Button */}
             <button
-              onClick={() => onRemove(item.id)}
-              className="flex items-center text-red-600 text-sm hover:text-red-700 transition-colors cursor-pointer"
+              onClick={handleRemove}
+              disabled={disabled}
+              className={`flex items-center text-red-600 text-sm hover:text-red-700 transition-colors cursor-pointer ${
+                disabled ? "opacity-50 cursor-not-allowed" : ""
+              }`}
             >
               <Trash2 size={16} className="mr-1" />
               제거
