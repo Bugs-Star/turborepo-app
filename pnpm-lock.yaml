@@ -23,6 +23,9 @@ importers:
       '@hello-pangea/dnd':
         specifier: ^18.0.1
         version: 18.0.1(@types/react@19.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      axios:
+        specifier: ^1.11.0
+        version: 1.11.0
       lucide-react:
         specifier: ^0.539.0
         version: 0.539.0(react@19.1.0)

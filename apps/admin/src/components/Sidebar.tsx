@@ -8,7 +8,7 @@ import {
   BarChart3,
   LogOut,
 } from "lucide-react";
-import { Dancing_Script } from "next/font/google";
+import { Dancing_Script, Pacifico } from "next/font/google";
 import { usePathname, useRouter } from "next/navigation";
 
 const menuItems = [
@@ -19,9 +19,9 @@ const menuItems = [
   { label: "보고서", icon: BarChart3, path: "/dashboard" },
 ];
 
-const dancingScript = Dancing_Script({
+const pacifico = Pacifico({
   subsets: ["latin"],
-  weight: ["500", "700"],
+  weight: ["400", "400"],
 });
 
 const Sidebar = () => {
@@ -31,9 +31,9 @@ const Sidebar = () => {
   return (
     <div className="flex flex-col w-48 h-screen border-r border-gray-200 bg-white">
       {/* Logo */}
-      <div className="flex items-center gap-2 p-4">
+      <div className="flex items-center gap-2 p-4 cursor-pointer">
         <img src="/bugs_star_logo.png" alt="Bugs Star" className="w-10 h-10" />
-        <span className={`${dancingScript.className} font-bold text-[#005C14]`}>
+        <span className={`${pacifico.className} font-extrabold text-[#005C14]`}>
           Bugs Star
         </span>
       </div>
