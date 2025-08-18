@@ -57,8 +57,11 @@ export default function OrderHistoryItem({ order }: OrderHistoryItemProps) {
 
       {/* Items Preview */}
       <div className="space-y-2 mb-3">
-        {displayItems.map((item) => (
-          <div key={item.productId} className="flex items-center space-x-3">
+        {displayItems.map((item, index) => (
+          <div
+            key={`${order._id}-${item.productId}-${index}`}
+            className="flex items-center space-x-3"
+          >
             <img
               src={item.productImg}
               alt={item.productName}
@@ -76,6 +79,7 @@ export default function OrderHistoryItem({ order }: OrderHistoryItemProps) {
         ))}
         {order.items.length > 2 && (
           <div
+            key={`${order._id}-expand-button`}
             className="text-xs text-gray-500 text-center cursor-pointer hover:text-gray-700 transition-colors py-1"
             onClick={handleExpandClick}
           >
