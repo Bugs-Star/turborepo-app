@@ -7,6 +7,7 @@ interface AsyncWrapperProps {
   children: ReactNode;
   loadingMessage?: string;
   errorMessage?: string;
+  onRetry?: () => void;
 }
 
 export default function AsyncWrapper({
@@ -15,6 +16,7 @@ export default function AsyncWrapper({
   children,
   loadingMessage = "로딩 중...",
   errorMessage = "잠시 후 다시 시도해주세요.",
+  onRetry,
 }: AsyncWrapperProps) {
   const [isClient, setIsClient] = useState(false);
 
@@ -51,7 +53,15 @@ export default function AsyncWrapper({
         <div className="flex-1 flex items-center justify-center">
           <div className="text-red-600 text-center">
             <p className="text-sm mb-2">{error}</p>
-            <p className="text-xs">{errorMessage}</p>
+            <p className="text-xs mb-4">{errorMessage}</p>
+            {onRetry && (
+              <button
+                onClick={onRetry}
+                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm"
+              >
+                다시 시도
+              </button>
+            )}
           </div>
         </div>
         <BottomNavigation />

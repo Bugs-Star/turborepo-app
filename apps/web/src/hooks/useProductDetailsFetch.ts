@@ -15,6 +15,7 @@ export const useProductDetailsFetch = (
     data: product,
     isLoading: loading,
     error,
+    refetch,
   } = useQuery({
     queryKey: ["product", productId],
     queryFn: async (): Promise<Product> => {
@@ -59,5 +60,6 @@ export const useProductDetailsFetch = (
     product: product || null,
     loading,
     error: finalError,
+    refetch,
   };
 };

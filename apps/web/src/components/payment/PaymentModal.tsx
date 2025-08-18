@@ -1,24 +1,28 @@
 import { Button } from "@repo/ui";
 import { PAYMENT_METHODS, PaymentMethod } from "@/hooks/usePayment";
+import { useState } from "react";
 
 interface PaymentModalProps {
   isOpen: boolean;
   isProcessing: boolean;
-  selectedPaymentMethod: PaymentMethod["value"];
-  onPaymentMethodChange: (method: PaymentMethod["value"]) => void;
-  onConfirm: () => void;
+  onConfirm: (paymentMethod: PaymentMethod["value"]) => void;
   onCancel: () => void;
 }
 
 export default function PaymentModal({
   isOpen,
   isProcessing,
-  selectedPaymentMethod,
-  onPaymentMethodChange,
   onConfirm,
   onCancel,
 }: PaymentModalProps) {
+  const [selectedPaymentMethod, setSelectedPaymentMethod] =
+    useState<PaymentMethod["value"]>("card");
+
   if (!isOpen) return null;
+
+  const handleConfirm = () => {
+    onConfirm(selectedPaymentMethod);
+  };
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
@@ -37,7 +41,7 @@ export default function PaymentModal({
                 value={method.value}
                 checked={selectedPaymentMethod === method.value}
                 onChange={(e) =>
-                  onPaymentMethodChange(
+                  setSelectedPaymentMethod(
                     e.target.value as PaymentMethod["value"]
                   )
                 }
@@ -60,7 +64,7 @@ export default function PaymentModal({
             취소
           </Button>
           <Button
-            onClick={onConfirm}
+            onClick={handleConfirm}
             variant="green"
             size="md"
             className="flex-1"
