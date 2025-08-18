@@ -161,7 +161,7 @@ export const productService = {
   // 추천 상품 목록 조회
   getRecommendedProducts: async (): Promise<{ products: Product[] }> => {
     const response = await api.get<{ products: Product[] }>(
-      "/products/recommended"
+      "/products?isRecommended=true"
     );
     return {
       ...response,
