@@ -215,17 +215,17 @@ export const cartService = {
 
   // 장바구니에 상품 추가
   addToCart: async (productId: string, quantity: number = 1) => {
-    return await api.post("/cart/items", { productId, quantity });
+    return await api.post("/cart/add", { productId, quantity });
   },
 
   // 장바구니에서 상품 제거
   removeFromCart: async (itemId: string) => {
-    return await api.delete(`/cart/items/${itemId}`);
+    return await api.delete(`/cart/${itemId}`);
   },
 
   // 장바구니 상품 수량 변경
   updateCartItemQuantity: async (itemId: string, quantity: number) => {
-    return await api.put(`/cart/items/${itemId}`, { quantity });
+    return await api.put(`/cart/${itemId}`, { quantity });
   },
 };
 

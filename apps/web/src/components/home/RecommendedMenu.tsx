@@ -32,7 +32,7 @@ export default function RecommendedMenu({
             <h3 className="text-sm font-medium text-gray-900 mb-1 truncate">
               {product.productName}
             </h3>
-            <p className="text-sm font-bold text-green-600">
+            <p className="text-sm font-bold text-green-700">
               {product.price.toLocaleString()}원
             </p>
           </div>
