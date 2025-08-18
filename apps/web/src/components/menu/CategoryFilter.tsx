@@ -12,13 +12,13 @@ export default function CategoryFilter({
   onCategoryChange,
   children,
 }: CategoryFilterProps) {
-  const [activeCategory, setActiveCategory] = useState("beverage");
+  const [activeCategory, setActiveCategory] = useState("goods");
 
   // 카테고리 매핑
   const categoryMapping = {
     beverage: "음료",
     food: "푸드",
-    product: "상품",
+    goods: "상품",
   };
 
   const categories = Object.keys(categoryMapping);
@@ -61,12 +61,12 @@ export default function CategoryFilter({
 
 // 훅으로도 사용할 수 있도록 export
 export const useCategoryFilter = (products: Product[]) => {
-  const [activeCategory, setActiveCategory] = useState("beverage");
+  const [activeCategory, setActiveCategory] = useState("goods");
 
   const categoryMapping = {
     beverage: "음료",
     food: "푸드",
-    product: "상품",
+    goods: "상품",
   };
 
   const categories = Object.keys(categoryMapping);

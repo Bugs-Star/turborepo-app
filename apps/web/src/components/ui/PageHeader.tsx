@@ -27,7 +27,7 @@ export default function PageHeader({
             <BackButton onClick={onBackClick} />
           </div>
         )}
-        <h1 className="flex-1 text-center text-lg font-medium text-gray-900">
+        <h1 className="flex-1 text-center text-lg font-semibold text-gray-900">
           {title}
         </h1>
         {showBackButton && <div className="w-10 flex-shrink-0" />}

@@ -13,7 +13,7 @@ export default function EventSection({
 }: EventSectionProps) {
   return (
     <div className="mb-8">
-      <h2 className="text-xl font-bold text-gray-900 px-6 mb-4">새로운 소식</h2>
+      <h2 className="text-xl font-bold text-gray-900 px-6 mb-2">새로운 소식</h2>
       <div className="flex flex-col gap-4 px-6">
         {events.map((event) => (
           <div
