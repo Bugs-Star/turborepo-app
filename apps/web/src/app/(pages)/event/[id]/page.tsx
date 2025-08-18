@@ -15,7 +15,7 @@ interface EventDetailPageProps {
 export default function EventDetailPage({ params }: EventDetailPageProps) {
   const router = useRouter();
   const { id } = use(params);
-  const { data: event, isLoading: loading, error } = useEventDetailFetch(id);
+  const { data: event, isLoading, error } = useEventDetailFetch(id);
 
   return (
     <div className="min-h-screen bg-white flex flex-col pb-20">
@@ -27,8 +27,8 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
       />
 
       {/* Main Content */}
-      <AsyncWrapper loading={loading} error={error?.message || null}>
-        {event && <EventDetailContent event={event} />}
+      <AsyncWrapper loading={isLoading} error={error?.message || null}>
+        <EventDetailContent event={event!} />
       </AsyncWrapper>
 
       {/* Bottom Navigation */}
