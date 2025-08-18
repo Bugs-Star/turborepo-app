@@ -16,15 +16,15 @@ export default function HomePage() {
 
   // 프로모션 데이터 가져오기
   const {
-    promotions,
-    loading: promotionsLoading,
+    data: promotions = [],
+    isLoading: promotionsLoading,
     error: promotionsError,
   } = usePromotionFetch({ isActive: true });
 
   // 이벤트 데이터 가져오기
   const {
-    events,
-    loading: eventsLoading,
+    data: events = [],
+    isLoading: eventsLoading,
     error: eventsError,
   } = useEventFetch({ isActive: true, limit: 5 });
 

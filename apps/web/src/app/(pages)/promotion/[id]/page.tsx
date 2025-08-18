@@ -17,7 +17,11 @@ export default function PromotionDetailPage({
 }: PromotionDetailPageProps) {
   const router = useRouter();
   const { id } = use(params);
-  const { promotion, loading, error } = usePromotionDetailFetch(id);
+  const {
+    data: promotion,
+    isLoading: loading,
+    error,
+  } = usePromotionDetailFetch(id);
 
   return (
     <div className="min-h-screen bg-white flex flex-col pb-20">
@@ -28,13 +32,8 @@ export default function PromotionDetailPage({
         onBackClick={() => router.back()}
       />
 
-      {/* Main Content - AsyncWrapper로 로딩/에러 처리 */}
-      <AsyncWrapper
-        loading={loading}
-        error={error}
-        loadingMessage="프로모션 정보를 불러오는 중..."
-        errorMessage="프로모션 정보를 불러오는데 실패했습니다."
-      >
+      {/* Main Content */}
+      <AsyncWrapper loading={loading} error={error?.message || null}>
         {promotion && <PromotionDetailContent promotion={promotion} />}
       </AsyncWrapper>
 

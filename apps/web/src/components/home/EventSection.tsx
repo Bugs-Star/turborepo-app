@@ -32,7 +32,7 @@ export default function EventSection({
               <h3 className="text-sm font-bold text-gray-900 mb-1">
                 {event.title}
               </h3>
-              <p className="text-xs text-gray-600 leading-relaxed">
+              <p className="text-xs text-gray-600 leading-relaxed line-clamp-1 overflow-hidden text-ellipsis">
                 {event.description}
               </p>
             </div>
