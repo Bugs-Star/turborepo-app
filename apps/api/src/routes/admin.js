@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { adminLogin, adminRefresh, adminLogout } from '../controllers/adminController.js';
+import { adminLogin, adminRefresh, adminLogout, getUsers } from '../controllers/adminController.js';
 import { 
   createProduct, 
   updateProduct, 
@@ -29,6 +29,9 @@ const router = Router();
 router.post('/login', adminLogin);
 router.post('/refresh', adminRefresh);
 router.post('/logout', adminAuth, adminLogout);
+
+// 유저 관리 라우트
+router.get('/users', adminAuth, getUsers);                    // 일반 유저 목록 조회
 
 // 상품 관리 라우트 (목록 조회는 공통 API 사용)
 router.post('/products', adminAuth, uploadFields, createProduct);      // 상품 등록
