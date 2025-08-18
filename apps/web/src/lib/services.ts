@@ -234,21 +234,45 @@ export const cartService = {
   },
 };
 
-// 주문 관련 API (향후 구현 예정)
+// 주문 관련 API
 export const orderService = {
   // 주문 내역 조회
   getOrderHistory: async () => {
-    return await api.get("/orders");
+    const response = await api.get("/order");
+    // 이미지 URL 수정
+    const ordersWithFixedImages = response.orders.map((order: any) => ({
+      ...order,
+      items: order.items.map((item: any) => ({
+        ...item,
+        productImg: fixImageUrl(item.productImg),
+      })),
+    }));
+    return {
+      ...response,
+      orders: ordersWithFixedImages,
+    };
   },
 
   // 주문 생성
   createOrder: async (orderData: any) => {
-    return await api.post("/orders", orderData);
+    return await api.post("/order", orderData);
   },
 
   // 주문 상세 조회
   getOrderDetail: async (orderId: string) => {
-    return await api.get(`/orders/${orderId}`);
+    const response = await api.get(`/order/${orderId}`);
+    // 이미지 URL 수정
+    const orderWithFixedImages = {
+      ...response.order,
+      items: response.order.items.map((item: any) => ({
+        ...item,
+        productImg: fixImageUrl(item.productImg),
+      })),
+    };
+    return {
+      ...response,
+      order: orderWithFixedImages,
+    };
   },
 };
 
