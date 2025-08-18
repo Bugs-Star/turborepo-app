@@ -29,11 +29,34 @@ export default function AddToCartButton({
   });
 
   const totalPrice = product.price * quantity;
+  const isOutOfStock = product.currentStock <= 0;
 
   const handleAddToCart = () => {
+    if (isOutOfStock) return;
     addToCart(product._id, quantity);
   };
 
+  // 재고가 없는 경우 Sold Out 버튼 표시
+  if (isOutOfStock) {
+    return (
+      <div className="px-6 pb-6">
+        <Button
+          variant="red"
+          size="lg"
+          fullWidth
+          disabled={true}
+          style={{
+            justifyContent: "center",
+            cursor: "not-allowed",
+          }}
+        >
+          <span>SOLD OUT</span>
+        </Button>
+      </div>
+    );
+  }
+
+  // 재고가 있는 경우 기존 장바구니 추가 버튼 표시
   return (
     <div className="px-6 pb-6">
       <Button
