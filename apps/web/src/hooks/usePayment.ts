@@ -2,6 +2,7 @@ import { useState } from "react";
 import { orderService } from "@/lib/services";
 import { useToast } from "./useToast";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 
 export interface PaymentMethod {
   value: "card" | "cash" | "point";
@@ -18,6 +19,7 @@ export const usePayment = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const { showToast } = useToast();
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const processPayment = async (
     paymentMethod: PaymentMethod["value"] = "card"
@@ -39,7 +41,10 @@ export const usePayment = () => {
 
       if (response.success) {
         showToast("주문이 완료되었습니다!", "success");
-        // 주문 내역 페이지로 이동
+        // 장바구니 쿼리 무효화하여 즉시 업데이트
+        queryClient.invalidateQueries({ queryKey: ["cart"] });
+        queryClient.invalidateQueries({ queryKey: ["cartCount"] });
+        // 즉시 주문 내역 페이지로 이동
         router.push("/order-history");
       } else {
         showToast("주문 처리 중 오류가 발생했습니다.", "error");

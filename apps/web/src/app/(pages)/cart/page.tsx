@@ -3,7 +3,6 @@
 import { BottomNavigation } from "@/components/layout";
 import { PageHeader } from "@/components/ui";
 import { CartContent } from "@/components/cart";
-import { PaymentModal } from "@/components/payment";
 import { AsyncWrapper } from "@/components/ui";
 import { Button } from "@repo/ui";
 import { useCartFetch, useCartActions, usePayment } from "@/hooks";
@@ -14,24 +13,19 @@ export default function CartPage() {
   const { handleQuantityChange, handleRemove, isActionLoading } =
     useCartActions();
   const { processPayment, isProcessing } = usePayment();
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<
+    "card" | "cash" | "point"
+  >("card");
 
   const cartItems = cartData?.cart || [];
   const total = cartData?.summary?.totalAmount || 0;
 
-  const handlePaymentClick = () => {
-    setShowPaymentModal(true);
+  const handlePaymentClick = async () => {
+    await processPayment(selectedPaymentMethod);
   };
 
-  const handlePaymentConfirm = async (
-    paymentMethod: "card" | "cash" | "point"
-  ) => {
-    await processPayment(paymentMethod);
-    setShowPaymentModal(false);
-  };
-
-  const handlePaymentCancel = () => {
-    setShowPaymentModal(false);
+  const handlePaymentMethodChange = (method: "card" | "cash" | "point") => {
+    setSelectedPaymentMethod(method);
   };
 
   return (
@@ -51,6 +45,8 @@ export default function CartPage() {
           isActionLoading={isActionLoading}
           onQuantityChange={handleQuantityChange}
           onRemove={handleRemove}
+          selectedPaymentMethod={selectedPaymentMethod}
+          onPaymentMethodChange={handlePaymentMethodChange}
         />
 
         {/* Payment Button */}
@@ -67,14 +63,6 @@ export default function CartPage() {
             </Button>
           </div>
         )}
-
-        {/* Payment Modal */}
-        <PaymentModal
-          isOpen={showPaymentModal}
-          isProcessing={isProcessing}
-          onConfirm={handlePaymentConfirm}
-          onCancel={handlePaymentCancel}
-        />
 
         {/* Bottom Navigation */}
         <BottomNavigation />

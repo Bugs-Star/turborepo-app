@@ -57,7 +57,7 @@ export const Button = ({
         backgroundColor: "#b91c1c", // red-700
       },
       white: {
-        backgroundColor: "#f9fafb", // gray-50
+        backgroundColor: "#f3f4f6", // gray-100
       },
     };
 
