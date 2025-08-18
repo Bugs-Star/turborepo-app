@@ -213,6 +213,11 @@ export const cartService = {
     return await api.get("/cart");
   },
 
+  // 장바구니 개수 조회
+  getCartCount: async () => {
+    return await api.get("/cart/count");
+  },
+
   // 장바구니에 상품 추가
   addToCart: async (productId: string, quantity: number = 1) => {
     return await api.post("/cart/add", { productId, quantity });

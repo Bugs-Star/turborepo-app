@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { cartService } from "@/lib/services";
 import { useToast } from "@/hooks/useToast";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface UseCartOptions {
   onSuccess?: () => void;
@@ -9,7 +10,14 @@ interface UseCartOptions {
 
 export const useCart = (options: UseCartOptions = {}) => {
   const { showToast } = useToast();
+  const queryClient = useQueryClient();
   const [isLoading, setIsLoading] = useState(false);
+
+  const invalidateCartQueries = () => {
+    // 장바구니 관련 모든 쿼리 무효화
+    queryClient.invalidateQueries({ queryKey: ["cart"] });
+    queryClient.invalidateQueries({ queryKey: ["cartCount"] });
+  };
 
   const addToCart = async (productId: string, quantity: number) => {
     if (isLoading) return;
@@ -18,6 +26,7 @@ export const useCart = (options: UseCartOptions = {}) => {
       setIsLoading(true);
       await cartService.addToCart(productId, quantity);
       showToast("장바구니에 추가되었습니다.", "success");
+      invalidateCartQueries();
       options.onSuccess?.();
     } catch (err) {
       const errorMessage = "장바구니 추가에 실패했습니다.";
@@ -36,6 +45,7 @@ export const useCart = (options: UseCartOptions = {}) => {
       setIsLoading(true);
       await cartService.removeFromCart(itemId);
       showToast("장바구니에서 제거되었습니다.", "success");
+      invalidateCartQueries();
       options.onSuccess?.();
     } catch (err) {
       const errorMessage = "장바구니에서 제거하는데 실패했습니다.";
@@ -54,6 +64,7 @@ export const useCart = (options: UseCartOptions = {}) => {
       setIsLoading(true);
       await cartService.updateCartItemQuantity(itemId, quantity);
       showToast("수량이 변경되었습니다.", "success");
+      invalidateCartQueries();
       options.onSuccess?.();
     } catch (err) {
       const errorMessage = "수량 변경에 실패했습니다.";
