@@ -17,24 +17,33 @@ export const PAYMENT_METHODS: PaymentMethod[] = [
 
 export const usePayment = () => {
   const [isProcessing, setIsProcessing] = useState(false);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] =
+    useState<PaymentMethod["value"]>("card");
   const { showToast } = useToast();
   const router = useRouter();
   const queryClient = useQueryClient();
 
-  const processPayment = async (
-    paymentMethod: PaymentMethod["value"] = "card"
-  ) => {
+  const handlePaymentMethodChange = (method: PaymentMethod["value"]) => {
+    setSelectedPaymentMethod(method);
+  };
+
+  const handlePaymentClick = async () => {
+    await processPayment(selectedPaymentMethod);
+  };
+
+  const processPayment = async (paymentMethod?: PaymentMethod["value"]) => {
+    const method = paymentMethod || selectedPaymentMethod;
     setIsProcessing(true);
 
     try {
-      console.log("결제 요청 데이터:", { paymentMethod });
+      console.log("결제 요청 데이터:", { paymentMethod: method });
 
       // 토큰 상태 확인
       const accessToken = localStorage.getItem("accessToken");
       console.log("액세스 토큰 존재:", !!accessToken);
 
       const response = await orderService.createOrder({
-        paymentMethod,
+        paymentMethod: method,
       });
 
       console.log("결제 응답:", response);
@@ -78,5 +87,8 @@ export const usePayment = () => {
   return {
     processPayment,
     isProcessing,
+    selectedPaymentMethod,
+    handlePaymentMethodChange,
+    handlePaymentClick,
   };
 };

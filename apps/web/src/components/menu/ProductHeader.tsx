@@ -1,3 +1,4 @@
+import { useSearchParams, useRouter } from "next/navigation";
 import { PageHeader } from "@/components/ui";
 
 interface ProductHeaderProps {
@@ -5,5 +6,17 @@ interface ProductHeaderProps {
 }
 
 export default function ProductHeader({ productName }: ProductHeaderProps) {
-  return <PageHeader title={productName} />;
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const category = searchParams.get("category");
+
+  const handleBackClick = () => {
+    if (category) {
+      router.push(`/menu?category=${category}`);
+    } else {
+      router.push("/menu");
+    }
+  };
+
+  return <PageHeader title={productName} onBackClick={handleBackClick} />;
 }
