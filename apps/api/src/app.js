@@ -1,8 +1,8 @@
 // src/app.js
-import express from 'express';
-import cors from 'cors';
-import qs from 'qs';
-import routes from './routes/index.js';
+import express from "express";
+import cors from "cors";
+import qs from "qs";
+import routes from "./routes/index.js";
 
 const app = express();
 
@@ -12,9 +12,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true })); // Form-data 처리
 
 // query parser
-app.set('query parser', str => qs.parse(str));
+app.set("query parser", (str) => qs.parse(str));
 
 // 라우트
-app.use('/', routes);
+app.use("/", routes);
 
 export default app;

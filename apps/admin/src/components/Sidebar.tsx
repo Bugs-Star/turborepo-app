@@ -1,5 +1,6 @@
 "use client";
 
+import useLogout from "@/hooks/useLogout";
 import {
   Coffee,
   ShoppingCart,
@@ -27,6 +28,7 @@ const pacifico = Pacifico({
 const Sidebar = () => {
   const router = useRouter();
   const pathname = usePathname();
+  const logout = useLogout();
 
   return (
     <div className="flex flex-col w-48 h-screen border-r border-gray-200 bg-white">

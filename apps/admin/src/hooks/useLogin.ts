@@ -13,7 +13,7 @@ export const useLogin = () => {
       localStorage.setItem("accessToken", data.token);
       //   localStorage.setItem("adminName", data.adminName);
 
-      router.push("/admin/dashboard");
+      router.push("/dashboard");
     },
     onError: (error) => {
       console.error("로그인 실패:", error);
