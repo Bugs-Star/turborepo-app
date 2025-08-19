@@ -17,6 +17,8 @@ export default function LoginPage() {
     const message = searchParams.get("message");
     if (message === "login_required") {
       showWarning("로그인이 필요한 서비스입니다.");
+    } else if (message === "session_expired") {
+      showWarning("세션이 만료되었습니다. 다시 로그인해주세요.");
     }
   }, [searchParams, showWarning]);
 
