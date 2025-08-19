@@ -2,31 +2,29 @@
 
 import { BottomNavigation } from "@/components/layout";
 import { PageHeader } from "@/components/ui";
-import { CartContent } from "@/components/cart";
+import { CartContent, CartActionButton } from "@/components/cart";
 import { AsyncWrapper } from "@/components/ui";
-import { Button } from "@repo/ui";
-import { useCartFetch, useCartActions, usePayment } from "@/hooks";
-import { useState } from "react";
+import {
+  useCartFetch,
+  useCartActions,
+  usePayment,
+  useNavigation,
+} from "@/hooks";
 
 export default function CartPage() {
   const { data: cartData, isLoading, error, isFetching } = useCartFetch();
   const { handleQuantityChange, handleRemove, isActionLoading } =
     useCartActions();
-  const { processPayment, isProcessing } = usePayment();
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<
-    "card" | "cash" | "point"
-  >("card");
+  const {
+    isProcessing,
+    selectedPaymentMethod,
+    handlePaymentMethodChange,
+    handlePaymentClick,
+  } = usePayment();
+  const { goToMenu } = useNavigation();
 
   const cartItems = cartData?.cart || [];
   const total = cartData?.summary?.totalAmount || 0;
-
-  const handlePaymentClick = async () => {
-    await processPayment(selectedPaymentMethod);
-  };
-
-  const handlePaymentMethodChange = (method: "card" | "cash" | "point") => {
-    setSelectedPaymentMethod(method);
-  };
 
   return (
     <AsyncWrapper
@@ -49,20 +47,14 @@ export default function CartPage() {
           onPaymentMethodChange={handlePaymentMethodChange}
         />
 
-        {/* Payment Button */}
-        {cartItems.length > 0 && (
-          <div className="fixed bottom-20 left-0 right-0 px-4 pb-4">
-            <Button
-              onClick={handlePaymentClick}
-              variant="green"
-              size="lg"
-              fullWidth
-              disabled={isActionLoading || isProcessing}
-            >
-              {isProcessing ? "결제 처리 중..." : "결제하기"}
-            </Button>
-          </div>
-        )}
+        {/* Action Buttons */}
+        <CartActionButton
+          hasItems={cartItems.length > 0}
+          isProcessing={isProcessing}
+          isActionLoading={isActionLoading}
+          onPaymentClick={handlePaymentClick}
+          onGoToMenu={goToMenu}
+        />
 
         {/* Bottom Navigation */}
         <BottomNavigation />
