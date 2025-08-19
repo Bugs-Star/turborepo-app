@@ -1,7 +1,6 @@
 import User from '../models/User.js';
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
-import { generateAccessToken, generateRefreshToken, verifyToken, decodeToken } from '../utils/tokenUtils.js';
+import { generateAccessToken } from '../utils/accessTokenUtils.js';
+import { generateRefreshToken, refreshTokens, decodeRefreshToken } from '../utils/refreshTokenUtils.js';
 import { compressMulterFile } from '../utils/imageUtils.js';
 import { addToBlacklist } from '../config/redis.js';
 
@@ -71,7 +70,11 @@ export const login = async (req, res) => {
       _id: user._id
     });
   } catch (error) {
-    res.status(500).json({ message: '서버 오류가 발생했습니다.' });
+    console.error('로그인 오류:', error);
+    res.status(500).json({ 
+      message: '서버 오류가 발생했습니다.',
+      error: error.message // 개발 중에만 사용
+    });
   }
 };
 
@@ -80,28 +83,15 @@ export const refresh = async (req, res) => {
   try {
     const { refreshToken } = req.body;
 
-    if (!refreshToken) {
-      return res.status(400).json({ message: 'Refresh Token이 필요합니다.' });
-    }
-
-    // Refresh Token 검증
-    const decoded = verifyToken(refreshToken);
-    
-    // 유저 찾기 및 Refresh Token 확인
-    const user = await User.findById(decoded.userId);
-    if (!user || user.refreshToken !== refreshToken) {
-      return res.status(401).json({ message: '유효하지 않은 Refresh Token입니다.' });
-    }
-
-    // 새로운 Access Token 생성
-    const newAccessToken = generateAccessToken({ userId: user._id });
-    
-    res.json({
-      accessToken: newAccessToken,
-      message: '토큰이 성공적으로 갱신되었습니다.'
-    });
+    const result = await refreshTokens(refreshToken);
+    res.json(result);
   } catch (error) {
     console.error('토큰 갱신 오류:', error);
+    
+    if (error.message === 'Refresh Token이 필요합니다.') {
+      return res.status(400).json({ message: error.message });
+    }
+    
     res.status(401).json({ message: '토큰 갱신에 실패했습니다.' });
   }
 };
@@ -144,8 +134,7 @@ export const updateProfile = async (req, res) => {
 
     // 비밀번호 수정
     if (newPassword) {
-      const hashedPassword = await bcrypt.hash(newPassword, 12);
-      updateData.passwordHash = hashedPassword;
+      updateData.passwordHash = newPassword; // User 모델의 pre-save 미들웨어에서 자동 해싱
     }
 
     // 프로필 이미지 수정
@@ -218,7 +207,7 @@ export const logout = async (req, res) => {
 
     // Refresh Token 무효화 (DB에서 제거)
     if (refreshToken) {
-      const decoded = decodeToken(refreshToken);
+      const decoded = decodeRefreshToken(refreshToken);
       if (decoded && decoded.userId) {
         await User.findByIdAndUpdate(decoded.userId, { refreshToken: null });
       }

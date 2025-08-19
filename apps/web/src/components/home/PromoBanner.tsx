@@ -1,5 +1,7 @@
 "use client";
 
+import { Button } from "@repo/ui";
+
 interface PromoBannerProps {
   title: string;
   subtitle: string;
@@ -16,7 +18,7 @@ export default function PromoBanner({
   onButtonClick,
 }: PromoBannerProps) {
   return (
-    <div className="mx-6 mb-6 mt-6 rounded-2xl p-6 relative overflow-hidden">
+    <div className="mx-6 mb-6 mt-6 rounded-lg p-8 relative overflow-hidden">
       {/* 배경 이미지 레이어 */}
       {imageUrl && (
         <div
@@ -34,12 +36,9 @@ export default function PromoBanner({
           <p className="text-sm text-black mb-4 leading-relaxed line-clamp-1 overflow-hidden text-ellipsis">
             {subtitle}
           </p>
-          <button
-            onClick={onButtonClick}
-            className="bg-white text-gray-900 px-4 py-2 rounded-lg text-sm font-medium shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-          >
+          <Button onClick={onButtonClick} variant="white" size="sm">
             {buttonText}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

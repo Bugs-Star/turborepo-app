@@ -2,7 +2,8 @@ import jwt from 'jsonwebtoken';
 import Admin from '../models/Admin.js';
 import User from '../models/User.js';
 import { addToBlacklist } from '../config/redis.js';
-import { generateAccessToken, generateRefreshToken, verifyToken, decodeToken } from '../utils/tokenUtils.js';
+import { generateAccessToken, verifyAccessToken } from '../utils/accessTokenUtils.js';
+import { generateRefreshToken, decodeRefreshToken } from '../utils/refreshTokenUtils.js';
 
 // Admin 로그인
 export const adminLogin = async (req, res) => {
@@ -49,7 +50,7 @@ export const adminRefresh = async (req, res) => {
     }
 
     // Refresh Token 검증
-    const decoded = verifyToken(refreshToken);
+    const decoded = verifyAccessToken(refreshToken);
     
     // Admin 찾기 및 Refresh Token 확인
     const admin = await Admin.findById(decoded.adminId);
@@ -100,7 +101,7 @@ export const adminLogout = async (req, res) => {
     // Refresh Token 무효화 (DB에서 제거)
     if (refreshToken) {
       try {
-        const decoded = decodeToken(refreshToken);
+        const decoded = decodeRefreshToken(refreshToken);
         if (decoded && decoded.adminId) {
           await Admin.findByIdAndUpdate(decoded.adminId, { refreshToken: null });
           console.log('Refresh Token DB에서 제거 완료');

@@ -213,37 +213,66 @@ export const cartService = {
     return await api.get("/cart");
   },
 
+  // 장바구니 개수 조회
+  getCartCount: async () => {
+    return await api.get("/cart/count");
+  },
+
   // 장바구니에 상품 추가
   addToCart: async (productId: string, quantity: number = 1) => {
-    return await api.post("/cart/items", { productId, quantity });
+    return await api.post("/cart/add", { productId, quantity });
   },
 
   // 장바구니에서 상품 제거
   removeFromCart: async (itemId: string) => {
-    return await api.delete(`/cart/items/${itemId}`);
+    return await api.delete(`/cart/${itemId}`);
   },
 
   // 장바구니 상품 수량 변경
   updateCartItemQuantity: async (itemId: string, quantity: number) => {
-    return await api.put(`/cart/items/${itemId}`, { quantity });
+    return await api.put(`/cart/${itemId}`, { quantity });
   },
 };
 
-// 주문 관련 API (향후 구현 예정)
+// 주문 관련 API
 export const orderService = {
   // 주문 내역 조회
   getOrderHistory: async () => {
-    return await api.get("/orders");
+    const response = await api.get("/order");
+    // 이미지 URL 수정
+    const ordersWithFixedImages = response.orders.map((order: any) => ({
+      ...order,
+      items: order.items.map((item: any) => ({
+        ...item,
+        productImg: fixImageUrl(item.productImg),
+      })),
+    }));
+    return {
+      ...response,
+      orders: ordersWithFixedImages,
+    };
   },
 
   // 주문 생성
   createOrder: async (orderData: any) => {
-    return await api.post("/orders", orderData);
+    return await api.post("/order", orderData);
   },
 
   // 주문 상세 조회
   getOrderDetail: async (orderId: string) => {
-    return await api.get(`/orders/${orderId}`);
+    const response = await api.get(`/order/${orderId}`);
+    // 이미지 URL 수정
+    const orderWithFixedImages = {
+      ...response.order,
+      items: response.order.items.map((item: any) => ({
+        ...item,
+        productImg: fixImageUrl(item.productImg),
+      })),
+    };
+    return {
+      ...response,
+      order: orderWithFixedImages,
+    };
   },
 };
 

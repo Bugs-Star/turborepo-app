@@ -1,9 +1,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { House, Menu, ShoppingCart, User } from "lucide-react";
+import { useCartCountFetch } from "@/hooks";
+import { tokenManager } from "@/lib/api";
 
 export default function BottomNavigation() {
   const pathname = usePathname();
+  const { data: cartCountData } = useCartCountFetch();
+  const cartCount = cartCountData?.count || 0;
 
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 py-3 z-50">
@@ -38,16 +42,23 @@ export default function BottomNavigation() {
         </Link>
         <Link
           href="/cart"
-          className={`flex flex-col items-center transition-colors ${
+          className={`flex flex-col items-center transition-colors relative ${
             pathname === "/cart"
               ? "text-green-700"
               : "text-gray-700 hover:text-green-700"
           }`}
         >
-          <ShoppingCart
-            className="w-6 h-6 mb-1"
-            fill={pathname === "/cart" ? "currentColor" : "none"}
-          />
+          <div className="relative">
+            <ShoppingCart
+              className="w-6 h-6 mb-1"
+              fill={pathname === "/cart" ? "currentColor" : "none"}
+            />
+            {cartCount > 0 && (
+              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                {cartCount > 99 ? "99+" : cartCount}
+              </span>
+            )}
+          </div>
           <span className="text-xs">CART</span>
         </Link>
         <Link

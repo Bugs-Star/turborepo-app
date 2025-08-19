@@ -22,3 +22,6 @@ export * from "./order-history";
 export * from "./promotion";
 
 export * from "./event";
+
+// Payment Components
+export * from "./payment";
