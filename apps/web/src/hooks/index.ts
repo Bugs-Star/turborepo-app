@@ -4,6 +4,7 @@ export { useToast } from "./useToast";
 export { useProfileValidation } from "./useProfileValidation";
 export { useProfileFetch } from "./useProfileFetch";
 export { useProductFetch } from "./useProductFetch";
+export { useInfiniteProductFetch } from "./useInfiniteProductFetch";
 export { useRecommendedMenuFetch } from "./useRecommendedMenuFetch";
 export { usePromotionFetch } from "./usePromotionFetch";
 export { usePromotionDetailFetch } from "./usePromotionDetailFetch";

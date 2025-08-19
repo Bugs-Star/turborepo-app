@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Product } from "@/lib";
 
 interface CategoryFilterProps {
@@ -28,18 +28,25 @@ export default function CategoryFilter({
 
   const categories = Object.keys(categoryMapping);
 
-  // 필터링된 상품들
+  // 필터링된 상품들 (무한 스크롤에서는 이미 필터링된 데이터가 전달됨)
   const filteredProducts = useMemo(() => {
     if (!products || !Array.isArray(products)) {
       return [];
     }
-    return products.filter((product) => product.category === activeCategory);
-  }, [products, activeCategory]);
+    // 무한 스크롤에서는 이미 카테고리별로 필터링된 데이터가 전달되므로
+    // 추가 필터링이 필요하지 않음
+    return products;
+  }, [products]);
 
   const handleCategoryChange = (category: string) => {
     setActiveCategory(category);
     onCategoryChange?.(category);
   };
+
+  // 초기 카테고리가 변경되면 activeCategory 업데이트
+  useEffect(() => {
+    setActiveCategory(initialCategory);
+  }, [initialCategory]);
 
   return (
     <>
