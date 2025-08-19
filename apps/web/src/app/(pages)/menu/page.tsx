@@ -1,5 +1,6 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
 import { BottomNavigation } from "@/components/layout";
 import { useProductFetch } from "@/hooks/useProductFetch";
 import ProductGrid from "@/components/menu/ProductGrid";
@@ -8,6 +9,8 @@ import CategoryFilter from "@/components/menu/CategoryFilter";
 
 export default function MenuPage() {
   const { products, loading, error, refetch } = useProductFetch();
+  const searchParams = useSearchParams();
+  const initialCategory = searchParams.get("category") || "beverage";
 
   return (
     <AsyncWrapper
@@ -21,10 +24,13 @@ export default function MenuPage() {
         <PageHeader title="메뉴" />
 
         {/* Category Filter with Product Grid */}
-        <CategoryFilter products={products}>
-          {(filteredProducts) => (
+        <CategoryFilter products={products} initialCategory={initialCategory}>
+          {(filteredProducts, activeCategory) => (
             <div className="flex-1 px-4 pb-6">
-              <ProductGrid products={filteredProducts} />
+              <ProductGrid
+                products={filteredProducts}
+                activeCategory={activeCategory}
+              />
             </div>
           )}
         </CategoryFilter>

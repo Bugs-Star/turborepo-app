@@ -3,16 +3,21 @@ import { Product } from "@/lib";
 
 interface CategoryFilterProps {
   products: Product[];
+  initialCategory?: string;
   onCategoryChange?: (category: string) => void;
-  children: (filteredProducts: Product[]) => React.ReactNode;
+  children: (
+    filteredProducts: Product[],
+    activeCategory: string
+  ) => React.ReactNode;
 }
 
 export default function CategoryFilter({
   products,
+  initialCategory = "beverage",
   onCategoryChange,
   children,
 }: CategoryFilterProps) {
-  const [activeCategory, setActiveCategory] = useState("goods");
+  const [activeCategory, setActiveCategory] = useState(initialCategory);
 
   // 카테고리 매핑
   const categoryMapping = {
@@ -54,14 +59,14 @@ export default function CategoryFilter({
       </div>
 
       {/* Render children with filtered products */}
-      {children(filteredProducts)}
+      {children(filteredProducts, activeCategory)}
     </>
   );
 }
 
 // 훅으로도 사용할 수 있도록 export
 export const useCategoryFilter = (products: Product[]) => {
-  const [activeCategory, setActiveCategory] = useState("goods");
+  const [activeCategory, setActiveCategory] = useState("beverage");
 
   const categoryMapping = {
     beverage: "음료",
