@@ -15,12 +15,7 @@ export default function CartPage() {
   const { cartItems, summary, isLoading, error, isFetching } = useCartFetch();
   const { handleQuantityChange, handleRemove, isActionLoading } =
     useCartActions();
-  const {
-    isProcessing,
-    selectedPaymentMethod,
-    handlePaymentMethodChange,
-    handlePaymentClick,
-  } = usePayment();
+  const { isProcessing, handlePaymentClick } = usePayment();
   const { goToMenu } = useNavigation();
 
   const total = summary?.totalAmount || 0;
@@ -42,8 +37,6 @@ export default function CartPage() {
           isActionLoading={isActionLoading}
           onQuantityChange={handleQuantityChange}
           onRemove={handleRemove}
-          selectedPaymentMethod={selectedPaymentMethod}
-          onPaymentMethodChange={handlePaymentMethodChange}
         />
 
         {/* Action Buttons */}
