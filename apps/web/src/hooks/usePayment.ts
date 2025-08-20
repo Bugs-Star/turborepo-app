@@ -1,39 +1,37 @@
-import { useState } from "react";
 import { orderService } from "@/lib/services";
 import { useToast } from "./useToast";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
+import { usePaymentStore } from "@/stores/paymentStore";
+import { PaymentMethod, PAYMENT_METHODS } from "@/types/payment";
 
-export interface PaymentMethod {
-  value: "card" | "cash" | "point";
-  label: string;
-}
-
-export const PAYMENT_METHODS: PaymentMethod[] = [
-  { value: "card", label: "카드" },
-  { value: "cash", label: "현금" },
-  { value: "point", label: "포인트" },
-];
+export type { PaymentMethod };
+export { PAYMENT_METHODS };
 
 export const usePayment = () => {
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [selectedPaymentMethod, setSelectedPaymentMethod] =
-    useState<PaymentMethod["value"]>("card");
   const { showToast } = useToast();
   const router = useRouter();
   const queryClient = useQueryClient();
 
-  const handlePaymentMethodChange = (method: PaymentMethod["value"]) => {
-    setSelectedPaymentMethod(method);
-  };
+  // Zustand 스토어에서 상태 가져오기
+  const {
+    selectedMethod,
+    isProcessing,
+    error,
+    setProcessing,
+    setError,
+    clearError,
+    setLastUsedMethod,
+  } = usePaymentStore();
 
   const handlePaymentClick = async () => {
-    await processPayment(selectedPaymentMethod);
+    await processPayment(selectedMethod);
   };
 
   const processPayment = async (paymentMethod?: PaymentMethod["value"]) => {
-    const method = paymentMethod || selectedPaymentMethod;
-    setIsProcessing(true);
+    const method = paymentMethod || selectedMethod;
+    setProcessing(true);
+    clearError();
 
     try {
       console.log("결제 요청 데이터:", { paymentMethod: method });
@@ -49,6 +47,9 @@ export const usePayment = () => {
       console.log("결제 응답:", response);
 
       if (response.success) {
+        // 최근 사용한 결제 수단으로 설정
+        setLastUsedMethod(method);
+
         showToast("주문이 완료되었습니다!", "success");
         // 장바구니 쿼리 무효화하여 즉시 업데이트
         queryClient.invalidateQueries({ queryKey: ["cart"] });
@@ -56,6 +57,7 @@ export const usePayment = () => {
         // 즉시 주문 내역 페이지로 이동
         router.push("/order-history");
       } else {
+        setError("주문 처리 중 오류가 발생했습니다.");
         showToast("주문 처리 중 오류가 발생했습니다.", "error");
       }
     } catch (error: any) {
@@ -78,17 +80,18 @@ export const usePayment = () => {
       // 백엔드에서 반환하는 에러 메시지 처리
       const errorMessage =
         error.response?.data?.message || "결제 처리 중 오류가 발생했습니다.";
+      setError(errorMessage);
       showToast(errorMessage, "error");
     } finally {
-      setIsProcessing(false);
+      setProcessing(false);
     }
   };
 
   return {
     processPayment,
     isProcessing,
-    selectedPaymentMethod,
-    handlePaymentMethodChange,
+    selectedPaymentMethod: selectedMethod, // 호환성을 위해 유지
+    error,
     handlePaymentClick,
   };
 };

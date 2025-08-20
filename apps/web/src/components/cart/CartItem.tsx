@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { CartItem as CartItemType } from "@/constants/dummyData";
+import { CartItemUI } from "@/types/cart";
 import { Trash2 } from "lucide-react";
 
 interface CartItemProps {
-  item: CartItemType;
+  item: CartItemUI;
   onQuantityChange: (id: string, quantity: number) => void;
   onRemove: (id: string) => void;
   disabled?: boolean;

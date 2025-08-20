@@ -12,19 +12,13 @@ import {
 } from "@/hooks";
 
 export default function CartPage() {
-  const { data: cartData, isLoading, error, isFetching } = useCartFetch();
+  const { cartItems, summary, isLoading, error, isFetching } = useCartFetch();
   const { handleQuantityChange, handleRemove, isActionLoading } =
     useCartActions();
-  const {
-    isProcessing,
-    selectedPaymentMethod,
-    handlePaymentMethodChange,
-    handlePaymentClick,
-  } = usePayment();
+  const { isProcessing, handlePaymentClick } = usePayment();
   const { goToMenu } = useNavigation();
 
-  const cartItems = cartData?.cart || [];
-  const total = cartData?.summary?.totalAmount || 0;
+  const total = summary?.totalAmount || 0;
 
   return (
     <AsyncWrapper
@@ -43,8 +37,6 @@ export default function CartPage() {
           isActionLoading={isActionLoading}
           onQuantityChange={handleQuantityChange}
           onRemove={handleRemove}
-          selectedPaymentMethod={selectedPaymentMethod}
-          onPaymentMethodChange={handlePaymentMethodChange}
         />
 
         {/* Action Buttons */}

@@ -1,15 +1,13 @@
 import { CartItem, CartSummary } from "@/components/cart";
 import PaymentMethodSelector from "@/components/payment/PaymentMethodSelector";
-import { PaymentMethod } from "@/hooks/usePayment";
+import { CartItemUI } from "@/types/cart";
 
 interface CartContentProps {
-  cartItems: any[];
+  cartItems: CartItemUI[];
   total: number;
   isActionLoading: boolean;
   onQuantityChange: (id: string, quantity: number) => void;
   onRemove: (id: string) => void;
-  selectedPaymentMethod: PaymentMethod["value"];
-  onPaymentMethodChange: (method: PaymentMethod["value"]) => void;
 }
 
 export default function CartContent({
@@ -18,8 +16,6 @@ export default function CartContent({
   isActionLoading,
   onQuantityChange,
   onRemove,
-  selectedPaymentMethod,
-  onPaymentMethodChange,
 }: CartContentProps) {
   return (
     <div className="flex-1 px-4 py-6">
@@ -31,14 +27,8 @@ export default function CartContent({
         {cartItems.length > 0 ? (
           cartItems.map((item) => (
             <CartItem
-              key={item._id}
-              item={{
-                id: item._id,
-                name: item.product.productName,
-                price: item.product.price,
-                quantity: item.quantity,
-                imageUrl: item.product.productImg,
-              }}
+              key={item.id}
+              item={item}
               onQuantityChange={onQuantityChange}
               onRemove={onRemove}
               disabled={isActionLoading}
@@ -52,11 +42,7 @@ export default function CartContent({
 
         {/* Payment Method Selector */}
         {cartItems.length > 0 && (
-          <PaymentMethodSelector
-            selectedMethod={selectedPaymentMethod}
-            onMethodChange={onPaymentMethodChange}
-            disabled={isActionLoading}
-          />
+          <PaymentMethodSelector disabled={isActionLoading} />
         )}
       </div>
     </div>
