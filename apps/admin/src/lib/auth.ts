@@ -29,4 +29,11 @@ export const AuthService = {
       { headers: { Authorization: `Bearer ${accessToken}` } }
     );
   },
+
+  refreshAccessToken: async (refreshToken: string) => {
+    const response = await axiosInstance.post("/admin/refresh", {
+      refreshToken,
+    });
+    return response.data;
+  },
 };

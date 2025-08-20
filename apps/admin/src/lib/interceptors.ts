@@ -1,14 +1,14 @@
 import axiosInstance from "./axios";
+import { AuthService } from "./auth";
 
 export function setupInterceptors() {
   // 요청 인터셉터
   axiosInstance.interceptors.request.use((config) => {
-    const token =
-      typeof window !== "undefined"
-        ? sessionStorage.getItem("accessToken")
-        : null;
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    if (typeof window !== "undefined") {
+      const accessToken = sessionStorage.getItem("accessToken");
+      if (accessToken && config.headers) {
+        config.headers.Authorization = `Bearer ${accessToken}`;
+      }
     }
     return config;
   });
@@ -18,27 +18,34 @@ export function setupInterceptors() {
     (res) => res,
     async (err) => {
       const originalRequest = err.config;
+
       if (err.response?.status === 401 && !originalRequest._retry) {
         originalRequest._retry = true;
+
         try {
-          const refreshToken = sessionStorage.getItem("refreshToken");
+          const refreshToken = localStorage.getItem("refreshToken");
           if (!refreshToken) throw new Error("No refresh token");
 
-          const res = await axiosInstance.post("/admin/refresh", {
-            refreshToken,
-          });
-          const newAccessToken = res.data.accessToken;
+          // AuthService 활용해서 새 액세스 토큰 발급
+          const data = await AuthService.refreshAccessToken(refreshToken);
+          const newAccessToken = data.accessToken;
 
-          sessionStorage.setItem("accessToken", newAccessToken);
-          originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+          // localStorage 갱신
+          localStorage.setItem("accessToken", newAccessToken);
 
+          // 원래 요청 헤더 업데이트 후 재요청
+          if (originalRequest.headers) {
+            originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+          }
           return axiosInstance(originalRequest);
         } catch (refreshError) {
-          sessionStorage.clear();
+          // 리프레시 실패 시 세션 초기화 후 로그인 페이지 이동
+          localStorage.clear();
           window.location.href = "/login";
           return Promise.reject(refreshError);
         }
       }
+
       return Promise.reject(err);
     }
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { AuthService, LoginResponse, LoginPayload } from "@/services/auth";
+import { AuthService, LoginResponse, LoginPayload } from "@/lib/auth";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 
