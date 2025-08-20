@@ -13,10 +13,10 @@ import { Dancing_Script, Pacifico } from "next/font/google";
 import { usePathname, useRouter } from "next/navigation";
 
 const menuItems = [
-  { label: "메뉴, 이벤트 관리", icon: Coffee, path: "/menu-event" },
-  { label: "재고관리", icon: ShoppingCart, path: "/stock-management" },
-  { label: "고객관리", icon: Users, path: "/customer-management" },
-  { label: "광고관리", icon: Megaphone, path: "/ads-management" },
+  { label: "이벤트, 추천메뉴 관리", icon: Coffee, path: "/event-menu" },
+  { label: "제품 관리", icon: ShoppingCart, path: "/product-management" },
+  { label: "고객 관리", icon: Users, path: "/customer-management" },
+  { label: "광고 관리", icon: Megaphone, path: "/ads-management" },
   { label: "보고서", icon: BarChart3, path: "/dashboard" },
 ];
 
