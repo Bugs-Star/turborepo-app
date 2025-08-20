@@ -25,11 +25,11 @@ export default function SignupForm() {
       try {
         await signup(formData.name, formData.email, formData.password);
 
-        showSuccess("회원가입이 완료되었습니다!");
+        showSuccess("회원가입이 완료되었습니다! 자동으로 로그인되었습니다.");
 
-        // 회원가입 성공 후 로그인 페이지로 리다이렉트
+        // 회원가입 성공 후 홈 페이지로 리다이렉트
         setTimeout(() => {
-          window.location.href = "/login";
+          window.location.href = "/home";
         }, 1500);
       } catch (error: any) {
         showError(error.response?.data?.message || "회원가입에 실패했습니다.");

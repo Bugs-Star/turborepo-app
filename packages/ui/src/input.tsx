@@ -12,7 +12,15 @@ interface InputProps
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
   (
-    { label, error, variant = "default", size = "md", style = {}, ...props },
+    {
+      label,
+      error,
+      variant = "default",
+      size = "md",
+      style = {},
+      value,
+      ...props
+    },
     ref
   ) => {
     const [isFocused, setIsFocused] = useState(false);
@@ -80,6 +88,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           ref={ref}
           style={inputStyles}
           placeholder={props.placeholder}
+          value={value || ""}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           {...props}

@@ -57,7 +57,12 @@ export const useAuthStore = create<AuthState>()(
                 accessToken: response.accessToken,
                 refreshToken: response.refreshToken,
               },
-              user: response.user || defaultUser,
+              user: {
+                _id: response._id || "",
+                name: "고객", // 임시값, 나중에 getCurrentUser로 업데이트
+                email: email,
+                profileImg: "/images/user.png",
+              },
               isLoading: false,
             });
           } else {
@@ -73,20 +78,33 @@ export const useAuthStore = create<AuthState>()(
       signup: async (name: string, email: string, password: string) => {
         set({ isLoading: true });
         try {
-          const response = await authService.signup({ name, email, password });
+          // 1. 회원가입 요청
+          const signupResponse = await authService.signup({
+            name,
+            email,
+            password,
+          });
 
-          if (response.accessToken && response.refreshToken) {
+          // 2. 회원가입 성공 후 자동 로그인
+          const loginResponse = await authService.login({ email, password });
+
+          if (loginResponse.accessToken && loginResponse.refreshToken) {
             set({
               isAuthenticated: true,
               tokens: {
-                accessToken: response.accessToken,
-                refreshToken: response.refreshToken,
+                accessToken: loginResponse.accessToken,
+                refreshToken: loginResponse.refreshToken,
               },
-              user: response.user || defaultUser,
+              user: {
+                _id: loginResponse._id || "",
+                name: "고객", // 임시값, 나중에 getCurrentUser로 업데이트
+                email: email,
+                profileImg: "/images/user.png",
+              },
               isLoading: false,
             });
           } else {
-            throw new Error("토큰이 없습니다.");
+            throw new Error("로그인에 실패했습니다.");
           }
         } catch (error) {
           set({ isLoading: false });

@@ -56,11 +56,11 @@ export const useForm = <T extends Record<string, any>>(
 
   // 필드 유효성 검사
   const validateField = useCallback(
-    (field: keyof T, value: any): string | undefined => {
+    (field: keyof T, value: any, allData?: any): string | undefined => {
       if (!validationRules || !validationRules[field as string]) {
         return undefined;
       }
-      return validationRules[field as string](value);
+      return validationRules[field as string](value, allData);
     },
     [validationRules]
   );
@@ -73,7 +73,7 @@ export const useForm = <T extends Record<string, any>>(
     let isValid = true;
 
     Object.keys(data).forEach((field) => {
-      const error = validateField(field as keyof T, data[field]);
+      const error = validateField(field as keyof T, data[field], data);
       if (error) {
         newErrors[field] = error;
         isValid = false;
@@ -235,12 +235,23 @@ export const useProfileForm = () => {
       return undefined;
     },
     confirmPassword: (value: string, allData?: any): string | undefined => {
-      if (allData?.newPassword && !value) {
+      const { newPassword } = allData || {};
+
+      // 새 비밀번호가 입력되지 않았는데 확인 비밀번호가 입력된 경우
+      if (!newPassword && value) {
+        return "새 비밀번호를 먼저 입력해주세요.";
+      }
+
+      // 새 비밀번호가 입력되었는데 확인 비밀번호가 없는 경우
+      if (newPassword && !value) {
         return "비밀번호 확인을 입력해주세요.";
       }
-      if (allData?.newPassword && value !== allData.newPassword) {
+
+      // 두 비밀번호가 다른 경우
+      if (newPassword && value && value !== newPassword) {
         return "비밀번호가 일치하지 않습니다.";
       }
+
       return undefined;
     },
   };
