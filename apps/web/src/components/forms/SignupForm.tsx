@@ -2,14 +2,13 @@
 
 import Link from "next/link";
 import { Input, Button } from "@repo/ui";
-import { Toast } from "@/components/ui";
 import { useSignupValidation, useToast } from "@/hooks";
 import { useAuthStore } from "@/stores/authStore";
 
 export default function SignupForm() {
   const { formData, errors, validateForm, handleInputChange } =
     useSignupValidation();
-  const { toast, showSuccess, showError, hideToast } = useToast();
+  const { showSuccess, showError } = useToast();
   const { signup, isLoading } = useAuthStore();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -110,13 +109,6 @@ export default function SignupForm() {
           </p>
         </div>
       </form>
-
-      <Toast
-        message={toast.message}
-        type={toast.type}
-        isVisible={toast.isVisible}
-        onClose={hideToast}
-      />
     </>
   );
 }

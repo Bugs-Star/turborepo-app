@@ -2,14 +2,13 @@
 
 import Link from "next/link";
 import { Input, Button } from "@repo/ui";
-import { Toast } from "@/components/ui";
 import { useLoginValidation, useToast } from "@/hooks";
 import { useAuthStore } from "@/stores/authStore";
 
 export default function LoginForm() {
   const { formData, errors, validateForm, handleInputChange } =
     useLoginValidation();
-  const { toast, showSuccess, showError, hideToast } = useToast();
+  const { showSuccess, showError } = useToast();
   const { login, isLoading } = useAuthStore();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -87,13 +86,6 @@ export default function LoginForm() {
           </p>
         </div>
       </form>
-
-      <Toast
-        message={toast.message}
-        type={toast.type}
-        isVisible={toast.isVisible}
-        onClose={hideToast}
-      />
     </>
   );
 }

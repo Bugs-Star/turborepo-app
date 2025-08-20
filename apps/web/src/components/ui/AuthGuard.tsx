@@ -4,6 +4,7 @@ import { useEffect, useState, ReactNode, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { BottomNavigation } from "@/components/layout";
 import { useAuthStore } from "@/stores/authStore";
+import { useToast } from "@/hooks/useToast";
 
 interface AuthGuardProps {
   children: ReactNode;
@@ -23,6 +24,7 @@ export const AuthGuard = ({
   const [isClient, setIsClient] = useState(false);
 
   const { isAuthenticated, checkAuth } = useAuthStore();
+  const { showWarning } = useToast();
 
   useEffect(() => {
     setIsClient(true);
@@ -35,9 +37,10 @@ export const AuthGuard = ({
     try {
       const isValid = await checkAuth();
       if (!isValid) {
+        showWarning("로그인이 필요한 서비스입니다.");
         // 잠시 로딩 화면을 보여주기 위해 약간의 지연
         const timer = setTimeout(() => {
-          router.push("/login?message=login_required");
+          router.push("/login");
         }, 800);
 
         return () => clearTimeout(timer);
@@ -46,13 +49,14 @@ export const AuthGuard = ({
       }
     } catch (error) {
       console.error("인증 확인 중 오류:", error);
+      showWarning("로그인이 필요한 서비스입니다.");
       const timer = setTimeout(() => {
-        router.push("/login?message=login_required");
+        router.push("/login");
       }, 800);
 
       return () => clearTimeout(timer);
     }
-  }, [router, isClient, checkAuth]);
+  }, [router, isClient, checkAuth, showWarning]);
 
   useEffect(() => {
     verifyAuth();

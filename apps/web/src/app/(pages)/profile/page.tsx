@@ -9,19 +9,9 @@ import {
 import { BottomNavigation } from "@/components/layout";
 import { useAuthStore } from "@/stores/authStore";
 import { AsyncWrapper, PageHeader, AuthGuard } from "@/components/ui";
-import { useEffect, useCallback } from "react";
 
 export default function ProfilePage() {
-  const { user, isLoading, checkAuth } = useAuthStore();
-
-  // 컴포넌트 마운트 시 인증 상태 확인
-  const verifyAuth = useCallback(async () => {
-    await checkAuth();
-  }, [checkAuth]);
-
-  useEffect(() => {
-    verifyAuth();
-  }, [verifyAuth]);
+  const { user, isLoading } = useAuthStore();
 
   return (
     <AuthGuard backgroundColor="bg-gray-50" title="내 프로필" showHeader={true}>
@@ -30,7 +20,6 @@ export default function ProfilePage() {
         error={null}
         loadingMessage="프로필 정보를 불러오는 중..."
         errorMessage="잠시 후 다시 시도해주세요."
-        onRetry={verifyAuth}
       >
         <div className="min-h-screen bg-gray-50 flex flex-col pb-20">
           <PageHeader title="내 프로필" />
