@@ -2,12 +2,18 @@
 
 import Link from "next/link";
 import { Input, Button } from "@repo/ui";
-import { useSignupValidation, useToast } from "@/hooks";
+import { useSignupForm, useToast } from "@/hooks";
 import { useAuthStore } from "@/stores/authStore";
 
 export default function SignupForm() {
-  const { formData, errors, validateForm, handleInputChange } =
-    useSignupValidation();
+  const {
+    data: formData,
+    errors,
+    validateForm,
+    setFieldValue,
+    setSubmitting,
+    state,
+  } = useSignupForm();
   const { showSuccess, showError } = useToast();
   const { signup, isLoading } = useAuthStore();
 
@@ -15,6 +21,7 @@ export default function SignupForm() {
     e.preventDefault();
 
     if (validateForm()) {
+      setSubmitting(true);
       try {
         await signup(formData.name, formData.email, formData.password);
 
@@ -26,11 +33,15 @@ export default function SignupForm() {
         }, 1500);
       } catch (error: any) {
         showError(error.response?.data?.message || "회원가입에 실패했습니다.");
+      } finally {
+        setSubmitting(false);
       }
     } else {
       showError("입력 정보를 확인해주세요.");
     }
   };
+
+  const isFormLoading = isLoading || state.isSubmitting;
 
   return (
     <>
@@ -45,9 +56,9 @@ export default function SignupForm() {
           variant="default"
           size="md"
           value={formData.name}
-          onChange={(e) => handleInputChange("name", e.target.value)}
+          onChange={(e) => setFieldValue("name", e.target.value)}
           error={errors.name}
-          disabled={isLoading}
+          disabled={isFormLoading}
         />
 
         <Input
@@ -57,9 +68,9 @@ export default function SignupForm() {
           variant="default"
           size="md"
           value={formData.email}
-          onChange={(e) => handleInputChange("email", e.target.value)}
+          onChange={(e) => setFieldValue("email", e.target.value)}
           error={errors.email}
-          disabled={isLoading}
+          disabled={isFormLoading}
         />
 
         <Input
@@ -69,9 +80,9 @@ export default function SignupForm() {
           variant="default"
           size="md"
           value={formData.password}
-          onChange={(e) => handleInputChange("password", e.target.value)}
+          onChange={(e) => setFieldValue("password", e.target.value)}
           error={errors.password}
-          disabled={isLoading}
+          disabled={isFormLoading}
         />
 
         <Input
@@ -81,9 +92,9 @@ export default function SignupForm() {
           variant="default"
           size="md"
           value={formData.confirmPassword}
-          onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
+          onChange={(e) => setFieldValue("confirmPassword", e.target.value)}
           error={errors.confirmPassword}
-          disabled={isLoading}
+          disabled={isFormLoading}
         />
 
         <Button
@@ -92,9 +103,9 @@ export default function SignupForm() {
           size="md"
           fullWidth
           className="rounded-full"
-          disabled={isLoading}
+          disabled={isFormLoading}
         >
-          {isLoading ? "가입 중..." : "가입하기"}
+          {isFormLoading ? "가입 중..." : "가입하기"}
         </Button>
 
         <div className="text-center">

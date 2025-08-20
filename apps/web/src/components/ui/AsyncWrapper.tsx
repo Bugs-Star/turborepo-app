@@ -1,7 +1,8 @@
 "use client";
 
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode } from "react";
 import { BottomNavigation } from "@/components/layout";
+import { useHydration } from "@/hooks";
 
 interface AsyncWrapperProps {
   loading: boolean;
@@ -20,11 +21,7 @@ export default function AsyncWrapper({
   errorMessage = "잠시 후 다시 시도해주세요.",
   onRetry,
 }: AsyncWrapperProps) {
-  const [isClient, setIsClient] = useState(false);
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
+  const isClient = useHydration();
 
   // 서버에서는 항상 로딩 상태로 시작하여 하이드레이션 오류 방지
   if (!isClient) {

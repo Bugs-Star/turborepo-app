@@ -11,6 +11,7 @@ export const ToastContainer = () => {
       {toasts.map((toast) => (
         <Toast
           key={toast.id}
+          id={toast.id}
           message={toast.message}
           type={toast.type}
           onClose={() => removeToast(toast.id)}

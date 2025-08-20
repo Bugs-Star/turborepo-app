@@ -1,16 +1,13 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useCallback } from "react";
 import { PageHeader } from "@/components/ui";
 import { useAuthStore } from "@/stores/authStore";
+import { useHydration } from "@/hooks";
 
 export default function GreetingSection() {
   const { user, isAuthenticated, checkAuth } = useAuthStore();
-  const [isClient, setIsClient] = useState(false);
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
+  const isClient = useHydration();
 
   // 인증 상태 확인 (한 번만 실행)
   const verifyAuth = useCallback(async () => {

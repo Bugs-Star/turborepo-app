@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import { ChevronRight, ChevronDown } from "lucide-react";
+import { useExpanded } from "@/hooks";
 
 // API 응답 형식에 맞는 타입 정의
 interface OrderItem {
@@ -27,7 +27,7 @@ interface OrderHistoryItemProps {
 }
 
 export default function OrderHistoryItem({ order }: OrderHistoryItemProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
+  const { isExpanded, toggle } = useExpanded(`order-${order._id}`);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -40,7 +40,7 @@ export default function OrderHistoryItem({ order }: OrderHistoryItemProps) {
 
   const handleExpandClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setIsExpanded(!isExpanded);
+    toggle();
   };
 
   const displayItems = isExpanded ? order.items : order.items.slice(0, 2);

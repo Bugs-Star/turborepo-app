@@ -1,25 +1,27 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useCallback } from "react";
 import { X } from "lucide-react";
+import { useVisible } from "@/hooks";
 
 interface ToastProps {
   message: string;
   type: "success" | "error" | "warning" | "info";
   onClose: () => void;
+  id: string; // 고유 ID 추가
 }
 
-export const Toast = ({ message, type, onClose }: ToastProps) => {
-  const [isShowing, setIsShowing] = useState(false);
+export const Toast = ({ message, type, onClose, id }: ToastProps) => {
+  const { isVisible, show, hide } = useVisible(`toast-${id}`);
 
   const handleClose = useCallback(() => {
-    setIsShowing(false);
+    hide();
     setTimeout(onClose, 300);
-  }, [onClose]);
+  }, [hide, onClose]);
 
   useEffect(() => {
-    setIsShowing(true);
-  }, []);
+    show();
+  }, [show]);
 
   const typeClasses = {
     success: "bg-green-500 text-white",
@@ -41,7 +43,7 @@ export const Toast = ({ message, type, onClose }: ToastProps) => {
         ${typeClasses[type]}
         px-4 py-3 rounded-lg shadow-lg flex items-center gap-2
         transform transition-all duration-300 ease-in-out
-        ${isShowing ? "translate-x-0 opacity-100" : "translate-x-full opacity-0"}
+        ${isVisible ? "translate-x-0 opacity-100" : "translate-x-full opacity-0"}
       `}
     >
       <span className="font-bold">{iconClasses[type]}</span>
