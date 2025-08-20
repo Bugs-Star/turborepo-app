@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { cartService } from "@/lib/services";
-import { tokenManager } from "@/lib/api";
+import { useAuthStore } from "@/stores/authStore";
 import { useState, useEffect } from "react";
 
 export interface CartCountResponse {
@@ -9,11 +9,10 @@ export interface CartCountResponse {
 
 export const useCartCountFetch = () => {
   const [isClient, setIsClient] = useState(false);
-  const [hasTokens, setHasTokens] = useState(false);
+  const { isAuthenticated } = useAuthStore();
 
   useEffect(() => {
     setIsClient(true);
-    setHasTokens(tokenManager.hasTokens());
   }, []);
 
   return useQuery<CartCountResponse>({
@@ -24,8 +23,8 @@ export const useCartCountFetch = () => {
     },
     staleTime: 1000 * 60 * 5, // 5분
     gcTime: 1000 * 60 * 10, // 10분
-    // 클라이언트에서만 토큰 체크
-    enabled: isClient && hasTokens,
+    // 클라이언트에서만 인증 상태 체크
+    enabled: isClient && isAuthenticated,
     // 401 에러는 재시도하지 않음
     retry: (failureCount, error: any) => {
       if (error?.response?.status === 401) {

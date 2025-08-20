@@ -2,7 +2,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { House, Menu, ShoppingCart, User } from "lucide-react";
 import { useCartCountFetch } from "@/hooks";
-import { tokenManager } from "@/lib/api";
 
 export default function BottomNavigation() {
   const pathname = usePathname();

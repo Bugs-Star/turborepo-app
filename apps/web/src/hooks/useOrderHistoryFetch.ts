@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { orderService } from "@/lib/services";
-import { tokenManager } from "@/lib/api";
+import { useAuthStore } from "@/stores/authStore";
 
 export interface OrderHistoryItem {
   _id: string;
@@ -35,31 +35,36 @@ export const useOrderHistoryFetch = () => {
     OrderHistoryResponse["pagination"] | null
   >(null);
 
-  const fetchOrderHistory = async (page: number = 1, limit: number = 10) => {
-    try {
-      setLoading(true);
-      setError(null);
+  const { isAuthenticated } = useAuthStore();
 
-      const response = await orderService.getOrderHistory();
-      setOrderHistory(response.orders);
-      setPagination(response.pagination);
-    } catch (err) {
-      console.error("주문 내역 조회 실패:", err);
-      setError("주문 내역을 불러오는데 실패했습니다.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  const fetchOrderHistory = useCallback(
+    async (page: number = 1, limit: number = 10) => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const response = await orderService.getOrderHistory();
+        setOrderHistory(response.orders);
+        setPagination(response.pagination);
+      } catch (err) {
+        console.error("주문 내역 조회 실패:", err);
+        setError("주문 내역을 불러오는데 실패했습니다.");
+      } finally {
+        setLoading(false);
+      }
+    },
+    []
+  );
 
   useEffect(() => {
-    // 토큰이 있을 때만 주문 내역 조회
-    if (tokenManager.hasTokens()) {
+    // 인증된 상태일 때만 주문 내역 조회
+    if (isAuthenticated) {
       fetchOrderHistory();
     } else {
       setLoading(false);
       setError("로그인이 필요합니다.");
     }
-  }, []);
+  }, [isAuthenticated, fetchOrderHistory]);
 
   return {
     orderHistory,

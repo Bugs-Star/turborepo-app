@@ -4,22 +4,20 @@ import Link from "next/link";
 import { Input, Button } from "@repo/ui";
 import { Toast } from "@/components/ui";
 import { useLoginValidation, useToast } from "@/hooks";
-import { authService } from "@/lib";
+import { useAuthStore } from "@/stores/authStore";
 
 export default function LoginForm() {
   const { formData, errors, validateForm, handleInputChange } =
     useLoginValidation();
   const { toast, showSuccess, showError, hideToast } = useToast();
+  const { login, isLoading } = useAuthStore();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (validateForm()) {
       try {
-        const response = await authService.login({
-          email: formData.email,
-          password: formData.password,
-        });
+        await login(formData.email, formData.password);
 
         showSuccess("로그인이 완료되었습니다!");
 
@@ -51,6 +49,7 @@ export default function LoginForm() {
           value={formData.email}
           onChange={(e) => handleInputChange("email", e.target.value)}
           error={errors.email}
+          disabled={isLoading}
         />
 
         <Input
@@ -62,6 +61,7 @@ export default function LoginForm() {
           value={formData.password}
           onChange={(e) => handleInputChange("password", e.target.value)}
           error={errors.password}
+          disabled={isLoading}
         />
 
         <Button
@@ -70,8 +70,9 @@ export default function LoginForm() {
           size="md"
           fullWidth
           className="rounded-full"
+          disabled={isLoading}
         >
-          로그인
+          {isLoading ? "로그인 중..." : "로그인"}
         </Button>
 
         <div className="text-center">

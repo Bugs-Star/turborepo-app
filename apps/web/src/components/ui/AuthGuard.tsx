@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState, ReactNode } from "react";
+import { useEffect, useState, ReactNode, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { BottomNavigation } from "@/components/layout";
-import { tokenManager } from "@/lib/api";
+import { useAuthStore } from "@/stores/authStore";
 
 interface AuthGuardProps {
   children: ReactNode;
@@ -22,25 +22,41 @@ export const AuthGuard = ({
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [isClient, setIsClient] = useState(false);
 
+  const { isAuthenticated, checkAuth } = useAuthStore();
+
   useEffect(() => {
     setIsClient(true);
   }, []);
 
-  // 비로그인 상태 체크 및 리다이렉트
-  useEffect(() => {
+  // 인증 상태 확인
+  const verifyAuth = useCallback(async () => {
     if (!isClient) return;
 
-    if (!tokenManager.hasTokens()) {
-      // 잠시 로딩 화면을 보여주기 위해 약간의 지연
+    try {
+      const isValid = await checkAuth();
+      if (!isValid) {
+        // 잠시 로딩 화면을 보여주기 위해 약간의 지연
+        const timer = setTimeout(() => {
+          router.push("/login?message=login_required");
+        }, 800);
+
+        return () => clearTimeout(timer);
+      } else {
+        setIsCheckingAuth(false);
+      }
+    } catch (error) {
+      console.error("인증 확인 중 오류:", error);
       const timer = setTimeout(() => {
         router.push("/login?message=login_required");
       }, 800);
 
       return () => clearTimeout(timer);
-    } else {
-      setIsCheckingAuth(false);
     }
-  }, [router, isClient]);
+  }, [router, isClient, checkAuth]);
+
+  useEffect(() => {
+    verifyAuth();
+  }, [verifyAuth]);
 
   // 서버에서는 항상 로딩 상태로 시작하여 하이드레이션 오류 방지
   if (!isClient) {
@@ -62,8 +78,8 @@ export const AuthGuard = ({
     );
   }
 
-  // 비로그인 상태이면 로딩 화면 표시
-  if (!tokenManager.hasTokens()) {
+  // 비로그인 상태이거나 인증 확인 중이면 로딩 화면 표시
+  if (!isAuthenticated || isCheckingAuth) {
     return (
       <div className={`min-h-screen ${backgroundColor} flex flex-col pb-20`}>
         {showHeader && title && (

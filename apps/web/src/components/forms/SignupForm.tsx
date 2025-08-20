@@ -4,23 +4,20 @@ import Link from "next/link";
 import { Input, Button } from "@repo/ui";
 import { Toast } from "@/components/ui";
 import { useSignupValidation, useToast } from "@/hooks";
-import { authService } from "@/lib";
+import { useAuthStore } from "@/stores/authStore";
 
 export default function SignupForm() {
   const { formData, errors, validateForm, handleInputChange } =
     useSignupValidation();
   const { toast, showSuccess, showError, hideToast } = useToast();
+  const { signup, isLoading } = useAuthStore();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (validateForm()) {
       try {
-        const response = await authService.signup({
-          name: formData.name,
-          email: formData.email,
-          password: formData.password,
-        });
+        await signup(formData.name, formData.email, formData.password);
 
         showSuccess("회원가입이 완료되었습니다!");
 
@@ -51,6 +48,7 @@ export default function SignupForm() {
           value={formData.name}
           onChange={(e) => handleInputChange("name", e.target.value)}
           error={errors.name}
+          disabled={isLoading}
         />
 
         <Input
@@ -62,6 +60,7 @@ export default function SignupForm() {
           value={formData.email}
           onChange={(e) => handleInputChange("email", e.target.value)}
           error={errors.email}
+          disabled={isLoading}
         />
 
         <Input
@@ -73,6 +72,7 @@ export default function SignupForm() {
           value={formData.password}
           onChange={(e) => handleInputChange("password", e.target.value)}
           error={errors.password}
+          disabled={isLoading}
         />
 
         <Input
@@ -84,6 +84,7 @@ export default function SignupForm() {
           value={formData.confirmPassword}
           onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
           error={errors.confirmPassword}
+          disabled={isLoading}
         />
 
         <Button
@@ -92,8 +93,9 @@ export default function SignupForm() {
           size="md"
           fullWidth
           className="rounded-full"
+          disabled={isLoading}
         >
-          가입하기
+          {isLoading ? "가입 중..." : "가입하기"}
         </Button>
 
         <div className="text-center">
