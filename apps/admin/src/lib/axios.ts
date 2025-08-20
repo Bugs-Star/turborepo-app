@@ -6,10 +6,4 @@ const axiosInstance = axios.create({
   withCredentials: true,
 });
 
-console.log("✅ axios baseURL:", process.env.NEXT_PUBLIC_API_URL);
-console.log(
-  "👉 최종 요청 URL:",
-  `${axiosInstance.defaults.baseURL}/admin/login`
-);
-
 export default axiosInstance;

@@ -7,9 +7,9 @@ export default function HomePage() {
   const router = useRouter();
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("accessToken");
 
-    if (!token || token === "undefined") {
+    if (!token) {
       router.replace("/login");
     } else {
       router.replace("/dashboard");

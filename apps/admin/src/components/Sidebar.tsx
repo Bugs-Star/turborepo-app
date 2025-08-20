@@ -28,7 +28,7 @@ const pacifico = Pacifico({
 const Sidebar = () => {
   const router = useRouter();
   const pathname = usePathname();
-  const logout = useLogout();
+  const { logout } = useLogout();
 
   return (
     <div className="flex flex-col w-48 h-screen border-r border-gray-200 bg-white">
@@ -65,7 +65,10 @@ const Sidebar = () => {
 
       {/* Logout */}
       <div className="p-4">
-        <button className="flex items-center justify-center w-full px-4 py-2 text-sm text-gray-700 border border-gray-200 rounded hover:bg-gray-50 cursor-pointer">
+        <button
+          onClick={() => void logout()}
+          className="flex items-center justify-center w-full px-4 py-2 text-sm text-gray-700 border border-gray-200 rounded hover:bg-gray-50 cursor-pointer"
+        >
           <LogOut className="w-4 h-4 mr-2" />
           로그아웃
         </button>

@@ -10,8 +10,7 @@ export const useLogin = () => {
   return useMutation<LoginResponse, Error, LoginPayload>({
     mutationFn: AuthService.login,
     onSuccess: (data) => {
-      localStorage.setItem("accessToken", data.token);
-      //   localStorage.setItem("adminName", data.adminName);
+      localStorage.setItem("accessToken", data.accessToken);
 
       router.push("/dashboard");
     },
