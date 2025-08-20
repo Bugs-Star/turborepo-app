@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { BottomNavigation } from "@/components/layout";
 import { useAuthStore } from "@/stores/authStore";
 import { useToast } from "@/hooks/useToast";
+import { useHydration } from "@/hooks";
 
 interface AuthGuardProps {
   children: ReactNode;
@@ -21,14 +22,10 @@ export const AuthGuard = ({
 }: AuthGuardProps) => {
   const router = useRouter();
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
-  const [isClient, setIsClient] = useState(false);
+  const isClient = useHydration();
 
   const { isAuthenticated, checkAuth } = useAuthStore();
   const { showWarning } = useToast();
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
 
   // 인증 상태 확인
   const verifyAuth = useCallback(async () => {

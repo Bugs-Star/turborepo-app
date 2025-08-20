@@ -2,12 +2,18 @@
 
 import Link from "next/link";
 import { Input, Button } from "@repo/ui";
-import { useLoginValidation, useToast } from "@/hooks";
+import { useLoginForm, useToast } from "@/hooks";
 import { useAuthStore } from "@/stores/authStore";
 
 export default function LoginForm() {
-  const { formData, errors, validateForm, handleInputChange } =
-    useLoginValidation();
+  const {
+    data: formData,
+    errors,
+    validateForm,
+    setFieldValue,
+    setSubmitting,
+    state,
+  } = useLoginForm();
   const { showSuccess, showError } = useToast();
   const { login, isLoading } = useAuthStore();
 
@@ -15,6 +21,7 @@ export default function LoginForm() {
     e.preventDefault();
 
     if (validateForm()) {
+      setSubmitting(true);
       try {
         await login(formData.email, formData.password);
 
@@ -26,11 +33,15 @@ export default function LoginForm() {
         }, 1500);
       } catch (error: any) {
         showError(error.response?.data?.message || "로그인에 실패했습니다.");
+      } finally {
+        setSubmitting(false);
       }
     } else {
       showError("입력 정보를 확인해주세요.");
     }
   };
+
+  const isFormLoading = isLoading || state.isSubmitting;
 
   return (
     <>
@@ -46,9 +57,9 @@ export default function LoginForm() {
           variant="default"
           size="md"
           value={formData.email}
-          onChange={(e) => handleInputChange("email", e.target.value)}
+          onChange={(e) => setFieldValue("email", e.target.value)}
           error={errors.email}
-          disabled={isLoading}
+          disabled={isFormLoading}
         />
 
         <Input
@@ -58,9 +69,9 @@ export default function LoginForm() {
           variant="default"
           size="md"
           value={formData.password}
-          onChange={(e) => handleInputChange("password", e.target.value)}
+          onChange={(e) => setFieldValue("password", e.target.value)}
           error={errors.password}
-          disabled={isLoading}
+          disabled={isFormLoading}
         />
 
         <Button
@@ -69,9 +80,9 @@ export default function LoginForm() {
           size="md"
           fullWidth
           className="rounded-full"
-          disabled={isLoading}
+          disabled={isFormLoading}
         >
-          {isLoading ? "로그인 중..." : "로그인"}
+          {isFormLoading ? "로그인 중..." : "로그인"}
         </Button>
 
         <div className="text-center">

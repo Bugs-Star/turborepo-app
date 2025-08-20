@@ -1,6 +1,6 @@
-import { useState, useRef } from "react";
+import { useRef } from "react";
 import { cartService } from "@/lib/services";
-import { useToast } from "@/hooks/useToast";
+import { useToast, useDelayedLoading } from "@/hooks";
 import { useQueryClient } from "@tanstack/react-query";
 import { CartResponse } from "@/types/cart";
 import { CartUtils, CacheUtils } from "@/utils";
@@ -13,8 +13,10 @@ interface UseCartOptions {
 export const useCart = (options: UseCartOptions = {}) => {
   const { showToast } = useToast();
   const queryClient = useQueryClient();
-  const [isLoading, setIsLoading] = useState(false);
-  const loadingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // 새로운 지연된 로딩 훅 사용
+  const { isLoading, startDelayedLoading, stopDelayedLoading } =
+    useDelayedLoading("cart", 300);
 
   const updateBothCaches = (
     updater: (oldData: CartResponse | undefined) => CartResponse | undefined
@@ -22,25 +24,10 @@ export const useCart = (options: UseCartOptions = {}) => {
     return CacheUtils.updateBothCaches(queryClient, updater);
   };
 
-  const startDelayedLoading = () => {
-    // 300ms 후에 로딩 표시 시작
-    loadingTimeoutRef.current = setTimeout(() => {
-      setIsLoading(true);
-    }, 300);
-  };
-
-  const stopLoading = () => {
-    if (loadingTimeoutRef.current) {
-      clearTimeout(loadingTimeoutRef.current);
-      loadingTimeoutRef.current = null;
-    }
-    setIsLoading(false);
-  };
-
   const addToCart = async (productId: string, quantity: number) => {
     if (isLoading) return;
 
-    startDelayedLoading();
+    const cleanup = startDelayedLoading();
 
     try {
       await cartService.addToCart(productId, quantity);
@@ -54,7 +41,8 @@ export const useCart = (options: UseCartOptions = {}) => {
       options.onError?.(errorMessage);
       throw err; // 에러를 다시 던져서 호출자가 처리할 수 있도록
     } finally {
-      stopLoading();
+      cleanup(); // timeout 정리
+      stopDelayedLoading();
     }
   };
 
@@ -70,7 +58,7 @@ export const useCart = (options: UseCartOptions = {}) => {
       return CartUtils.removeItemFromCart(oldData, itemId);
     });
 
-    startDelayedLoading();
+    const cleanup = startDelayedLoading();
 
     try {
       await cartService.removeFromCart(itemId);
@@ -88,7 +76,8 @@ export const useCart = (options: UseCartOptions = {}) => {
       options.onError?.(errorMessage);
       throw err;
     } finally {
-      stopLoading();
+      cleanup(); // timeout 정리
+      stopDelayedLoading();
     }
   };
 
@@ -104,7 +93,7 @@ export const useCart = (options: UseCartOptions = {}) => {
       return CartUtils.updateItemQuantity(oldData, itemId, quantity);
     });
 
-    startDelayedLoading();
+    const cleanup = startDelayedLoading();
 
     try {
       await cartService.updateCartItemQuantity(itemId, quantity);
@@ -122,7 +111,8 @@ export const useCart = (options: UseCartOptions = {}) => {
       options.onError?.(errorMessage);
       throw err;
     } finally {
-      stopLoading();
+      cleanup(); // timeout 정리
+      stopDelayedLoading();
     }
   };
 
