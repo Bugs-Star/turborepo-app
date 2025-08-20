@@ -2,35 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import { cartService } from "@/lib/services";
 import { useAuthStore } from "@/stores/authStore";
 import { useState, useEffect } from "react";
-
-export interface CartItem {
-  _id: string;
-  productId: string;
-  quantity: number;
-  product: {
-    _id: string;
-    productName: string;
-    productImg: string;
-    price: number;
-    category: string;
-  };
-  subtotal: number;
-  isAvailable: boolean;
-  stockStatus: string;
-}
-
-export interface CartSummary {
-  totalAmount: number;
-  totalItems: number;
-  itemCount: number;
-  availableItems: number;
-  outOfStockItems: number;
-}
-
-export interface CartResponse {
-  cart: CartItem[];
-  summary: CartSummary;
-}
+import { CartResponse, CartItemUI, transformCartForUI } from "@/types/cart";
+import { CartUtils } from "@/utils/cartUtils";
 
 export const useCartFetch = () => {
   const [isClient, setIsClient] = useState(false);
@@ -40,7 +13,7 @@ export const useCartFetch = () => {
     setIsClient(true);
   }, []);
 
-  return useQuery<CartResponse>({
+  const query = useQuery<CartResponse>({
     queryKey: ["cart"],
     queryFn: async () => {
       const response = await cartService.getCart();
@@ -60,4 +33,18 @@ export const useCartFetch = () => {
     // 에러 시 기본값 반환
     throwOnError: false,
   });
+
+  // UI용 변환된 데이터 제공
+  const cartItems: CartItemUI[] = query.data
+    ? transformCartForUI(query.data).cart
+    : [];
+
+  // CartUtils를 사용하여 일관된 요약 정보 계산
+  const summary = query.data?.summary || CartUtils.calculateSummary([]);
+
+  return {
+    ...query,
+    cartItems,
+    summary,
+  };
 };

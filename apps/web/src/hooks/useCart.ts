@@ -2,7 +2,8 @@ import { useState, useRef } from "react";
 import { cartService } from "@/lib/services";
 import { useToast } from "@/hooks/useToast";
 import { useQueryClient } from "@tanstack/react-query";
-import { CartResponse, CartItem } from "./useCartFetch";
+import { CartResponse } from "@/types/cart";
+import { CartUtils, CacheUtils } from "@/utils";
 
 interface UseCartOptions {
   onSuccess?: () => void;
@@ -15,15 +16,10 @@ export const useCart = (options: UseCartOptions = {}) => {
   const [isLoading, setIsLoading] = useState(false);
   const loadingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const updateCartCount = () => {
-    // 장바구니 개수만 무효화 (GET /cart는 호출하지 않음)
-    queryClient.invalidateQueries({ queryKey: ["cartCount"] });
-  };
-
-  const updateCartCache = (
+  const updateBothCaches = (
     updater: (oldData: CartResponse | undefined) => CartResponse | undefined
   ) => {
-    queryClient.setQueryData<CartResponse>(["cart"], updater);
+    return CacheUtils.updateBothCaches(queryClient, updater);
   };
 
   const startDelayedLoading = () => {
@@ -49,9 +45,8 @@ export const useCart = (options: UseCartOptions = {}) => {
     try {
       await cartService.addToCart(productId, quantity);
       showToast("장바구니에 추가되었습니다.", "success");
-      // 장바구니 추가는 전체 목록이 변경되므로 무효화
-      queryClient.invalidateQueries({ queryKey: ["cart"] });
-      updateCartCount();
+      // 장바구니 추가는 전체 목록이 변경되므로 모든 캐시 무효화
+      CacheUtils.invalidateAllCartCaches(queryClient);
       options.onSuccess?.();
     } catch (err) {
       const errorMessage = "장바구니 추가에 실패했습니다.";
@@ -66,41 +61,28 @@ export const useCart = (options: UseCartOptions = {}) => {
   const removeFromCart = async (itemId: string) => {
     if (isLoading) return;
 
-    // 낙관적 업데이트: UI를 먼저 업데이트
-    const previousCart = queryClient.getQueryData<CartResponse>(["cart"]);
+    // 현재 캐시 상태 백업
+    const previousState = CacheUtils.backupCacheState(queryClient);
 
-    if (previousCart) {
-      updateCartCache((oldData) => {
-        if (!oldData) return oldData;
-        return {
-          ...oldData,
-          cart: oldData.cart.filter((item) => item._id !== itemId),
-          summary: {
-            ...oldData.summary,
-            totalItems: oldData.summary.totalItems - 1,
-            totalAmount: oldData.cart
-              .filter((item) => item._id !== itemId)
-              .reduce((sum, item) => sum + item.subtotal, 0),
-            itemCount: oldData.cart
-              .filter((item) => item._id !== itemId)
-              .reduce((sum, item) => sum + item.quantity, 0),
-          },
-        };
-      });
-    }
+    // 낙관적 업데이트: 모든 캐시를 동시에 업데이트
+    updateBothCaches((oldData) => {
+      if (!oldData) return oldData;
+      return CartUtils.removeItemFromCart(oldData, itemId);
+    });
 
     startDelayedLoading();
 
     try {
       await cartService.removeFromCart(itemId);
       showToast("장바구니에서 제거되었습니다.", "success");
-      updateCartCount();
       options.onSuccess?.();
     } catch (err) {
-      // 에러 발생 시 이전 상태로 롤백
-      if (previousCart) {
-        queryClient.setQueryData<CartResponse>(["cart"], previousCart);
-      }
+      // 에러 발생 시 모든 캐시 롤백
+      CacheUtils.rollbackAllCaches(
+        queryClient,
+        previousState.cart,
+        previousState.cartCount
+      );
       const errorMessage = "장바구니에서 제거하는데 실패했습니다.";
       showToast(errorMessage, "error");
       options.onError?.(errorMessage);
@@ -113,49 +95,28 @@ export const useCart = (options: UseCartOptions = {}) => {
   const updateCartItemQuantity = async (itemId: string, quantity: number) => {
     if (isLoading) return;
 
-    // 낙관적 업데이트: UI를 먼저 업데이트
-    const previousCart = queryClient.getQueryData<CartResponse>(["cart"]);
+    // 현재 캐시 상태 백업
+    const previousState = CacheUtils.backupCacheState(queryClient);
 
-    if (previousCart) {
-      updateCartCache((oldData) => {
-        if (!oldData) return oldData;
-
-        const updatedCart = oldData.cart.map((item) =>
-          item._id === itemId
-            ? { ...item, quantity, subtotal: item.product.price * quantity }
-            : item
-        );
-
-        return {
-          ...oldData,
-          cart: updatedCart,
-          summary: {
-            ...oldData.summary,
-            totalAmount: updatedCart.reduce(
-              (sum, item) => sum + item.subtotal,
-              0
-            ),
-            itemCount: updatedCart.reduce(
-              (sum, item) => sum + item.quantity,
-              0
-            ),
-          },
-        };
-      });
-    }
+    // 낙관적 업데이트: 모든 캐시를 동시에 업데이트
+    updateBothCaches((oldData) => {
+      if (!oldData) return oldData;
+      return CartUtils.updateItemQuantity(oldData, itemId, quantity);
+    });
 
     startDelayedLoading();
 
     try {
       await cartService.updateCartItemQuantity(itemId, quantity);
       showToast("수량이 변경되었습니다.", "success");
-      updateCartCount();
       options.onSuccess?.();
     } catch (err) {
-      // 에러 발생 시 이전 상태로 롤백
-      if (previousCart) {
-        queryClient.setQueryData<CartResponse>(["cart"], previousCart);
-      }
+      // 에러 발생 시 모든 캐시 롤백
+      CacheUtils.rollbackAllCaches(
+        queryClient,
+        previousState.cart,
+        previousState.cartCount
+      );
       const errorMessage = "수량 변경에 실패했습니다.";
       showToast(errorMessage, "error");
       options.onError?.(errorMessage);

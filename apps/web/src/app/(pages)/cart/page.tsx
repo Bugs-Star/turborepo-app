@@ -12,7 +12,7 @@ import {
 } from "@/hooks";
 
 export default function CartPage() {
-  const { data: cartData, isLoading, error, isFetching } = useCartFetch();
+  const { cartItems, summary, isLoading, error, isFetching } = useCartFetch();
   const { handleQuantityChange, handleRemove, isActionLoading } =
     useCartActions();
   const {
@@ -23,8 +23,7 @@ export default function CartPage() {
   } = usePayment();
   const { goToMenu } = useNavigation();
 
-  const cartItems = cartData?.cart || [];
-  const total = cartData?.summary?.totalAmount || 0;
+  const total = summary?.totalAmount || 0;
 
   return (
     <AsyncWrapper
