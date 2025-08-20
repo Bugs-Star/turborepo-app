@@ -1,5 +1,6 @@
 export { default as Logo } from "./Logo";
 export { Toast } from "./Toast";
+export { ToastContainer } from "./ToastContainer";
 export { default as AsyncWrapper } from "./AsyncWrapper";
 export { default as SectionAsyncWrapper } from "./SectionAsyncWrapper";
 export { default as BackButton } from "./BackButton";

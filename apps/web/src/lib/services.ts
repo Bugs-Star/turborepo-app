@@ -1,4 +1,4 @@
-import { api, tokenManager } from "./api";
+import { api } from "./api";
 
 // 이미지 URL 포트 수정 유틸리티 함수
 const fixImageUrl = (url: string): string => {
@@ -82,24 +82,12 @@ export const authService = {
   // 로그인
   login: async (credentials: LoginRequest): Promise<AuthResponse> => {
     const response = await api.post<AuthResponse>("/auth/login", credentials);
-    if (response.accessToken) {
-      tokenManager.setAccessToken(response.accessToken);
-    }
-    if (response.refreshToken) {
-      tokenManager.setRefreshToken(response.refreshToken);
-    }
     return response;
   },
 
   // 회원가입
   signup: async (userData: SignupRequest): Promise<AuthResponse> => {
     const response = await api.post<AuthResponse>("/auth/register", userData);
-    if (response.accessToken) {
-      tokenManager.setAccessToken(response.accessToken);
-    }
-    if (response.refreshToken) {
-      tokenManager.setRefreshToken(response.refreshToken);
-    }
     return response;
   },
 
@@ -107,21 +95,30 @@ export const authService = {
   logout: async () => {
     try {
       // 서버에 로그아웃 요청 (리프레시 토큰 무효화)
-      const refreshToken = tokenManager.getRefreshToken();
+      // Zustand store에서 refreshToken을 가져와서 사용
+      const { useAuthStore } = await import("@/stores/authStore");
+      const refreshToken = useAuthStore.getState().tokens.refreshToken;
+
       if (refreshToken) {
         await api.post("/auth/logout", { refreshToken });
       }
     } catch (error) {
       console.error("로그아웃 요청 실패:", error);
-    } finally {
-      // 클라이언트에서 모든 토큰 삭제
-      tokenManager.removeAllTokens();
     }
+  },
+
+  // 토큰 갱신
+  refreshTokens: async (refreshToken: string): Promise<AuthResponse> => {
+    const response = await api.post<AuthResponse>("/auth/refresh", {
+      refreshToken,
+    });
+    return response;
   },
 
   // 현재 사용자 정보 조회
   getCurrentUser: async (): Promise<User> => {
-    return await api.get<User>("/auth/me");
+    const response = await api.get<{ user: User }>("/auth/profile");
+    return response.user;
   },
 };
 

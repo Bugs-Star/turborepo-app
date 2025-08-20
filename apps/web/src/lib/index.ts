@@ -1,5 +1,5 @@
 // HTTP 클라이언트
-export { default as apiClient, api, tokenManager } from "./api";
+export { default as apiClient, api } from "./api";
 
 // API 서비스들
 export {

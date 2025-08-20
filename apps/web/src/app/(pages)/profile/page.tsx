@@ -7,20 +7,19 @@ import {
   LogoutButton,
 } from "@/components/profile";
 import { BottomNavigation } from "@/components/layout";
-import { useProfileFetch } from "@/hooks";
+import { useAuthStore } from "@/stores/authStore";
 import { AsyncWrapper, PageHeader, AuthGuard } from "@/components/ui";
 
 export default function ProfilePage() {
-  const { user, loading, error, refetch } = useProfileFetch();
+  const { user, isLoading } = useAuthStore();
 
   return (
     <AuthGuard backgroundColor="bg-gray-50" title="내 프로필" showHeader={true}>
       <AsyncWrapper
-        loading={loading}
-        error={error}
+        loading={isLoading}
+        error={null}
         loadingMessage="프로필 정보를 불러오는 중..."
         errorMessage="잠시 후 다시 시도해주세요."
-        onRetry={refetch}
       >
         <div className="min-h-screen bg-gray-50 flex flex-col pb-20">
           <PageHeader title="내 프로필" />

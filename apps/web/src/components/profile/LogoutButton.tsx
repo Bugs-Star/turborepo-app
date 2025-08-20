@@ -2,17 +2,19 @@
 
 import { LogOut } from "lucide-react";
 import { Button } from "@repo/ui";
-import { authService } from "@/lib";
+import { useAuthStore } from "@/stores/authStore";
 
 interface LogoutButtonProps {
   onLogout?: () => void;
 }
 
 export default function LogoutButton({ onLogout }: LogoutButtonProps) {
+  const { logout, isLoading } = useAuthStore();
+
   const handleLogout = async () => {
     try {
       // 실제 로그아웃 처리
-      await authService.logout();
+      await logout();
 
       if (onLogout) {
         onLogout();
@@ -34,9 +36,10 @@ export default function LogoutButton({ onLogout }: LogoutButtonProps) {
       size="md"
       fullWidth
       className="rounded-lg"
+      disabled={isLoading}
     >
       <LogOut className="w-4 h-4 mr-2" />
-      로그아웃
+      {isLoading ? "로그아웃 중..." : "로그아웃"}
     </Button>
   );
 }
