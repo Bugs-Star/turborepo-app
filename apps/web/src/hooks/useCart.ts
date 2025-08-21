@@ -97,7 +97,7 @@ export const useCart = (options: UseCartOptions = {}) => {
 
     try {
       await cartService.updateCartItemQuantity(itemId, quantity);
-      showToast("수량이 변경되었습니다.", "success");
+      // 수량 변경 성공 시에는 토스트 메시지 제거 (사용자 경험 개선)
       options.onSuccess?.();
     } catch (err) {
       // 에러 발생 시 모든 캐시 롤백

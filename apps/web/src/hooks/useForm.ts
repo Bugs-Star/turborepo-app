@@ -225,13 +225,31 @@ export const useProfileForm = () => {
       }
       return undefined;
     },
-    newPassword: (value: string): string | undefined => {
+    currentPassword: (value: string, allData?: any): string | undefined => {
+      const { newPassword } = allData || {};
+
+      // 새 비밀번호를 변경하려는 경우에만 현재 비밀번호 필수
+      if (newPassword && !value) {
+        return "현재 비밀번호를 입력해주세요.";
+      }
+
+      return undefined;
+    },
+    newPassword: (value: string, allData?: any): string | undefined => {
+      const { currentPassword } = allData || {};
+
       if (value && value.length < 5) {
         return "비밀번호는 5글자 이상 입력해주세요.";
       }
       if (value && value.length > 15) {
         return "비밀번호는 15글자 이하로 입력해주세요.";
       }
+
+      // 새 비밀번호가 현재 비밀번호와 동일한지 검증
+      if (value && currentPassword && value === currentPassword) {
+        return "새 비밀번호는 현재 비밀번호와 달라야 합니다.";
+      }
+
       return undefined;
     },
     confirmPassword: (value: string, allData?: any): string | undefined => {
@@ -258,7 +276,7 @@ export const useProfileForm = () => {
 
   return useForm(
     "profile",
-    { name: "", newPassword: "", confirmPassword: "" },
+    { name: "", currentPassword: "", newPassword: "", confirmPassword: "" },
     validationRules
   );
 };

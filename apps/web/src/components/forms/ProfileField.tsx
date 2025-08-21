@@ -7,7 +7,7 @@ import {
 } from "@/hooks/useFormSelectors";
 
 interface ProfileFieldProps {
-  field: "name" | "newPassword" | "confirmPassword";
+  field: "name" | "currentPassword" | "newPassword" | "confirmPassword";
   label: string;
   placeholder: string;
   type?: "text" | "password";
