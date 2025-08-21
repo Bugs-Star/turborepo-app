@@ -52,3 +52,6 @@ export {
 
 // 통합 상품 훅
 export { useProducts } from "./useProducts";
+
+// 분석 관련 훅
+export { useAnalytics } from "./useAnalytics";
