@@ -1,5 +1,6 @@
 import axiosInstance from "./axios";
 
+// 상품 추가에 사용하는 payload
 export interface AddProductPayload {
   productCode: string;
   productName: string;
@@ -13,11 +14,12 @@ export interface AddProductPayload {
   recommendedOrder?: number;
 }
 
+// 상품 응답 데이터
 export interface ProductResponse {
   _id: string;
   productCode: string;
   productName: string;
-  productImg: string; // base64
+  productImg: string; // base64 혹은 URL
   productContents: string;
   category: "beverage" | "food" | "goods";
   price: number;
@@ -30,6 +32,7 @@ export interface ProductResponse {
   updatedAt: string;
 }
 
+// 상품 조회 파라미터
 export interface GetProductsParams {
   category?: "beverage" | "food" | "goods";
   isRecommended?: boolean;
@@ -37,6 +40,7 @@ export interface GetProductsParams {
   limit?: number;
 }
 
+// 상품 조회 응답
 export interface GetProductsResponse {
   products: ProductResponse[];
   pagination: {
@@ -49,7 +53,7 @@ export interface GetProductsResponse {
 
 export const ProductsService = {
   // 상품 추가
-  addProduct: async (payload: AddProductPayload) => {
+  addProduct: async (payload: AddProductPayload): Promise<ProductResponse> => {
     const formData = new FormData();
     formData.append("productCode", payload.productCode);
     formData.append("productName", payload.productName);
@@ -72,14 +76,45 @@ export const ProductsService = {
       formData.append("recommendedOrder", payload.recommendedOrder.toString());
     }
 
-    const token = localStorage.getItem("accessToken");
+    const response = await axiosInstance.post("/admin/products", formData);
+    return response.data;
+  },
 
-    const response = await axiosInstance.post("/admin/products", formData, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+  // 상품 수정
+  editProduct: async (
+    productId: string,
+    payload: Partial<AddProductPayload>
+  ): Promise<ProductResponse> => {
+    const formData = new FormData();
 
+    if (payload.productCode)
+      formData.append("productCode", payload.productCode);
+    if (payload.productName)
+      formData.append("productName", payload.productName);
+    if (payload.productImg) formData.append("productImg", payload.productImg);
+    if (payload.productContents)
+      formData.append("productContents", payload.productContents);
+    if (payload.category) formData.append("category", payload.category);
+    if (payload.price !== undefined)
+      formData.append("price", payload.price.toString());
+    if (payload.optimalStock !== undefined)
+      formData.append("optimalStock", payload.optimalStock.toString());
+    if (payload.currentStock !== undefined)
+      formData.append("currentStock", payload.currentStock.toString());
+    if (payload.isRecommended !== undefined) {
+      formData.append(
+        "isRecommended",
+        payload.isRecommended ? "true" : "false"
+      );
+    }
+    if (payload.recommendedOrder !== undefined) {
+      formData.append("recommendedOrder", payload.recommendedOrder.toString());
+    }
+
+    const response = await axiosInstance.put(
+      `/admin/products/${productId}`,
+      formData
+    );
     return response.data;
   },
 

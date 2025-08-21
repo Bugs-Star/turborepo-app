@@ -5,7 +5,7 @@ export function setupInterceptors() {
   // 요청 인터셉터
   axiosInstance.interceptors.request.use((config) => {
     if (typeof window !== "undefined") {
-      const accessToken = sessionStorage.getItem("accessToken");
+      const accessToken = localStorage.getItem("accessToken");
       if (accessToken && config.headers) {
         config.headers.Authorization = `Bearer ${accessToken}`;
       }
