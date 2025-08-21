@@ -126,7 +126,7 @@ export const getProfile = async (req, res) => {
 // 내 정보 수정 (이름, 비밀번호, 프로필 이미지)
 export const updateProfile = async (req, res) => {
   try {
-    const { name, newPassword } = req.body;
+    const { name, currentPassword, newPassword } = req.body;
     const userId = req.user._id;
 
     console.log("프로필 업데이트 요청:", {
@@ -144,6 +144,35 @@ export const updateProfile = async (req, res) => {
 
     // 비밀번호 수정
     if (newPassword) {
+      // 현재 비밀번호 검증
+      if (!currentPassword) {
+        return res
+          .status(400)
+          .json({ message: "현재 비밀번호를 입력해주세요." });
+      }
+
+      // 유저 정보 가져오기
+      const user = await User.findById(userId);
+      if (!user) {
+        return res.status(404).json({ message: "사용자를 찾을 수 없습니다." });
+      }
+
+      // 현재 비밀번호 확인
+      const isCurrentPasswordValid =
+        await user.comparePassword(currentPassword);
+      if (!isCurrentPasswordValid) {
+        return res
+          .status(400)
+          .json({ message: "현재 비밀번호가 올바르지 않습니다." });
+      }
+
+      // 새 비밀번호가 현재 비밀번호와 동일한지 확인
+      if (currentPassword === newPassword) {
+        return res
+          .status(400)
+          .json({ message: "새 비밀번호는 현재 비밀번호와 달라야 합니다." });
+      }
+
       updateData.passwordHash = newPassword; // User 모델의 pre-save 미들웨어에서 자동 해싱
     }
 
@@ -177,10 +206,19 @@ export const updateProfile = async (req, res) => {
       return res.status(400).json({ message: "업데이트할 데이터가 없습니다." });
     }
 
-    // 유저 정보 업데이트
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({ message: "사용자를 찾을 수 없습니다." });
+    // 유저 정보 업데이트 (비밀번호 변경이 아닌 경우에만 user 객체 재조회)
+    let user;
+    if (!newPassword) {
+      user = await User.findById(userId);
+      if (!user) {
+        return res.status(404).json({ message: "사용자를 찾을 수 없습니다." });
+      }
+    } else {
+      // 비밀번호 변경의 경우 이미 위에서 user 객체를 가져왔으므로 재사용
+      user = await User.findById(userId);
+      if (!user) {
+        return res.status(404).json({ message: "사용자를 찾을 수 없습니다." });
+      }
     }
 
     // 업데이트할 필드들을 설정

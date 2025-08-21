@@ -48,6 +48,8 @@ export default function ProfileEditForm({ onCancel }: ProfileEditFormProps) {
 
   // 선택적 구독으로 필요한 데이터만 가져오기
   const name = useFormDataSelector<string>("profile", "name") || "";
+  const currentPassword =
+    useFormDataSelector<string>("profile", "currentPassword") || "";
   const newPassword =
     useFormDataSelector<string>("profile", "newPassword") || "";
   const { setFieldValue } = useFormActions("profile");
@@ -90,6 +92,7 @@ export default function ProfileEditForm({ onCancel }: ProfileEditFormProps) {
         const formDataToSend = new FormData();
         formDataToSend.append("name", name);
         if (newPassword) {
+          formDataToSend.append("currentPassword", currentPassword);
           formDataToSend.append("newPassword", newPassword);
         }
         if (profileImg) {
@@ -115,7 +118,12 @@ export default function ProfileEditForm({ onCancel }: ProfileEditFormProps) {
         onCancel();
       } catch (error: any) {
         console.error("프로필 업데이트 오류:", error);
-        handleError(error, "프로필 업데이트 중 오류가 발생했습니다.");
+
+        // 백엔드에서 전달된 에러 메시지가 있으면 사용, 없으면 기본 메시지
+        const errorMessage =
+          error.response?.data?.message ||
+          "프로필 업데이트 중 오류가 발생했습니다.";
+        showToast(errorMessage, "error");
       } finally {
         setSubmitting(false);
         stopLoading();
@@ -152,17 +160,24 @@ export default function ProfileEditForm({ onCancel }: ProfileEditFormProps) {
           />
 
           <ProfileField
+            field="currentPassword"
+            label="현재 패스워드"
+            type="password"
+            placeholder="현재 패스워드를 입력하세요"
+          />
+
+          <ProfileField
             field="newPassword"
             label="새로운 패스워드"
             type="password"
-            placeholder="패스워드를 입력하세요"
+            placeholder="새 패스워드를 입력하세요"
           />
 
           <ProfileField
             field="confirmPassword"
             label="새로운 패스워드 확인"
             type="password"
-            placeholder="같은 패스워드를 입력하세요"
+            placeholder="새 패스워드를 다시 입력하세요"
           />
         </div>
 
