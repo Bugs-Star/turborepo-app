@@ -3,7 +3,7 @@
 import { useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 import { BottomNavigation } from "@/components/layout";
-import { useInfiniteProductFetch } from "@/hooks/useInfiniteProductFetch";
+import { useInfiniteProductFetch } from "@/hooks";
 import ProductGrid from "@/components/menu/ProductGrid";
 import { AsyncWrapper, PageHeader, InfiniteScroll } from "@/components/ui";
 import CategoryFilter from "@/components/menu/CategoryFilter";

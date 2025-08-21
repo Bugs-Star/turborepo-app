@@ -1,10 +1,9 @@
 import { Product } from "@/lib";
 import { useRouter } from "next/navigation";
+import { createImageErrorHandler, ProductUtils } from "@/utils";
 
-// 가격 포맷팅 함수
-const formatPrice = (price: number) => {
-  return price.toLocaleString() + "원";
-};
+// ProductUtils의 formatPrice 사용으로 일관성 확보
+const formatPrice = ProductUtils.formatPrice;
 
 // 개별 상품 카드 컴포넌트
 interface ProductCardProps {
@@ -14,13 +13,10 @@ interface ProductCardProps {
 
 function ProductCard({ product, activeCategory }: ProductCardProps) {
   const router = useRouter();
-  const isOutOfStock = product.currentStock <= 0;
+  const productStatus = ProductUtils.getProductStatus(product);
+  const isOutOfStock = productStatus.isOutOfStock;
 
-  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
-    const target = e.target as HTMLImageElement;
-    target.src =
-      "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23f3f4f6'/%3E%3Ctext x='50' y='50' font-family='Arial' font-size='12' fill='%236b7280' text-anchor='middle' dy='.3em'%3E이미지%3C/text%3E%3C/svg%3E";
-  };
+  const handleImageError = createImageErrorHandler();
 
   const handleCardClick = () => {
     router.push(`/menu/${product._id}?category=${activeCategory}`);
