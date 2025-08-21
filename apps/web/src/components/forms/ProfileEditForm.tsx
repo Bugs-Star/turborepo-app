@@ -1,22 +1,40 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { Button } from "@repo/ui";
-import { Input } from "@repo/ui";
-import { useProfileForm, useLoading } from "@/hooks";
+import {
+  useProfileForm,
+  useLoading,
+  useErrorHandler,
+  useProfileImage,
+  useFormDataSelector,
+  useFormActions,
+} from "@/hooks";
 import { LoadingIndicator } from "@/components/ui";
+import ProfileImageSection from "./ProfileImageSection";
+import ProfileField from "./ProfileField";
 import { userService } from "@/lib/services";
 import { useToast } from "@/hooks";
+import { useAuthStore } from "@/stores/authStore";
 
 interface ProfileEditFormProps {
   onCancel: () => void;
 }
 
 export default function ProfileEditForm({ onCancel }: ProfileEditFormProps) {
-  const [profileImg, setProfileImg] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string>("/images/user.png");
-  const [profileImgError, setProfileImgError] = useState<string | undefined>();
   const { showToast } = useToast();
+  const { handleError } = useErrorHandler();
+  const { setUser } = useAuthStore();
+
+  // 이미지 상태 관리 훅 사용
+  const {
+    profileImg,
+    imagePreview,
+    imageError: profileImgError,
+    isOptimizing,
+    handleImageChange,
+    setImagePreview,
+  } = useProfileImage();
 
   // 로딩 훅들 사용
   const {
@@ -26,15 +44,13 @@ export default function ProfileEditForm({ onCancel }: ProfileEditFormProps) {
   } = useLoading("profile-initial");
   const { isLoading, startLoading, stopLoading } = useLoading("profile-edit");
 
-  const {
-    data: formData,
-    errors,
-    setFieldValue,
-    setFieldError,
-    validateForm,
-    setSubmitting,
-    state,
-  } = useProfileForm();
+  const { validateForm, setSubmitting, state } = useProfileForm();
+
+  // 선택적 구독으로 필요한 데이터만 가져오기
+  const name = useFormDataSelector<string>("profile", "name") || "";
+  const newPassword =
+    useFormDataSelector<string>("profile", "newPassword") || "";
+  const { setFieldValue } = useFormActions("profile");
 
   // 기존 사용자 정보 불러오기
   useEffect(() => {
@@ -52,49 +68,14 @@ export default function ProfileEditForm({ onCancel }: ProfileEditFormProps) {
         }
       } catch (error: any) {
         console.error("프로필 정보 로드 오류:", error);
-        showToast(
-          error.response?.data?.message ||
-            "프로필 정보를 불러오는데 실패했습니다.",
-          "error"
-        );
+        handleError(error, "프로필 정보를 불러오는데 실패했습니다.");
       } finally {
         stopInitialLoading();
       }
     };
 
     loadUserProfile();
-  }, []);
-
-  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      // 파일 타입 검증
-      const allowedTypes = ["image/jpeg", "image/png", "image/gif"];
-      if (!allowedTypes.includes(file.type)) {
-        setProfileImgError("JPG, PNG, GIF 파일만 업로드 가능합니다.");
-        return;
-      }
-
-      // 파일 크기 검증 (5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        setProfileImgError("파일 크기는 5MB 이하여야 합니다.");
-        return;
-      }
-
-      // 에러 제거
-      setProfileImgError(undefined);
-
-      // 파일 저장
-      setProfileImg(file);
-
-      // 미리보기 생성
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setImagePreview(e.target?.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
+  }, [setFieldValue, startInitialLoading, stopInitialLoading, handleError]);
 
   const handleSave = async () => {
     // 전체 폼 유효성 검사
@@ -107,9 +88,9 @@ export default function ProfileEditForm({ onCancel }: ProfileEditFormProps) {
       try {
         // FormData를 사용하여 이미지와 함께 서버로 전송
         const formDataToSend = new FormData();
-        formDataToSend.append("name", formData.name);
-        if (formData.newPassword) {
-          formDataToSend.append("newPassword", formData.newPassword);
+        formDataToSend.append("name", name);
+        if (newPassword) {
+          formDataToSend.append("newPassword", newPassword);
         }
         if (profileImg) {
           formDataToSend.append("profileImg", profileImg);
@@ -118,15 +99,23 @@ export default function ProfileEditForm({ onCancel }: ProfileEditFormProps) {
         // API 호출
         await userService.updateProfile(formDataToSend);
 
+        // ✅ 상태 동기화: authStore의 사용자 정보 업데이트
+        const currentUser = useAuthStore.getState().user;
+        if (currentUser) {
+          setUser({
+            ...currentUser,
+            name: name,
+            profileImg: profileImg
+              ? URL.createObjectURL(profileImg)
+              : currentUser.profileImg,
+          });
+        }
+
         showToast("프로필이 성공적으로 업데이트되었습니다.", "success");
         onCancel();
       } catch (error: any) {
         console.error("프로필 업데이트 오류:", error);
-        showToast(
-          error.response?.data?.message ||
-            "프로필 업데이트 중 오류가 발생했습니다.",
-          "error"
-        );
+        handleError(error, "프로필 업데이트 중 오류가 발생했습니다.");
       } finally {
         setSubmitting(false);
         stopLoading();
@@ -147,59 +136,33 @@ export default function ProfileEditForm({ onCancel }: ProfileEditFormProps) {
     >
       <>
         {/* Profile Picture Section */}
-        <div className="flex flex-col items-center mb-8">
-          <div className="relative w-24 h-24 mb-4 group">
-            <img
-              src={imagePreview}
-              alt="프로필 이미지"
-              className="w-full h-full rounded-full object-cover"
-            />
-            <label className="absolute inset-0 flex items-center justify-center cursor-pointer">
-              <span className="text-white text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200 drop-shadow-lg px-2 py-1 rounded bg-black/50 backdrop-blur-sm">
-                사진 변경
-              </span>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageChange}
-                className="hidden"
-              />
-            </label>
-          </div>
-          {profileImgError && (
-            <p className="text-red-500 text-sm mt-2">{profileImgError}</p>
-          )}
-        </div>
+        <ProfileImageSection
+          imagePreview={imagePreview}
+          imageError={profileImgError}
+          isOptimizing={isOptimizing}
+          onImageChange={handleImageChange}
+        />
 
         {/* Form Fields */}
         <div className="space-y-6">
-          {/* Name Field */}
-          <Input
+          <ProfileField
+            field="name"
             label="이름"
             placeholder="이름을 입력하세요"
-            value={formData.name}
-            onChange={(e) => setFieldValue("name", e.target.value)}
-            error={errors.name}
           />
 
-          {/* New Password Field */}
-          <Input
+          <ProfileField
+            field="newPassword"
             label="새로운 패스워드"
             type="password"
             placeholder="패스워드를 입력하세요"
-            value={formData.newPassword}
-            onChange={(e) => setFieldValue("newPassword", e.target.value)}
-            error={errors.newPassword}
           />
 
-          {/* Confirm Password Field */}
-          <Input
+          <ProfileField
+            field="confirmPassword"
             label="새로운 패스워드 확인"
             type="password"
             placeholder="같은 패스워드를 입력하세요"
-            value={formData.confirmPassword}
-            onChange={(e) => setFieldValue("confirmPassword", e.target.value)}
-            error={errors.confirmPassword}
           />
         </div>
 

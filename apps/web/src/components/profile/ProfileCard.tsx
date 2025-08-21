@@ -1,5 +1,6 @@
 "use client";
 
+import React, { memo } from "react";
 import { User } from "lucide-react";
 
 interface ProfileCardProps {
@@ -11,7 +12,7 @@ interface ProfileCardProps {
   };
 }
 
-export default function ProfileCard({ user }: ProfileCardProps) {
+const ProfileCard: React.FC<ProfileCardProps> = memo(({ user }) => {
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
       <div className="flex items-center space-x-4">
@@ -33,4 +34,8 @@ export default function ProfileCard({ user }: ProfileCardProps) {
       </div>
     </div>
   );
-}
+});
+
+ProfileCard.displayName = "ProfileCard";
+
+export default ProfileCard;
