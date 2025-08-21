@@ -1,8 +1,14 @@
 "use client";
 
+import { useEffect } from "react";
 import { BottomNavigation } from "@/components/layout";
 import { HomeContent } from "@/components/home";
-import { usePromotionFetch, useEventFetch, useHomeActions } from "@/hooks";
+import {
+  usePromotionFetch,
+  useEventFetch,
+  useHomeActions,
+  useAnalytics,
+} from "@/hooks";
 import { AsyncWrapper } from "@/components/ui";
 
 export default function HomePage() {
@@ -15,6 +21,16 @@ export default function HomePage() {
 
   const { handleProductClick, handlePromoClick, handleEventClick } =
     useHomeActions();
+
+  // 페이지 뷰 로거
+  const { trackPageView } = useAnalytics();
+
+  // 페이지 로드 시 페이지 뷰 로그 (브라우저에서만 실행)
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      trackPageView("/home");
+    }
+  }, [trackPageView]);
 
   return (
     <AsyncWrapper
