@@ -1,33 +1,5 @@
 import { api } from "./api";
 
-// 이미지 URL 포트 수정 유틸리티 함수
-const fixImageUrl = (url: string): string => {
-  // 상대 경로인 경우 API 서버의 완전한 URL로 변환
-  if (url && url.startsWith("/uploads/")) {
-    return `http://localhost:3002${url}`;
-  }
-
-  // localhost:3001인 경우 3002로 변경
-  if (url && url.includes("localhost:3001")) {
-    return url.replace("localhost:3001", "localhost:3002");
-  }
-
-  return url;
-};
-
-// 상품 데이터의 이미지 URL 수정
-const fixProductImageUrl = (product: any): any => {
-  return {
-    ...product,
-    productImg: fixImageUrl(product.productImg),
-  };
-};
-
-// 상품 배열의 이미지 URL 수정
-const fixProductsImageUrls = (products: any[]): any[] => {
-  return products.map(fixProductImageUrl);
-};
-
 // 타입 정의
 export interface User {
   _id: string;
@@ -36,17 +8,8 @@ export interface User {
   profileImg?: string;
 }
 
-export interface Product {
-  _id: string;
-  productName: string;
-  productImg: string;
-  productContents: string;
-  category: string;
-  price: number;
-  currentStock: number;
-  isRecommended: boolean;
-  optimalStock: number;
-}
+// Product 타입을 새로운 타입 시스템에서 import
+import type { Product } from "@/types/product";
 
 export interface LoginRequest {
   email: string;
@@ -67,15 +30,8 @@ export interface AuthResponse {
   _id?: string;
 }
 
-export interface ProductsResponse {
-  products: Product[];
-  pagination?: {
-    currentPage: number;
-    totalPages: number;
-    totalItems: number;
-    itemsPerPage: number;
-  };
-}
+// ProductsResponse 타입을 새로운 타입 시스템에서 import
+import type { ProductsResponse } from "@/types/product";
 
 // 인증 관련 API
 export const authService = {
@@ -139,31 +95,19 @@ export const productService = {
     if (params?.limit) queryParams.append("limit", params.limit.toString());
 
     const url = `/products${queryParams.toString() ? `?${queryParams.toString()}` : ""}`;
-    const response = await api.get<ProductsResponse>(url);
-    return {
-      ...response,
-      products: fixProductsImageUrls(response.products),
-    };
+    return await api.get<ProductsResponse>(url);
   },
 
   // 특정 상품 조회
   getProduct: async (id: string): Promise<{ product: Product }> => {
-    const response = await api.get<{ product: Product }>(`/products/${id}`);
-    return {
-      ...response,
-      product: fixProductImageUrl(response.product),
-    };
+    return await api.get<{ product: Product }>(`/products/${id}`);
   },
 
   // 추천 상품 목록 조회
   getRecommendedProducts: async (): Promise<{ products: Product[] }> => {
-    const response = await api.get<{ products: Product[] }>(
+    return await api.get<{ products: Product[] }>(
       "/products?isRecommended=true"
     );
-    return {
-      ...response,
-      products: fixProductsImageUrls(response.products),
-    };
   },
 
   // 카테고리별 상품 조회
@@ -235,19 +179,7 @@ export const cartService = {
 export const orderService = {
   // 주문 내역 조회
   getOrderHistory: async () => {
-    const response = await api.get("/order");
-    // 이미지 URL 수정
-    const ordersWithFixedImages = response.orders.map((order: any) => ({
-      ...order,
-      items: order.items.map((item: any) => ({
-        ...item,
-        productImg: fixImageUrl(item.productImg),
-      })),
-    }));
-    return {
-      ...response,
-      orders: ordersWithFixedImages,
-    };
+    return await api.get("/order");
   },
 
   // 주문 생성
@@ -257,19 +189,7 @@ export const orderService = {
 
   // 주문 상세 조회
   getOrderDetail: async (orderId: string) => {
-    const response = await api.get(`/order/${orderId}`);
-    // 이미지 URL 수정
-    const orderWithFixedImages = {
-      ...response.order,
-      items: response.order.items.map((item: any) => ({
-        ...item,
-        productImg: fixImageUrl(item.productImg),
-      })),
-    };
-    return {
-      ...response,
-      order: orderWithFixedImages,
-    };
+    return await api.get(`/order/${orderId}`);
   },
 };
 

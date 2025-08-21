@@ -1,6 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
-import { productService, Product } from "@/lib/services";
+import { productService } from "@/lib/services";
+import { useProductErrorHandler } from "./useProductErrorHandler";
+import type { Product } from "@/types/product";
 
 interface UseProductDetailsFetchOptions {
   onSuccess?: (product: Product) => void;
@@ -11,6 +13,8 @@ export const useProductDetailsFetch = (
   productId: string,
   options: UseProductDetailsFetchOptions = {}
 ) => {
+  const { handleProductDetailError } = useProductErrorHandler();
+
   const {
     data: product,
     isLoading: loading,
@@ -23,8 +27,13 @@ export const useProductDetailsFetch = (
         throw new Error("상품 ID가 필요합니다.");
       }
 
-      const response = await productService.getProduct(productId);
-      return response.product;
+      try {
+        const response = await productService.getProduct(productId);
+        return response.product;
+      } catch (error) {
+        handleProductDetailError(error);
+        throw error;
+      }
     },
     enabled: !!productId, // productId가 있을 때만 쿼리 실행
     staleTime: 10 * 60 * 1000, // 10분간 데이터를 fresh로 유지 (상품 정보는 자주 변경되지 않음)
