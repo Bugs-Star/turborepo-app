@@ -1,10 +1,9 @@
-// components/SearchableTable.tsx
 "use client";
 
 import React, { useState } from "react";
 
 interface Column<T> {
-  key: keyof T;
+  key: keyof T | "actions" | "delete";
   label: string;
   render?: (row: T) => React.ReactNode; // render 함수 추가
 }
