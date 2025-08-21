@@ -1,5 +1,5 @@
 import ChartCard from "@/components/ChartCard";
-import FilterPanel from "@/app/ads-management/FilterPanel";
+import FilterPanel from "./FilterPanel";
 
 const viewTimeData = [
   { name: "1주", value: 45 },

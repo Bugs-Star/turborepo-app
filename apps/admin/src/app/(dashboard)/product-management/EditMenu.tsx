@@ -33,6 +33,7 @@ const EditMenu = ({ productId, initialData, onClose }: EditMenuProps) => {
   const [selectedCategory, setSelectedCategory] = useState<CategoryType>(
     initialData?.category || "drink"
   );
+  const [image, setImage] = useState<File | null>(null);
 
   const handleSubmit = (formData: FormData) => {
     const payload: any = Object.fromEntries(formData.entries());
@@ -66,9 +67,13 @@ const EditMenu = ({ productId, initialData, onClose }: EditMenuProps) => {
           title="메뉴 수정"
           uploadLabel="메뉴 이미지"
           buttonLabel="메뉴 수정"
-          onSubmit={handleSubmit}
+          imageFile={image}
+          onImageChange={setImage}
+          onSubmit={() =>
+            handleSubmit(new FormData(document.querySelector("form")!))
+          }
           headerExtra={
-            <div className="flex gap-3">
+            <div className="flex gap-3 mb-4">
               {categoryOptions.map(({ key, icon: Icon }) => (
                 <button
                   key={key}
@@ -87,7 +92,20 @@ const EditMenu = ({ productId, initialData, onClose }: EditMenuProps) => {
             </div>
           }
         >
-          {/* 상품 코드 */}
+          {/* 메뉴 이름 */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              메뉴 이름
+            </label>
+            <input
+              type="text"
+              name="productName"
+              defaultValue={initialData?.productName}
+              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring focus:border-[#005C14]"
+            />
+          </div>
+
+          {/* 메뉴 코드 */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               메뉴 코드
@@ -95,7 +113,6 @@ const EditMenu = ({ productId, initialData, onClose }: EditMenuProps) => {
             <input
               type="text"
               name="productCode"
-              placeholder="예: hot_americano"
               defaultValue={initialData?.productCode}
               className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring focus:border-[#005C14]"
             />
@@ -138,6 +155,18 @@ const EditMenu = ({ productId, initialData, onClose }: EditMenuProps) => {
                 className="w-full border border-gray-300 rounded-lg px-4 py-2"
               />
             </div>
+          </div>
+
+          {/* 설명 */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              설명
+            </label>
+            <textarea
+              name="productContents"
+              defaultValue={initialData?.productContents}
+              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring focus:border-[#005C14] min-h-[100px]"
+            />
           </div>
         </BaseForm>
       </div>
