@@ -24,7 +24,10 @@ export const usePayment = () => {
     setLastUsedMethod,
   } = usePaymentStore();
 
-  const handlePaymentClick = async () => {
+  const handlePaymentClick = async (onOrderInitiate?: () => void) => {
+    // 로거 콜백 호출 (있는 경우)
+    onOrderInitiate?.();
+
     await processPayment(selectedMethod);
   };
 

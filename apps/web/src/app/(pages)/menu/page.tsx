@@ -1,12 +1,13 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { BottomNavigation } from "@/components/layout";
 import { useInfiniteProductFetch } from "@/hooks";
 import ProductGrid from "@/components/menu/ProductGrid";
 import { AsyncWrapper, PageHeader, InfiniteScroll } from "@/components/ui";
 import CategoryFilter from "@/components/menu/CategoryFilter";
+import { useAnalytics, useMenuActions } from "@/hooks";
 
 export default function MenuPage() {
   const searchParams = useSearchParams();
@@ -25,13 +26,29 @@ export default function MenuPage() {
     pageSize: 10,
   });
 
+  // 로거 훅들
+  const { trackPageView } = useAnalytics();
+  const { handleProductClick, handleCategoryChange } = useMenuActions();
+
+  // 중복 로깅 방지를 위한 ref
+  const hasLoggedPageView = useRef(false);
+
   // URL 파라미터가 변경되면 refetch 실행
   useEffect(() => {
     refetch();
   }, [initialCategory, refetch]);
 
-  const handleCategoryChange = (category: string) => {
-    // 카테고리가 변경되면 URL 업데이트 (선택사항)
+  // 페이지 로드 시 페이지 뷰 로그 (브라우저에서만 실행, 한 번만)
+  useEffect(() => {
+    if (typeof window !== "undefined" && !hasLoggedPageView.current) {
+      trackPageView("/menu");
+      hasLoggedPageView.current = true;
+    }
+  }, [trackPageView]);
+
+  // 카테고리 변경 핸들러 (URL 업데이트 + 로깅)
+  const handleCategoryChangeWithURL = (category: string) => {
+    // URL 업데이트
     const url = new URL(window.location.href);
     url.searchParams.set("category", category);
     window.history.replaceState({}, "", url.toString());
@@ -52,7 +69,14 @@ export default function MenuPage() {
         <CategoryFilter
           products={products}
           initialCategory={initialCategory}
-          onCategoryChange={handleCategoryChange}
+          onCategoryChange={handleCategoryChangeWithURL}
+          onFilterChange={(category, previousCategory) =>
+            handleCategoryChange(
+              category,
+              previousCategory,
+              handleCategoryChangeWithURL
+            )
+          }
         >
           {(filteredProducts, activeCategory) => (
             <div className="flex-1 px-4 pb-6">
@@ -66,6 +90,7 @@ export default function MenuPage() {
                 <ProductGrid
                   products={filteredProducts}
                   activeCategory={activeCategory}
+                  onProductClick={handleProductClick}
                 />
               </InfiniteScroll>
             </div>

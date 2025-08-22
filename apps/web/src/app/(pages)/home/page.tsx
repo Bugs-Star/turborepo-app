@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { BottomNavigation } from "@/components/layout";
 import { HomeContent } from "@/components/home";
 import {
@@ -25,10 +25,14 @@ export default function HomePage() {
   // 페이지 뷰 로거
   const { trackPageView } = useAnalytics();
 
-  // 페이지 로드 시 페이지 뷰 로그 (브라우저에서만 실행)
+  // 중복 로깅 방지를 위한 ref
+  const hasLoggedPageView = useRef(false);
+
+  // 페이지 로드 시 페이지 뷰 로그 (브라우저에서만 실행, 한 번만)
   useEffect(() => {
-    if (typeof window !== "undefined") {
+    if (typeof window !== "undefined" && !hasLoggedPageView.current) {
       trackPageView("/home");
+      hasLoggedPageView.current = true;
     }
   }, [trackPageView]);
 

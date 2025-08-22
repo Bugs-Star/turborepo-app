@@ -26,6 +26,8 @@ export default function CartItem({
 
   const handleRemove = () => {
     if (disabled) return;
+
+    // 기존 제거 로직
     onRemove(item.id);
   };
 

@@ -40,7 +40,7 @@ export const useCartFetch = () => {
     : [];
 
   // CartUtils를 사용하여 일관된 요약 정보 계산
-  const summary = query.data?.summary || CartUtils.calculateSummary([]);
+  const summary = query.data?.summary;
 
   return {
     ...query,

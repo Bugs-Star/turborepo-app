@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { BottomNavigation } from "@/components/layout";
 import { PageHeader } from "@/components/ui";
 import { CartContent, CartActionButton } from "@/components/cart";
@@ -9,7 +10,10 @@ import {
   useCartActions,
   usePayment,
   useNavigation,
+  useAnalytics,
+  useCartAnalyticsActions,
 } from "@/hooks";
+import { usePaymentStore } from "@/stores/paymentStore";
 
 export default function CartPage() {
   const { cartItems, summary, isLoading, error, isFetching } = useCartFetch();
@@ -17,8 +21,49 @@ export default function CartPage() {
     useCartActions();
   const { isProcessing, handlePaymentClick } = usePayment();
   const { goToMenu } = useNavigation();
+  const { selectedMethod } = usePaymentStore();
+
+  // 로거 훅들
+  const { trackPageView } = useAnalytics();
+  const { handleCartView, handleCartRemove, handleOrderInitiate } =
+    useCartAnalyticsActions();
+
+  // 중복 로깅 방지를 위한 ref
+  const hasLoggedPageView = useRef(false);
+  const hasLoggedCartView = useRef(false);
 
   const total = summary?.totalAmount || 0;
+
+  // 페이지 로드 시 페이지 뷰 로그 (브라우저에서만 실행, 한 번만)
+  useEffect(() => {
+    if (typeof window !== "undefined" && !hasLoggedPageView.current) {
+      trackPageView("/cart");
+      hasLoggedPageView.current = true;
+    }
+  }, [trackPageView]);
+
+  // 장바구니 데이터가 로드되면 장바구니 뷰 로그 (한 번만)
+  useEffect(() => {
+    if (cartItems && summary && !hasLoggedCartView.current) {
+      handleCartView(summary.totalItems, summary.totalAmount);
+      hasLoggedCartView.current = true;
+    }
+  }, [cartItems, summary, handleCartView, isLoading, isFetching, error]);
+
+  // 장바구니 제거 로깅 핸들러
+  const handleRemoveWithLogging = (id: string) => {
+    const item = cartItems.find((item) => item.id === id);
+    if (item) {
+      handleCartRemove(item);
+    }
+    handleRemove(id);
+  };
+
+  // 주문 시작 로깅 핸들러
+  const handlePaymentClickWithLogging = () => {
+    handleOrderInitiate(total, summary?.totalItems || 0, selectedMethod);
+    handlePaymentClick();
+  };
 
   return (
     <AsyncWrapper
@@ -36,7 +81,7 @@ export default function CartPage() {
           total={total}
           isActionLoading={isActionLoading}
           onQuantityChange={handleQuantityChange}
-          onRemove={handleRemove}
+          onRemove={handleRemoveWithLogging}
         />
 
         {/* Action Buttons */}
@@ -44,7 +89,7 @@ export default function CartPage() {
           hasItems={cartItems.length > 0}
           isProcessing={isProcessing}
           isActionLoading={isActionLoading}
-          onPaymentClick={handlePaymentClick}
+          onPaymentClick={handlePaymentClickWithLogging}
           onGoToMenu={goToMenu}
         />
 
