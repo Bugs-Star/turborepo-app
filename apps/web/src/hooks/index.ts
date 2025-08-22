@@ -60,3 +60,4 @@ export { useProducts } from "./useProducts";
 export { useAnalytics } from "./useAnalytics";
 export { useProfileActions } from "./useProfileActions";
 export { useLoginActions } from "./useLoginActions";
+export { useSignupActions } from "./useSignupActions";

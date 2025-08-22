@@ -214,6 +214,47 @@ export const useAnalytics = () => {
     });
   }, [getPageInfo]);
 
+  // === 회원가입 페이지 전용 이벤트 ===
+  const trackSignupAttempt = useCallback(
+    (email: string, name: string) => {
+      logger.log("signup_attempt", {
+        email: email,
+        name: name,
+        ...getPageInfo(),
+      });
+    },
+    [getPageInfo]
+  );
+
+  const trackSignupSuccess = useCallback(
+    (email: string, name: string) => {
+      logger.log("signup_success", {
+        email: email,
+        name: name,
+        ...getPageInfo(),
+      });
+    },
+    [getPageInfo]
+  );
+
+  const trackSignupFailure = useCallback(
+    (email: string, name: string, errorMessage: string) => {
+      logger.log("signup_failure", {
+        email: email,
+        name: name,
+        error_message: errorMessage,
+        ...getPageInfo(),
+      });
+    },
+    [getPageInfo]
+  );
+
+  const trackLoginLinkClick = useCallback(() => {
+    logger.log("login_link_click", {
+      ...getPageInfo(),
+    });
+  }, [getPageInfo]);
+
   // === 페이지 뷰 이벤트 ===
   const trackPageView = useCallback((pageName?: string) => {
     logger.log("page_view", {
@@ -255,6 +296,12 @@ export const useAnalytics = () => {
     trackLoginSuccess,
     trackLoginFailure,
     trackSignupLinkClick,
+
+    // 회원가입 페이지 관련
+    trackSignupAttempt,
+    trackSignupSuccess,
+    trackSignupFailure,
+    trackLoginLinkClick,
 
     // 페이지 관련
     trackPageView,

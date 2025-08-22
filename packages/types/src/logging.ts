@@ -48,6 +48,10 @@ export type EventName =
   | "login_success"
   | "login_failure"
   | "signup_link_click"
+  | "signup_attempt"
+  | "signup_success"
+  | "signup_failure"
+  | "login_link_click"
 
   // 중요 로그 (즉시 처리)
   | "error"
