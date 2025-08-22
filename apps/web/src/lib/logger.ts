@@ -1,7 +1,9 @@
 /**
  * 카페앱 프론트엔드 로거
  *
- * Collector, Formatter, Storage, Transport 기능을 모두 포함한 단일 클래스
+ * 문서 방식에 맞춘 개선된 로거:
+ * - sendImmediate: 즉시 전송 (중요 로그)
+ * - flushAll: 배치 전송 (모든 로그)
  *
  * 사용법:
  * import { logger } from '@/lib/logger';
@@ -18,15 +20,10 @@ import { LogData, EventName, DEFAULT_BATCH_CONFIG } from "@repo/types";
 class FrontendLogger {
   // === Storage: 메모리 큐 관리 ===
   private memoryQueue: LogData[] = [];
-  private criticalQueue: LogData[] = [];
 
-  // 일반 이벤트 설정
-  private eventBatchSize = DEFAULT_BATCH_CONFIG.events.size; // 20개
-  private eventFlushInterval = DEFAULT_BATCH_CONFIG.events.timeout; // 5000ms
-
-  // 중요 로그 설정
-  private criticalBatchSize = DEFAULT_BATCH_CONFIG.critical.size; // 5개
-  private criticalFlushInterval = DEFAULT_BATCH_CONFIG.critical.timeout; // 1000ms
+  // 배치 설정
+  private batchSize = DEFAULT_BATCH_CONFIG.events.size; // 20개
+  private flushInterval = DEFAULT_BATCH_CONFIG.events.timeout; // 5000ms
 
   constructor() {
     this.setupAutoFlush();
@@ -41,19 +38,15 @@ class FrontendLogger {
     // 2. Formatter: 로그 정제
     const formattedLog = this.formatLog(rawEvent);
 
-    // 3. Storage: 메모리 큐에 저장
-    this.addToMemoryQueue(formattedLog);
-
-    // 4. 배치 크기 확인
-    if (this.memoryQueue.length >= this.eventBatchSize) {
-      this.flushEvents();
-    }
-
-    // 중요 로그는 별도 큐에 저장
+    // 3. 중요 로그는 즉시 전송, 일반 로그는 큐에 저장
     if (this.isCritical(formattedLog)) {
-      this.criticalQueue.push(formattedLog);
-      if (this.criticalQueue.length >= this.criticalBatchSize) {
-        this.flushCritical();
+      this.sendImmediate([formattedLog]);
+    } else {
+      this.addToMemoryQueue(formattedLog);
+
+      // 배치 크기 확인
+      if (this.memoryQueue.length >= this.batchSize) {
+        this.flushAll();
       }
     }
   }
@@ -98,56 +91,38 @@ class FrontendLogger {
   }
 
   // === Transport: 전송 관리 ===
-  private async flushEvents() {
+
+  // 즉시 전송 (중요 로그)
+  private sendImmediate(logs: LogData[]) {
+    // 임시로 콘솔 출력 (나중에 실제 API 호출로 변경)
+    console.log("🚨 즉시 전송:", {
+      count: logs.length,
+      logs: logs.map((log) => ({
+        event_name: log.event_name,
+        timestamp: log.event_timestamp,
+        payload: log.payload,
+      })),
+    });
+
+    // 실제 API 호출 (백엔드 구현 후 활성화)
+    // if (navigator.sendBeacon) {
+    //   navigator.sendBeacon('/api/logs/immediate', JSON.stringify(logs));
+    // } else {
+    //   fetch('/api/logs/immediate', {
+    //     method: 'POST',
+    //     body: JSON.stringify(logs)
+    //   });
+    // }
+  }
+
+  // 배치 전송 (모든 로그)
+  private flushAll() {
     if (this.memoryQueue.length === 0) return;
 
     const logs = this.getMemoryQueue();
 
-    try {
-      await this.sendEvents(logs);
-      this.clearMemoryQueue();
-    } catch (error) {
-      console.error("일반 이벤트 전송 실패:", error);
-    }
-  }
-
-  private async flushCritical() {
-    if (this.criticalQueue.length === 0) return;
-
-    const logs = [...this.criticalQueue];
-
-    try {
-      await this.sendCritical(logs);
-      this.criticalQueue = [];
-    } catch (error) {
-      console.error("중요 로그 전송 실패:", error);
-    }
-  }
-
-  private async flush() {
-    await Promise.all([this.flushEvents(), this.flushCritical()]);
-  }
-
-  private async sendLogs(logs: LogData[]) {
-    const events = logs.filter((log) => !this.isCritical(log));
-    const critical = logs.filter((log) => this.isCritical(log));
-
-    const promises = [];
-
-    if (events.length > 0) {
-      promises.push(this.sendEvents(events));
-    }
-
-    if (critical.length > 0) {
-      promises.push(this.sendCritical(critical));
-    }
-
-    await Promise.all(promises);
-  }
-
-  private async sendEvents(logs: LogData[]) {
     // 임시로 콘솔 출력 (나중에 실제 API 호출로 변경)
-    console.log("📊 일반 이벤트 전송:", {
+    console.log("📊 배치 전송:", {
       count: logs.length,
       logs: logs.map((log) => ({
         event_name: log.event_name,
@@ -157,30 +132,18 @@ class FrontendLogger {
     });
 
     // 실제 API 호출 (백엔드 구현 후 활성화)
-    // await fetch('/api/logs/events', {
+    // fetch('/api/logs/batch', {
     //   method: 'POST',
     //   headers: { 'Content-Type': 'application/json' },
     //   body: JSON.stringify({ logs })
+    // }).then(() => {
+    //   this.clearMemoryQueue();
+    // }).catch((error) => {
+    //   console.error("배치 전송 실패:", error);
     // });
-  }
 
-  private async sendCritical(logs: LogData[]) {
-    // 임시로 콘솔 출력 (나중에 실제 API 호출로 변경)
-    console.log("🚨 중요 로그 전송:", {
-      count: logs.length,
-      logs: logs.map((log) => ({
-        event_name: log.event_name,
-        timestamp: log.event_timestamp,
-        payload: log.payload,
-      })),
-    });
-
-    // 실제 API 호출 (백엔드 구현 후 활성화)
-    // await fetch('/api/logs/critical', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify({ logs })
-    // });
+    // 임시로 큐 정리
+    this.clearMemoryQueue();
   }
 
   // === 유틸리티 메서드들 ===
@@ -229,11 +192,8 @@ class FrontendLogger {
     // 브라우저 환경에서만 실행
     if (typeof window === "undefined") return;
 
-    // 일반 이벤트: 5초마다 전송
-    setInterval(() => this.flushEvents(), this.eventFlushInterval);
-
-    // 중요 로그: 1초마다 전송
-    setInterval(() => this.flushCritical(), this.criticalFlushInterval);
+    // 5초마다 배치 전송
+    setInterval(() => this.flushAll(), this.flushInterval);
   }
 
   private setupPageUnload() {
@@ -246,7 +206,7 @@ class FrontendLogger {
         // const apiBaseUrl =
         //   process.env.NEXT_PUBLIC_API_URL || "http://localhost:3002";
         // navigator.sendBeacon(
-        //   `${apiBaseUrl}/logs/events`,
+        //   `${apiBaseUrl}/logs/batch`,
         //   JSON.stringify({
         //     logs: this.memoryQueue,
         //   })
@@ -263,7 +223,7 @@ class FrontendLogger {
 
   // === 디버깅용 메서드들 (개발용) ===
   getQueueSize(): number {
-    return this.memoryQueue.length + this.criticalQueue.length;
+    return this.memoryQueue.length;
   }
 
   getEventQueueSize(): number {
@@ -271,11 +231,11 @@ class FrontendLogger {
   }
 
   getCriticalQueueSize(): number {
-    return this.criticalQueue.length;
+    return 0; // 중요 로그는 즉시 전송되므로 큐에 저장되지 않음
   }
 
   forceFlush() {
-    this.flush();
+    this.flushAll();
   }
 }
 
