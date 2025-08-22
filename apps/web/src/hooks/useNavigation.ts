@@ -10,6 +10,7 @@ export const useNavigation = () => {
   const goToProfile = () => router.push("/profile");
   const goToProfileEdit = () => router.push("/profile/edit");
   const goToLogin = () => router.push("/login");
+  const goToSignup = () => router.push("/signup");
 
   return {
     goToMenu,
@@ -19,5 +20,6 @@ export const useNavigation = () => {
     goToProfile,
     goToProfileEdit,
     goToLogin,
+    goToSignup,
   };
 };

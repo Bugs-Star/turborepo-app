@@ -44,6 +44,10 @@ export type EventName =
   | "profile_edit_click"
   | "order_history_click"
   | "logout"
+  | "login_attempt"
+  | "login_success"
+  | "login_failure"
+  | "signup_link_click"
 
   // 중요 로그 (즉시 처리)
   | "error"
