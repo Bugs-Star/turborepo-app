@@ -41,6 +41,17 @@ export type EventName =
   | "order_complete"
   | "promotion_view"
   | "event_view"
+  | "profile_edit_click"
+  | "order_history_click"
+  | "logout"
+  | "login_attempt"
+  | "login_success"
+  | "login_failure"
+  | "signup_link_click"
+  | "signup_attempt"
+  | "signup_success"
+  | "signup_failure"
+  | "login_link_click"
 
   // 중요 로그 (즉시 처리)
   | "error"

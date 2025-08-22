@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Input, Button } from "@repo/ui";
 import { useSignupForm, useToast } from "@/hooks";
 import { useAuthStore } from "@/stores/authStore";
+import { useSignupActions } from "@/hooks/useSignupActions";
 
 export default function SignupForm() {
   const {
@@ -16,23 +17,41 @@ export default function SignupForm() {
   } = useSignupForm();
   const { showSuccess, showError } = useToast();
   const { signup, isLoading } = useAuthStore();
+  const {
+    handleSignupAttempt,
+    handleSignupSuccess,
+    handleSignupFailure,
+    handleLoginLinkClick,
+  } = useSignupActions();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (validateForm()) {
+      // 회원가입 시도 로그
+      handleSignupAttempt(formData.email, formData.name);
+
       setSubmitting(true);
       try {
         await signup(formData.name, formData.email, formData.password);
 
+        // 회원가입 성공 로그
+        await handleSignupSuccess(formData.email, formData.name);
+
         showSuccess("회원가입이 완료되었습니다! 자동으로 로그인되었습니다.");
 
-        // 회원가입 성공 후 홈 페이지로 리다이렉트
+        // 로그 전송 완료 후 홈 페이지로 리다이렉트
         setTimeout(() => {
           window.location.href = "/home";
         }, 1500);
       } catch (error: any) {
-        showError(error.response?.data?.message || "회원가입에 실패했습니다.");
+        const errorMessage =
+          error.response?.data?.message || "회원가입에 실패했습니다.";
+
+        // 회원가입 실패 로그
+        handleSignupFailure(formData.email, formData.name, errorMessage);
+
+        showError(errorMessage);
       } finally {
         setSubmitting(false);
       }
@@ -114,6 +133,7 @@ export default function SignupForm() {
             <Link
               href="/login"
               className="text-green-700 hover:underline font-bold"
+              onClick={handleLoginLinkClick}
             >
               로그인
             </Link>

@@ -1,10 +1,26 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { Logo } from "@/components/ui";
 import { LoginForm } from "@/components/forms";
 import { BottomNavigation } from "@/components/layout";
+import { useAnalytics } from "@/hooks";
 
 export default function LoginPage() {
+  // 로거 훅
+  const { trackPageView } = useAnalytics();
+
+  // 중복 로깅 방지를 위한 ref
+  const hasLoggedPageView = useRef(false);
+
+  // 페이지 로드 시 페이지 뷰 로그 (브라우저에서만 실행, 한 번만)
+  useEffect(() => {
+    if (typeof window !== "undefined" && !hasLoggedPageView.current) {
+      trackPageView("/login");
+      hasLoggedPageView.current = true;
+    }
+  }, [trackPageView]);
+
   return (
     <>
       <div className="min-h-screen bg-white flex flex-col pb-20">

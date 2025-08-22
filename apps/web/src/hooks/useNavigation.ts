@@ -8,7 +8,9 @@ export const useNavigation = () => {
   const goToOrderHistory = () => router.push("/order-history");
   const goToHome = () => router.push("/home");
   const goToProfile = () => router.push("/profile");
+  const goToProfileEdit = () => router.push("/profile/edit");
   const goToLogin = () => router.push("/login");
+  const goToSignup = () => router.push("/signup");
 
   return {
     goToMenu,
@@ -16,6 +18,8 @@ export const useNavigation = () => {
     goToOrderHistory,
     goToHome,
     goToProfile,
+    goToProfileEdit,
     goToLogin,
+    goToSignup,
   };
 };

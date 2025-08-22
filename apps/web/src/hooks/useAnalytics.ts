@@ -157,6 +157,104 @@ export const useAnalytics = () => {
     [getPageInfo]
   );
 
+  // === 프로필 페이지 전용 이벤트 ===
+  const trackProfileEditClick = useCallback(() => {
+    logger.log("profile_edit_click", {
+      ...getPageInfo(),
+    });
+  }, [getPageInfo]);
+
+  const trackOrderHistoryClick = useCallback(() => {
+    logger.log("order_history_click", {
+      ...getPageInfo(),
+    });
+  }, [getPageInfo]);
+
+  const trackLogout = useCallback(() => {
+    logger.log("logout", {
+      ...getPageInfo(),
+    });
+  }, [getPageInfo]);
+
+  // === 로그인 페이지 전용 이벤트 ===
+  const trackLoginAttempt = useCallback(
+    (email: string) => {
+      logger.log("login_attempt", {
+        email: email,
+        ...getPageInfo(),
+      });
+    },
+    [getPageInfo]
+  );
+
+  const trackLoginSuccess = useCallback(
+    (email: string) => {
+      logger.log("login_success", {
+        email: email,
+        ...getPageInfo(),
+      });
+    },
+    [getPageInfo]
+  );
+
+  const trackLoginFailure = useCallback(
+    (email: string, errorMessage: string) => {
+      logger.log("login_failure", {
+        email: email,
+        error_message: errorMessage,
+        ...getPageInfo(),
+      });
+    },
+    [getPageInfo]
+  );
+
+  const trackSignupLinkClick = useCallback(() => {
+    logger.log("signup_link_click", {
+      ...getPageInfo(),
+    });
+  }, [getPageInfo]);
+
+  // === 회원가입 페이지 전용 이벤트 ===
+  const trackSignupAttempt = useCallback(
+    (email: string, name: string) => {
+      logger.log("signup_attempt", {
+        email: email,
+        name: name,
+        ...getPageInfo(),
+      });
+    },
+    [getPageInfo]
+  );
+
+  const trackSignupSuccess = useCallback(
+    (email: string, name: string) => {
+      logger.log("signup_success", {
+        email: email,
+        name: name,
+        ...getPageInfo(),
+      });
+    },
+    [getPageInfo]
+  );
+
+  const trackSignupFailure = useCallback(
+    (email: string, name: string, errorMessage: string) => {
+      logger.log("signup_failure", {
+        email: email,
+        name: name,
+        error_message: errorMessage,
+        ...getPageInfo(),
+      });
+    },
+    [getPageInfo]
+  );
+
+  const trackLoginLinkClick = useCallback(() => {
+    logger.log("login_link_click", {
+      ...getPageInfo(),
+    });
+  }, [getPageInfo]);
+
   // === 페이지 뷰 이벤트 ===
   const trackPageView = useCallback((pageName?: string) => {
     logger.log("page_view", {
@@ -187,6 +285,23 @@ export const useAnalytics = () => {
     // 프로모션/이벤트 관련
     trackPromotionView,
     trackEventView,
+
+    // 프로필 페이지 관련
+    trackProfileEditClick,
+    trackOrderHistoryClick,
+    trackLogout,
+
+    // 로그인 페이지 관련
+    trackLoginAttempt,
+    trackLoginSuccess,
+    trackLoginFailure,
+    trackSignupLinkClick,
+
+    // 회원가입 페이지 관련
+    trackSignupAttempt,
+    trackSignupSuccess,
+    trackSignupFailure,
+    trackLoginLinkClick,
 
     // 페이지 관련
     trackPageView,

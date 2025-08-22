@@ -190,7 +190,8 @@ class FrontendLogger {
       log.event_name === "security" ||
       log.event_name === "payment_failure" ||
       log.event_name === "authentication_fail" ||
-      log.event_name === "performance_issue"
+      log.event_name === "performance_issue" ||
+      log.event_name === "logout"
     );
   }
 
