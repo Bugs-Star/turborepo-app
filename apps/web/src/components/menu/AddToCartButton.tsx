@@ -39,8 +39,8 @@ export default function AddToCartButton({
     // 로거 콜백 호출 (있는 경우)
     onCartAdd?.(product, quantity);
 
-    // 기존 장바구니 추가 로직
-    addToCart(product._id, quantity);
+    // 기존 장바구니 추가 로직 (상품 정보 포함)
+    addToCart(product._id, quantity, product);
   };
 
   // 재고가 없는 경우 Sold Out 버튼 표시

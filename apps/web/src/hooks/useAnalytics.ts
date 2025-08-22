@@ -12,8 +12,19 @@ import { useCallback } from "react";
 import { logger } from "@/lib/logger";
 import { Product } from "@/types";
 import { Promotion, Event } from "@/lib/services";
+import { CartItemUI } from "@/types/cart";
 
 export const useAnalytics = () => {
+  // === 유틸리티 함수 ===
+  const getPageInfo = useCallback(
+    () => ({
+      page: typeof window !== "undefined" ? window.location.pathname : "",
+      page_title: typeof document !== "undefined" ? document.title : "",
+      referrer: typeof document !== "undefined" ? document.referrer : "",
+    }),
+    []
+  );
+
   // === 상품 관련 이벤트 ===
   const createProductLogData = useCallback(
     (product: Product) => ({
@@ -21,9 +32,9 @@ export const useAnalytics = () => {
       product_name: product.productName,
       product_price: product.price,
       category: product.category,
-      page: typeof window !== "undefined" ? window.location.pathname : "",
+      ...getPageInfo(),
     }),
-    []
+    [getPageInfo]
   );
 
   const trackRecommendedProductClick = useCallback(
@@ -49,10 +60,10 @@ export const useAnalytics = () => {
       logger.log("filter_change", {
         filter_category: category,
         previous_category: previousCategory,
-        page: typeof window !== "undefined" ? window.location.pathname : "",
+        ...getPageInfo(),
       });
     },
-    []
+    [getPageInfo]
   );
 
   const trackProductView = useCallback(
@@ -70,7 +81,6 @@ export const useAnalytics = () => {
     (product: Product) => {
       logger.log("product_view", {
         ...createProductLogData(product),
-        page: typeof window !== "undefined" ? window.location.pathname : "",
       });
     },
     [createProductLogData]
@@ -82,28 +92,70 @@ export const useAnalytics = () => {
         ...createProductLogData(product),
         quantity: quantity,
         cart_total: product.price * quantity,
-        page: typeof window !== "undefined" ? window.location.pathname : "",
       });
     },
     [createProductLogData]
   );
 
-  // === 프로모션/이벤트 관련 이벤트 ===
-  const trackPromotionView = useCallback((promotion: Promotion) => {
-    logger.log("promotion_view", {
-      promotion_id: promotion._id,
-      promotion_name: promotion.title,
-      page: typeof window !== "undefined" ? window.location.pathname : "",
-    });
-  }, []);
+  // === 장바구니 페이지 전용 이벤트 ===
+  const trackCartView = useCallback(
+    (itemCount: number, totalAmount: number) => {
+      logger.log("cart_view", {
+        ...getPageInfo(),
+        cart_item_count: itemCount,
+        cart_total: totalAmount,
+      });
+    },
+    [getPageInfo]
+  );
 
-  const trackEventView = useCallback((event: Event) => {
-    logger.log("event_view", {
-      event_id: event._id,
-      event_name: event.title,
-      page: typeof window !== "undefined" ? window.location.pathname : "",
-    });
-  }, []);
+  const trackCartRemove = useCallback(
+    (item: CartItemUI) => {
+      logger.log("cart_remove", {
+        product_id: item.id,
+        product_name: item.name,
+        product_price: item.price,
+        quantity: item.quantity,
+        ...getPageInfo(),
+      });
+    },
+    [getPageInfo]
+  );
+
+  const trackOrderInitiate = useCallback(
+    (totalAmount: number, itemCount: number, paymentMethod?: string) => {
+      logger.log("order_initiate", {
+        order_total: totalAmount,
+        cart_item_count: itemCount,
+        payment_method: paymentMethod,
+        ...getPageInfo(),
+      });
+    },
+    [getPageInfo]
+  );
+
+  // === 프로모션/이벤트 관련 이벤트 ===
+  const trackPromotionView = useCallback(
+    (promotion: Promotion) => {
+      logger.log("promotion_view", {
+        promotion_id: promotion._id,
+        promotion_name: promotion.title,
+        ...getPageInfo(),
+      });
+    },
+    [getPageInfo]
+  );
+
+  const trackEventView = useCallback(
+    (event: Event) => {
+      logger.log("event_view", {
+        event_id: event._id,
+        event_name: event.title,
+        ...getPageInfo(),
+      });
+    },
+    [getPageInfo]
+  );
 
   // === 페이지 뷰 이벤트 ===
   const trackPageView = useCallback((pageName?: string) => {
@@ -125,6 +177,9 @@ export const useAnalytics = () => {
 
     // 장바구니 관련
     trackCartAdd,
+    trackCartView,
+    trackCartRemove,
+    trackOrderInitiate,
 
     // 필터 관련
     trackFilterChange,

@@ -4,6 +4,7 @@ import { useToast, useDelayedLoading } from "@/hooks";
 import { useQueryClient } from "@tanstack/react-query";
 import { CartResponse } from "@/types/cart";
 import { CartUtils, CacheUtils } from "@/utils";
+import { Product } from "@/types";
 
 interface UseCartOptions {
   onSuccess?: () => void;
@@ -24,18 +25,55 @@ export const useCart = (options: UseCartOptions = {}) => {
     return CacheUtils.updateBothCaches(queryClient, updater);
   };
 
-  const addToCart = async (productId: string, quantity: number) => {
+  const addToCart = async (
+    productId: string,
+    quantity: number,
+    productInfo?: any
+  ) => {
     if (isLoading) return;
+
+    // 현재 캐시 상태 백업
+    const previousState = CacheUtils.backupCacheState(queryClient);
+
+    // 낙관적 업데이트: 모든 캐시를 동시에 업데이트
+    updateBothCaches((oldData) => {
+      if (!oldData) return oldData;
+      // 새로운 아이템을 추가하는 로직 (CartUtils.addCartItem 사용)
+      const newItem = {
+        _id: `temp_${Date.now()}`, // 임시 ID
+        productId: productId,
+        quantity: quantity,
+        subtotal: productInfo ? productInfo.price * quantity : 0, // 실제 가격 사용
+        product: productInfo || {
+          _id: productId,
+          productName: "로딩 중...",
+          price: 0,
+          category: "",
+          description: "",
+          image: "",
+          isAvailable: true,
+        },
+        isAvailable: true,
+        stockStatus: "available", // stockStatus 필드 추가
+      };
+      return CartUtils.updateCartResponse(oldData, [...oldData.cart, newItem]);
+    });
 
     const cleanup = startDelayedLoading();
 
     try {
       await cartService.addToCart(productId, quantity);
       showToast("장바구니에 추가되었습니다.", "success");
-      // 장바구니 추가는 전체 목록이 변경되므로 모든 캐시 무효화
+      // 성공 시 캐시 무효화하여 최신 데이터 가져오기
       CacheUtils.invalidateAllCartCaches(queryClient);
       options.onSuccess?.();
     } catch (err) {
+      // 에러 발생 시 모든 캐시 롤백
+      CacheUtils.rollbackAllCaches(
+        queryClient,
+        previousState.cart,
+        previousState.cartCount
+      );
       const errorMessage = "장바구니 추가에 실패했습니다.";
       showToast(errorMessage, "error");
       options.onError?.(errorMessage);

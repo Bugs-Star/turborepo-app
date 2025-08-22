@@ -9,6 +9,7 @@ export { useCartFetch } from "./useCartFetch";
 export { useCartCountFetch } from "./useCartCountFetch";
 export { useCart } from "./useCart";
 export { useCartActions } from "./useCartActions";
+export { useCartAnalyticsActions } from "./useCartAnalyticsActions";
 export { useOrderHistoryFetch } from "./useOrderHistoryFetch";
 export { usePayment } from "./usePayment";
 export {
