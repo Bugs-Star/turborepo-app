@@ -6,13 +6,22 @@ import { useAuthStore } from "@/stores/authStore";
 
 interface LogoutButtonProps {
   onLogout?: () => void;
+  onLogoutStart?: () => void;
 }
 
-export default function LogoutButton({ onLogout }: LogoutButtonProps) {
+export default function LogoutButton({
+  onLogout,
+  onLogoutStart,
+}: LogoutButtonProps) {
   const { logout, isLoading } = useAuthStore();
 
   const handleLogout = async () => {
     try {
+      // 로그아웃 시작 시 콜백 호출 (로그 생성 + 강제 전송)
+      if (onLogoutStart) {
+        await onLogoutStart(); // async로 변경
+      }
+
       // 실제 로그아웃 처리
       await logout();
 
@@ -20,7 +29,7 @@ export default function LogoutButton({ onLogout }: LogoutButtonProps) {
         onLogout();
       }
 
-      // 로그인 페이지로 리다이렉트
+      // 로그 전송 완료 후 로그인 페이지로 리다이렉트
       window.location.href = "/login";
     } catch (error) {
       console.error("로그아웃 중 오류 발생:", error);

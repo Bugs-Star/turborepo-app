@@ -157,6 +157,25 @@ export const useAnalytics = () => {
     [getPageInfo]
   );
 
+  // === 프로필 페이지 전용 이벤트 ===
+  const trackProfileEditClick = useCallback(() => {
+    logger.log("profile_edit_click", {
+      ...getPageInfo(),
+    });
+  }, [getPageInfo]);
+
+  const trackOrderHistoryClick = useCallback(() => {
+    logger.log("order_history_click", {
+      ...getPageInfo(),
+    });
+  }, [getPageInfo]);
+
+  const trackLogout = useCallback(() => {
+    logger.log("logout", {
+      ...getPageInfo(),
+    });
+  }, [getPageInfo]);
+
   // === 페이지 뷰 이벤트 ===
   const trackPageView = useCallback((pageName?: string) => {
     logger.log("page_view", {
@@ -187,6 +206,11 @@ export const useAnalytics = () => {
     // 프로모션/이벤트 관련
     trackPromotionView,
     trackEventView,
+
+    // 프로필 페이지 관련
+    trackProfileEditClick,
+    trackOrderHistoryClick,
+    trackLogout,
 
     // 페이지 관련
     trackPageView,

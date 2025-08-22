@@ -8,6 +8,7 @@ interface ProfileMenuItemProps {
   title: string;
   href: string;
   variant?: "default" | "bordered";
+  onClick?: () => void;
 }
 
 export default function ProfileMenuItem({
@@ -15,6 +16,7 @@ export default function ProfileMenuItem({
   title,
   href,
   variant = "default",
+  onClick,
 }: ProfileMenuItemProps) {
   const baseClasses =
     "flex items-center justify-between p-4 bg-white rounded-lg transition-colors";
@@ -23,8 +25,18 @@ export default function ProfileMenuItem({
     bordered: "border border-green-200 hover:bg-green-50",
   };
 
+  const handleClick = () => {
+    if (onClick) {
+      onClick();
+    }
+  };
+
   return (
-    <Link href={href} className={`${baseClasses} ${variantClasses[variant]}`}>
+    <Link
+      href={href}
+      className={`${baseClasses} ${variantClasses[variant]}`}
+      onClick={handleClick}
+    >
       <div className="flex items-center space-x-3">
         <Icon className="w-5 h-5 text-gray-600" />
         <span className="text-gray-900 font-medium">{title}</span>

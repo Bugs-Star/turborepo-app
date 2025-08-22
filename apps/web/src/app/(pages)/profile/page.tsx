@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { User, Clock } from "lucide-react";
 import {
   ProfileCard,
@@ -9,9 +10,26 @@ import {
 import { BottomNavigation } from "@/components/layout";
 import { useAuthStore } from "@/stores/authStore";
 import { AsyncWrapper, PageHeader, AuthGuard } from "@/components/ui";
+import { useAnalytics, useProfileActions } from "@/hooks";
 
 export default function ProfilePage() {
   const { user, isLoading } = useAuthStore();
+
+  // 로거 훅들
+  const { trackPageView } = useAnalytics();
+  const { handleProfileEditClick, handleOrderHistoryClick, handleLogout } =
+    useProfileActions();
+
+  // 중복 로깅 방지를 위한 ref
+  const hasLoggedPageView = useRef(false);
+
+  // 페이지 로드 시 페이지 뷰 로그 (브라우저에서만 실행, 한 번만)
+  useEffect(() => {
+    if (typeof window !== "undefined" && !hasLoggedPageView.current) {
+      trackPageView("/profile");
+      hasLoggedPageView.current = true;
+    }
+  }, [trackPageView]);
 
   return (
     <AuthGuard backgroundColor="bg-gray-50" title="내 프로필" showHeader={true}>
@@ -46,18 +64,20 @@ export default function ProfilePage() {
                 title="프로필 편집"
                 href="/profile/edit"
                 variant="default"
+                onClick={handleProfileEditClick}
               />
               <ProfileMenuItem
                 icon={Clock}
                 title="결제 내역"
                 href="/order-history"
                 variant="default"
+                onClick={handleOrderHistoryClick}
               />
             </div>
 
             {/* 로그아웃 버튼 */}
             <div className="px-4">
-              <LogoutButton />
+              <LogoutButton onLogoutStart={handleLogout} />
             </div>
           </div>
 
