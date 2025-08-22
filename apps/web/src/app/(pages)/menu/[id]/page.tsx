@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams } from "next/navigation";
 import { BottomNavigation } from "@/components/layout";
 import AsyncWrapper from "@/components/ui/AsyncWrapper";
@@ -9,6 +9,7 @@ import ProductHeader from "@/components/menu/ProductHeader";
 import ProductImage from "@/components/menu/ProductImage";
 import ProductDetails from "@/components/menu/ProductDetails";
 import { useProductDetailsFetch } from "@/hooks/useProductDetailsFetch";
+import { useAnalytics, useProductDetailActions } from "@/hooks";
 
 export default function MenuItemDetailPage() {
   const params = useParams();
@@ -18,9 +19,33 @@ export default function MenuItemDetailPage() {
     useProductDetailsFetch(productId);
   const [quantity, setQuantity] = useState(1);
 
+  // 로거 훅들
+  const { trackPageView } = useAnalytics();
+  const { handleProductView, handleCartAdd } = useProductDetailActions();
+
+  // 중복 로깅 방지를 위한 ref
+  const hasLoggedPageView = useRef(false);
+  const hasLoggedProductView = useRef(false);
+
   const handleQuantityChange = (newQuantity: number) => {
     setQuantity(newQuantity);
   };
+
+  // 페이지 로드 시 페이지 뷰 로그 (브라우저에서만 실행, 한 번만)
+  useEffect(() => {
+    if (typeof window !== "undefined" && !hasLoggedPageView.current) {
+      trackPageView(`/menu/${productId}`);
+      hasLoggedPageView.current = true;
+    }
+  }, [trackPageView, productId]);
+
+  // 상품 데이터가 로드되면 상품 뷰 로그 (한 번만)
+  useEffect(() => {
+    if (product && !hasLoggedProductView.current) {
+      handleProductView(product);
+      hasLoggedProductView.current = true;
+    }
+  }, [product, handleProductView]);
 
   return (
     <AsyncWrapper
@@ -48,7 +73,11 @@ export default function MenuItemDetailPage() {
             />
 
             {/* Add to Cart Button */}
-            <AddToCartButton product={product} quantity={quantity} />
+            <AddToCartButton
+              product={product}
+              quantity={quantity}
+              onCartAdd={handleCartAdd}
+            />
           </div>
 
           {/* Bottom Navigation */}

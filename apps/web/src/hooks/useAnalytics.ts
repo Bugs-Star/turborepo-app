@@ -8,43 +8,105 @@
  * trackPageView("/home");
  */
 
+import { useCallback } from "react";
 import { logger } from "@/lib/logger";
 import { Product } from "@/types";
 import { Promotion, Event } from "@/lib/services";
 
 export const useAnalytics = () => {
   // === 상품 관련 이벤트 ===
-  const createProductLogData = (product: Product) => ({
-    product_id: product._id,
-    product_name: product.productName,
-    product_price: product.price,
-    category: product.category,
-    page: typeof window !== "undefined" ? window.location.pathname : "",
-  });
+  const createProductLogData = useCallback(
+    (product: Product) => ({
+      product_id: product._id,
+      product_name: product.productName,
+      product_price: product.price,
+      category: product.category,
+      page: typeof window !== "undefined" ? window.location.pathname : "",
+    }),
+    []
+  );
 
-  const trackRecommendedProductClick = (product: Product) => {
-    logger.log("recommended_product_click", createProductLogData(product));
-  };
+  const trackRecommendedProductClick = useCallback(
+    (product: Product) => {
+      logger.log("recommended_product_click", createProductLogData(product));
+    },
+    [createProductLogData]
+  );
+
+  // === 메뉴 페이지 전용 이벤트 ===
+  const trackProductClick = useCallback(
+    (product: Product, activeCategory: string) => {
+      logger.log("product_click", {
+        ...createProductLogData(product),
+        filter_category: activeCategory,
+      });
+    },
+    [createProductLogData]
+  );
+
+  const trackFilterChange = useCallback(
+    (category: string, previousCategory?: string) => {
+      logger.log("filter_change", {
+        filter_category: category,
+        previous_category: previousCategory,
+        page: typeof window !== "undefined" ? window.location.pathname : "",
+      });
+    },
+    []
+  );
+
+  const trackProductView = useCallback(
+    (product: Product, activeCategory: string) => {
+      logger.log("product_view", {
+        ...createProductLogData(product),
+        filter_category: activeCategory,
+      });
+    },
+    [createProductLogData]
+  );
+
+  // === 상품 상세 페이지 전용 이벤트 ===
+  const trackProductDetailView = useCallback(
+    (product: Product) => {
+      logger.log("product_view", {
+        ...createProductLogData(product),
+        page: typeof window !== "undefined" ? window.location.pathname : "",
+      });
+    },
+    [createProductLogData]
+  );
+
+  const trackCartAdd = useCallback(
+    (product: Product, quantity: number) => {
+      logger.log("cart_add", {
+        ...createProductLogData(product),
+        quantity: quantity,
+        cart_total: product.price * quantity,
+        page: typeof window !== "undefined" ? window.location.pathname : "",
+      });
+    },
+    [createProductLogData]
+  );
 
   // === 프로모션/이벤트 관련 이벤트 ===
-  const trackPromotionView = (promotion: Promotion) => {
+  const trackPromotionView = useCallback((promotion: Promotion) => {
     logger.log("promotion_view", {
       promotion_id: promotion._id,
       promotion_name: promotion.title,
       page: typeof window !== "undefined" ? window.location.pathname : "",
     });
-  };
+  }, []);
 
-  const trackEventView = (event: Event) => {
+  const trackEventView = useCallback((event: Event) => {
     logger.log("event_view", {
       event_id: event._id,
       event_name: event.title,
       page: typeof window !== "undefined" ? window.location.pathname : "",
     });
-  };
+  }, []);
 
   // === 페이지 뷰 이벤트 ===
-  const trackPageView = (pageName?: string) => {
+  const trackPageView = useCallback((pageName?: string) => {
     logger.log("page_view", {
       page:
         pageName ||
@@ -52,11 +114,20 @@ export const useAnalytics = () => {
       page_title: typeof document !== "undefined" ? document.title : "",
       referrer: typeof document !== "undefined" ? document.referrer : "",
     });
-  };
+  }, []);
 
   return {
     // 상품 관련
     trackRecommendedProductClick,
+    trackProductClick,
+    trackProductView,
+    trackProductDetailView,
+
+    // 장바구니 관련
+    trackCartAdd,
+
+    // 필터 관련
+    trackFilterChange,
 
     // 프로모션/이벤트 관련
     trackPromotionView,

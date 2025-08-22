@@ -9,9 +9,14 @@ const formatPrice = ProductUtils.formatPrice;
 interface ProductCardProps {
   product: Product;
   activeCategory: string;
+  onProductClick?: (product: Product, activeCategory: string) => void;
 }
 
-function ProductCard({ product, activeCategory }: ProductCardProps) {
+function ProductCard({
+  product,
+  activeCategory,
+  onProductClick,
+}: ProductCardProps) {
   const router = useRouter();
   const productStatus = ProductUtils.getProductStatus(product);
   const isOutOfStock = productStatus.isOutOfStock;
@@ -19,6 +24,10 @@ function ProductCard({ product, activeCategory }: ProductCardProps) {
   const handleImageError = createImageErrorHandler();
 
   const handleCardClick = () => {
+    // 로거 콜백 호출 (있는 경우)
+    onProductClick?.(product, activeCategory);
+
+    // 기존 네비게이션 로직
     router.push(`/menu/${product._id}?category=${activeCategory}`);
   };
 
@@ -61,11 +70,13 @@ function ProductCard({ product, activeCategory }: ProductCardProps) {
 interface ProductGridProps {
   products: Product[];
   activeCategory: string;
+  onProductClick?: (product: Product, activeCategory: string) => void;
 }
 
 export default function ProductGrid({
   products,
   activeCategory,
+  onProductClick,
 }: ProductGridProps) {
   if (products.length === 0) {
     return (
@@ -85,6 +96,7 @@ export default function ProductGrid({
           key={product._id}
           product={product}
           activeCategory={activeCategory}
+          onProductClick={onProductClick}
         />
       ))}
     </div>

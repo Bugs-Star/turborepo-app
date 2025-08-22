@@ -5,6 +5,7 @@ interface CategoryFilterProps {
   products: Product[];
   initialCategory?: string;
   onCategoryChange?: (category: string) => void;
+  onFilterChange?: (category: string, previousCategory?: string) => void;
   children: (
     filteredProducts: Product[],
     activeCategory: string
@@ -15,6 +16,7 @@ export default function CategoryFilter({
   products,
   initialCategory = "beverage",
   onCategoryChange,
+  onFilterChange,
   children,
 }: CategoryFilterProps) {
   const [activeCategory, setActiveCategory] = useState(initialCategory);
@@ -39,7 +41,13 @@ export default function CategoryFilter({
   }, [products]);
 
   const handleCategoryChange = (category: string) => {
+    const previousCategory = activeCategory;
     setActiveCategory(category);
+
+    // 로거 콜백 호출 (있는 경우)
+    onFilterChange?.(category, previousCategory);
+
+    // 기존 카테고리 변경 콜백 호출
     onCategoryChange?.(category);
   };
 

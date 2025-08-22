@@ -14,6 +14,7 @@ interface AddToCartButtonProps {
   disabled?: boolean;
   onSuccess?: () => void;
   onError?: (error: string) => void;
+  onCartAdd?: (product: Product, quantity: number) => void;
 }
 
 export default function AddToCartButton({
@@ -22,6 +23,7 @@ export default function AddToCartButton({
   disabled = false,
   onSuccess,
   onError,
+  onCartAdd,
 }: AddToCartButtonProps) {
   const { addToCart, isLoading } = useCart({
     onSuccess,
@@ -33,6 +35,11 @@ export default function AddToCartButton({
 
   const handleAddToCart = () => {
     if (isOutOfStock) return;
+
+    // 로거 콜백 호출 (있는 경우)
+    onCartAdd?.(product, quantity);
+
+    // 기존 장바구니 추가 로직
     addToCart(product._id, quantity);
   };
 
