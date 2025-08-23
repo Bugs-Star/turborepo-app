@@ -2,7 +2,7 @@
 import BaseForm from "@/components/BaseForm";
 import { useEditMenu } from "@/hooks/useEditMenu";
 import { X, Coffee, Utensils, Gift } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type CategoryType = "drink" | "food" | "product";
 

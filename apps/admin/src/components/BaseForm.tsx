@@ -1,6 +1,6 @@
 "use client";
 import { UploadCloud } from "lucide-react";
-import { ReactNode, ChangeEvent } from "react";
+import { ReactNode, ChangeEvent, useEffect, useState } from "react";
 
 interface BaseFormProps {
   title: string; // Form 제목
@@ -23,6 +23,20 @@ const BaseForm = ({
   onImageChange,
   onSubmit,
 }: BaseFormProps) => {
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+  // 미리보기 로직
+  useEffect(() => {
+    if (!imageFile) {
+      setPreviewUrl(null);
+      return;
+    }
+    const url = URL.createObjectURL(imageFile);
+    setPreviewUrl(url);
+
+    return () => URL.revokeObjectURL(url);
+  }, [imageFile]);
+
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files?.[0]) onImageChange(e.target.files[0]);
   };
@@ -36,11 +50,21 @@ const BaseForm = ({
           <label className="block text-sm font-medium text-gray-700 mb-2">
             {uploadLabel}
           </label>
-          <label className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg h-64 cursor-pointer hover:bg-gray-50">
-            <UploadCloud className="text-gray-400 w-8 h-8 mb-2" />
-            <span className="text-gray-500">
-              {imageFile ? imageFile.name : "이미지 업로드"}
-            </span>
+          <label className="flex flex-col relative items-center justify-center border-2 border-dashed border-gray-300 rounded-lg h-64 cursor-pointer hover:bg-gray-50">
+            {previewUrl ? (
+              <img
+                src={previewUrl}
+                alt="미리보기"
+                className="object-contain w-full h-full"
+              />
+            ) : (
+              <>
+                <UploadCloud className="text-gray-400 w-8 h-8 mb-2" />
+                <span className="text-gray-500">
+                  {imageFile ? imageFile.name : "이미지 업로드"}
+                </span>
+              </>
+            )}
             <input
               type="file"
               accept="image/*"
