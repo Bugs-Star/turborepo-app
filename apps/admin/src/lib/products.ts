@@ -111,10 +111,8 @@ export const ProductsService = {
       formData.append("recommendedOrder", payload.recommendedOrder.toString());
     }
 
-    const response = await axiosInstance.put(
-      `/admin/products/${productId}`,
-      formData
-    );
+    const response = await axiosInstance.post("/admin/products", formData);
+
     return response.data;
   },
 

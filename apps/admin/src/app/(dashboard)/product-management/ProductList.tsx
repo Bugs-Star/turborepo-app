@@ -50,6 +50,7 @@ const ProductList = () => {
     setSelectedProduct(null);
   };
 
+  console.log(selectedProduct, "프로덕트");
   return (
     <>
       <SearchableTable
@@ -127,7 +128,25 @@ const ProductList = () => {
         data={products}
       />
       {selectedProduct && (
-        <EditMenu productId={selectedProduct.id} onClose={closeEditMenuModal} />
+        <EditMenu
+          productId={selectedProduct.id}
+          initialData={{
+            productCode: selectedProduct.code,
+            productName: selectedProduct.name,
+            category:
+              selectedProduct.category === "beverage"
+                ? "drink"
+                : selectedProduct.category === "food"
+                  ? "food"
+                  : "product",
+            price: selectedProduct.price,
+            currentStock: Number(selectedProduct.stock.split("/")[0]),
+            optimalStock: Number(
+              selectedProduct.stock.split("/")[1].replace(/[^0-9]/g, "")
+            ),
+          }}
+          onClose={closeEditMenuModal}
+        />
       )}
     </>
   );
