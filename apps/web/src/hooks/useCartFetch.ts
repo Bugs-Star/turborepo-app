@@ -3,7 +3,6 @@ import { cartService } from "@/lib/services";
 import { useAuthStore } from "@/stores/authStore";
 import { useState, useEffect } from "react";
 import { CartResponse, CartItemUI, transformCartForUI } from "@/types/cart";
-import { CartUtils } from "@/utils/cartUtils";
 
 export const useCartFetch = () => {
   const [isClient, setIsClient] = useState(false);
@@ -39,7 +38,7 @@ export const useCartFetch = () => {
     ? transformCartForUI(query.data).cart
     : [];
 
-  // CartUtils를 사용하여 일관된 요약 정보 계산
+  // 요약 정보 제공
   const summary = query.data?.summary;
 
   return {

@@ -1,9 +1,10 @@
 import { Product } from "@/lib";
 import { useRouter } from "next/navigation";
-import { createImageErrorHandler, ProductUtils } from "@/utils";
-
-// ProductUtils의 formatPrice 사용으로 일관성 확보
-const formatPrice = ProductUtils.formatPrice;
+import {
+  createImageErrorHandler,
+  formatPrice,
+  getProductStatus,
+} from "@/utils";
 
 // 개별 상품 카드 컴포넌트
 interface ProductCardProps {
@@ -18,7 +19,7 @@ function ProductCard({
   onProductClick,
 }: ProductCardProps) {
   const router = useRouter();
-  const productStatus = ProductUtils.getProductStatus(product);
+  const productStatus = getProductStatus(product);
   const isOutOfStock = productStatus.isOutOfStock;
 
   const handleImageError = createImageErrorHandler();
