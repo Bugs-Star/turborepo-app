@@ -3,22 +3,22 @@ import { Product } from "@/types";
 import { useAnalytics } from "./useAnalytics";
 
 export const useProductDetailActions = () => {
-  const { trackProductDetailView, trackCartAdd } = useAnalytics();
+  const { trackProductView, trackAddToCart } = useAnalytics();
 
   const handleProductView = useCallback(
     (product: Product) => {
       // 상품 상세 페이지 뷰 로깅
-      trackProductDetailView(product);
+      trackProductView(product);
     },
-    [trackProductDetailView]
+    [trackProductView]
   );
 
   const handleCartAdd = useCallback(
     (product: Product, quantity: number) => {
       // 장바구니 추가 로깅
-      trackCartAdd(product, quantity);
+      trackAddToCart(product, quantity);
     },
-    [trackCartAdd]
+    [trackAddToCart]
   );
 
   return {

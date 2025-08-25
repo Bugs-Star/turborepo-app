@@ -25,3 +25,5 @@ export * from "./event";
 
 // Payment Components
 export * from "./payment";
+
+export { default as ErrorBoundary } from "./ErrorBoundary";

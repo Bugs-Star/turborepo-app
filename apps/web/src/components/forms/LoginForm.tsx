@@ -6,6 +6,7 @@ import { useLoginForm, useToast } from "@/hooks";
 import { useAuthStore } from "@/stores/authStore";
 import { useLoginActions } from "@/hooks/useLoginActions";
 import { logger } from "@/lib/logger";
+import { handleError, getUserFriendlyMessage } from "@/lib/errorHandler";
 
 export default function LoginForm() {
   const {
@@ -49,12 +50,12 @@ export default function LoginForm() {
           window.location.href = "/home";
         }, 1500);
       } catch (error: any) {
-        const errorMessage =
-          error.response?.data?.message || "로그인에 실패했습니다.";
+        // 통합 에러 핸들러로 에러 처리
+        handleError(error, "LOGIN_FORM");
 
-        // 로그인 실패 로그
+        // 사용자에게 친화적인 메시지 표시
+        const errorMessage = getUserFriendlyMessage(error);
         handleLoginFailure(formData.email, errorMessage);
-
         showError(errorMessage);
       } finally {
         setSubmitting(false);
