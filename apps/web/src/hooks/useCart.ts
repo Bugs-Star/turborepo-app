@@ -3,8 +3,15 @@ import { cartService } from "@/lib/services";
 import { useToast, useDelayedLoading } from "@/hooks";
 import { useQueryClient } from "@tanstack/react-query";
 import { CartResponse } from "@/types/cart";
-import { CartUtils, CacheUtils } from "@/utils";
-import { Product } from "@/types";
+import {
+  updateCartResponse,
+  removeItemFromCart,
+  updateItemQuantity,
+  updateBothCaches as updateBothCachesUtil,
+  backupCacheState,
+  invalidateAllCartCaches,
+  rollbackAllCaches,
+} from "@/utils";
 
 interface UseCartOptions {
   onSuccess?: () => void;
@@ -22,7 +29,7 @@ export const useCart = (options: UseCartOptions = {}) => {
   const updateBothCaches = (
     updater: (oldData: CartResponse | undefined) => CartResponse | undefined
   ) => {
-    return CacheUtils.updateBothCaches(queryClient, updater);
+    return updateBothCachesUtil(queryClient, updater);
   };
 
   const addToCart = async (
@@ -33,12 +40,12 @@ export const useCart = (options: UseCartOptions = {}) => {
     if (isLoading) return;
 
     // 현재 캐시 상태 백업
-    const previousState = CacheUtils.backupCacheState(queryClient);
+    const previousState = backupCacheState(queryClient);
 
     // 낙관적 업데이트: 모든 캐시를 동시에 업데이트
     updateBothCaches((oldData) => {
       if (!oldData) return oldData;
-      // 새로운 아이템을 추가하는 로직 (CartUtils.addCartItem 사용)
+      // 새로운 아이템을 추가하는 로직 (updateCartResponse 사용)
       const newItem = {
         _id: `temp_${Date.now()}`, // 임시 ID
         productId: productId,
@@ -56,7 +63,7 @@ export const useCart = (options: UseCartOptions = {}) => {
         isAvailable: true,
         stockStatus: "available", // stockStatus 필드 추가
       };
-      return CartUtils.updateCartResponse(oldData, [...oldData.cart, newItem]);
+      return updateCartResponse(oldData, [...oldData.cart, newItem]);
     });
 
     const cleanup = startDelayedLoading();
@@ -65,11 +72,11 @@ export const useCart = (options: UseCartOptions = {}) => {
       await cartService.addToCart(productId, quantity);
       showToast("장바구니에 추가되었습니다.", "success");
       // 성공 시 캐시 무효화하여 최신 데이터 가져오기
-      CacheUtils.invalidateAllCartCaches(queryClient);
+      invalidateAllCartCaches(queryClient);
       options.onSuccess?.();
     } catch (err) {
       // 에러 발생 시 모든 캐시 롤백
-      CacheUtils.rollbackAllCaches(
+      rollbackAllCaches(
         queryClient,
         previousState.cart,
         previousState.cartCount
@@ -88,12 +95,12 @@ export const useCart = (options: UseCartOptions = {}) => {
     if (isLoading) return;
 
     // 현재 캐시 상태 백업
-    const previousState = CacheUtils.backupCacheState(queryClient);
+    const previousState = backupCacheState(queryClient);
 
     // 낙관적 업데이트: 모든 캐시를 동시에 업데이트
     updateBothCaches((oldData) => {
       if (!oldData) return oldData;
-      return CartUtils.removeItemFromCart(oldData, itemId);
+      return removeItemFromCart(oldData, itemId);
     });
 
     const cleanup = startDelayedLoading();
@@ -104,7 +111,7 @@ export const useCart = (options: UseCartOptions = {}) => {
       options.onSuccess?.();
     } catch (err) {
       // 에러 발생 시 모든 캐시 롤백
-      CacheUtils.rollbackAllCaches(
+      rollbackAllCaches(
         queryClient,
         previousState.cart,
         previousState.cartCount
@@ -123,12 +130,12 @@ export const useCart = (options: UseCartOptions = {}) => {
     if (isLoading) return;
 
     // 현재 캐시 상태 백업
-    const previousState = CacheUtils.backupCacheState(queryClient);
+    const previousState = backupCacheState(queryClient);
 
     // 낙관적 업데이트: 모든 캐시를 동시에 업데이트
     updateBothCaches((oldData) => {
       if (!oldData) return oldData;
-      return CartUtils.updateItemQuantity(oldData, itemId, quantity);
+      return updateItemQuantity(oldData, itemId, quantity);
     });
 
     const cleanup = startDelayedLoading();
@@ -139,7 +146,7 @@ export const useCart = (options: UseCartOptions = {}) => {
       options.onSuccess?.();
     } catch (err) {
       // 에러 발생 시 모든 캐시 롤백
-      CacheUtils.rollbackAllCaches(
+      rollbackAllCaches(
         queryClient,
         previousState.cart,
         previousState.cartCount
