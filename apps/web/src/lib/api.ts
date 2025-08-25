@@ -3,6 +3,7 @@ import {
   normalizeProductImage,
   normalizeProductsImage,
 } from "@/utils/imageUtils";
+import { handleError, getUserFriendlyMessage } from "./errorHandler";
 
 // API 기본 설정
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3002";
@@ -131,30 +132,6 @@ apiClient.interceptors.request.use(
 // 응답 인터셉터
 apiClient.interceptors.response.use(
   (response: AxiosResponse) => {
-    // 상품 관련 응답에서 이미지 URL 자동 정규화
-    if (response.data?.products) {
-      response.data.products = normalizeProductsImage(response.data.products);
-    }
-    if (response.data?.product) {
-      response.data.product = normalizeProductImage(response.data.product);
-    }
-    if (response.data?.cart?.items) {
-      response.data.cart.items = normalizeProductsImage(
-        response.data.cart.items
-      );
-    }
-    if (response.data?.orders) {
-      response.data.orders = response.data.orders.map((order: any) => ({
-        ...order,
-        items: normalizeProductsImage(order.items),
-      }));
-    }
-    if (response.data?.order?.items) {
-      response.data.order.items = normalizeProductsImage(
-        response.data.order.items
-      );
-    }
-
     return response;
   },
   async (error) => {
@@ -196,36 +173,9 @@ apiClient.interceptors.response.use(
       return handleTokenRefresh(originalRequest);
     }
 
-    // 에러 처리
-    if (error.response) {
-      const { status, data } = error.response;
-
-      switch (status) {
-        case 401:
-          // 인증 에러 - 이미 위에서 처리됨
-          break;
-        case 403:
-          // 권한 에러
-          console.error("권한이 없습니다.");
-          break;
-        case 404:
-          // 리소스 없음
-          console.error("요청한 리소스를 찾을 수 없습니다.");
-          break;
-        case 500:
-          // 서버 에러
-          console.error("서버 오류가 발생했습니다.");
-          break;
-        default:
-          console.error("알 수 없는 오류가 발생했습니다.");
-      }
-    } else if (error.request) {
-      // 네트워크 에러
-      console.error("네트워크 연결을 확인해주세요.");
-    } else {
-      // 기타 에러
-      console.error("요청 설정 중 오류가 발생했습니다.");
-    }
+    // 통합 에러 핸들러로 에러 처리
+    const context = `API_${error.config?.method?.toUpperCase() || "UNKNOWN"}_${error.config?.url || "unknown"}`;
+    handleError(error, context);
 
     return Promise.reject(error);
   }

@@ -92,13 +92,17 @@ const formatLog = (rawEvent: any): LogData => {
  * 중요 로그 판별 함수
  */
 const isCritical = (log: LogData): boolean => {
-  const criticalEvents = [
-    "login_attempt",
-    "login_success", // 추가: 로그인 성공도 중요 로그
-    "signup_success",
-    "payment_initiated",
-    "order_created",
+  const criticalEvents: string[] = [
+    "login_failure", // 즉시 전송 (보안 중요)
+    "signup_failure", // 즉시 전송 (보안 중요)
+    "critical_error", // 즉시 전송 (중요한 시스템 오류만)
   ];
+
+  // error 이벤트의 경우 payload의 is_critical 값 확인
+  if (log.event_name === "error") {
+    return log.payload?.is_critical === true;
+  }
+
   return criticalEvents.includes(log.event_name);
 };
 

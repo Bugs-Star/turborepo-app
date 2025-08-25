@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { usePaymentStore } from "@/stores/paymentStore";
 import { PaymentMethod, PAYMENT_METHODS } from "@/types/payment";
+import { handleError, getUserFriendlyMessage } from "@/lib/errorHandler";
 
 export type { PaymentMethod };
 export { PAYMENT_METHODS };
@@ -64,25 +65,11 @@ export const usePayment = () => {
         showToast("주문 처리 중 오류가 발생했습니다.", "error");
       }
     } catch (error: any) {
-      console.error("결제 처리 오류:", error);
-      console.error("에러 상세 정보:", {
-        status: error.response?.status,
-        data: error.response?.data,
-        message: error.message,
-        config: error.config,
-      });
+      // 통합 에러 핸들러로 에러 처리
+      handleError(error, "PAYMENT_PROCESS");
 
-      // 백엔드 에러 응답의 전체 내용 출력
-      if (error.response?.data) {
-        console.error(
-          "백엔드 에러 응답:",
-          JSON.stringify(error.response.data, null, 2)
-        );
-      }
-
-      // 백엔드에서 반환하는 에러 메시지 처리
-      const errorMessage =
-        error.response?.data?.message || "결제 처리 중 오류가 발생했습니다.";
+      // 사용자에게 친화적인 메시지 표시
+      const errorMessage = getUserFriendlyMessage(error);
       setError(errorMessage);
       showToast(errorMessage, "error");
     } finally {

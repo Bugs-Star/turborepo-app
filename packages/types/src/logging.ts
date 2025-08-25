@@ -55,6 +55,7 @@ export type EventName =
 
   // 중요 로그 (즉시 처리)
   | "error"
+  | "critical_error"
   | "security"
   | "payment_failure"
   | "authentication_fail"
