@@ -148,7 +148,7 @@ const sendImmediate = async (logs: LogData[]): Promise<void> => {
     if (navigator.sendBeacon) {
       const success = navigator.sendBeacon(
         `${apiUrl}/logs/immediate`,
-        JSON.stringify(logs)
+        JSON.stringify({ logs: logs }) // 배치와 동일한 구조로 통일
       );
       if (success) return;
     }
@@ -159,7 +159,7 @@ const sendImmediate = async (logs: LogData[]): Promise<void> => {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(logs),
+      body: JSON.stringify({ logs: logs }), // 배치와 동일한 구조로 통일
     });
   } catch (error) {
     console.error("❌ 즉시 전송 실패:", error);
@@ -192,7 +192,7 @@ const sendBatch = async (logs: LogData[]): Promise<void> => {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(logs),
+      body: JSON.stringify({ logs: logs }), // 백엔드 구조와 통일
     });
   } catch (error) {
     console.error("❌ 배치 전송 실패:", error);
