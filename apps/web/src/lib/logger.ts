@@ -94,6 +94,7 @@ const formatLog = (rawEvent: any): LogData => {
 const isCritical = (log: LogData): boolean => {
   const criticalEvents = [
     "login_attempt",
+    "login_success", // 추가: 로그인 성공도 중요 로그
     "signup_success",
     "payment_initiated",
     "order_created",
