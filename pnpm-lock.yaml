@@ -203,9 +203,6 @@ importers:
       axios:
         specifier: ^1.11.0
         version: 1.11.0
-      ioredis:
-        specifier: ^5.7.0
-        version: 5.7.0
       node-fetch:
         specifier: ^3.3.2
         version: 3.3.2
