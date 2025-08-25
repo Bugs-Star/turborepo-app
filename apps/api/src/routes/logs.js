@@ -9,6 +9,7 @@ router.post('/batch', (req, res) => {
     const { logs } = req.body;
 
     // 받은 로그만 깔끔하게 출력
+    console.log('[batch 로그]');
     if (logs && logs.length > 0) {
       logs.forEach((log, index) => {
         console.log(`[${index + 1}]`, log);
@@ -36,10 +37,11 @@ router.post('/immediate', (req, res) => {
   try {
     const logs = req.body;
 
-    // 받은 로그만 깔끔하게 출력 (중요 로그는 [URGENT] 표시)
+    // 받은 로그만 깔끔하게 출력
+    console.log('[fetch 로그]');
     if (logs && logs.length > 0) {
       logs.forEach((log, index) => {
-        console.log(`[URGENT ${index + 1}]`, log);
+        console.log(`[${index + 1}]`, log);
       });
     }
 
