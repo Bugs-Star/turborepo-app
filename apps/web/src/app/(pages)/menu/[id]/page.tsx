@@ -20,24 +20,24 @@ export default function MenuItemDetailPage() {
   const [quantity, setQuantity] = useState(1);
 
   // 로거 훅들
-  const { trackPageView } = useAnalytics();
+  const { trackScreenView } = useAnalytics();
   const { handleProductView, handleCartAdd } = useProductDetailActions();
 
   // 중복 로깅 방지를 위한 ref
-  const hasLoggedPageView = useRef(false);
+  const hasLoggedScreenView = useRef(false);
   const hasLoggedProductView = useRef(false);
 
   const handleQuantityChange = (newQuantity: number) => {
     setQuantity(newQuantity);
   };
 
-  // 페이지 로드 시 페이지 뷰 로그 (브라우저에서만 실행, 한 번만)
+  // 페이지 로드 시 화면 조회 로그 (브라우저에서만 실행, 한 번만)
   useEffect(() => {
-    if (typeof window !== "undefined" && !hasLoggedPageView.current) {
-      trackPageView(`/menu/${productId}`);
-      hasLoggedPageView.current = true;
+    if (typeof window !== "undefined" && !hasLoggedScreenView.current) {
+      trackScreenView(`/menu/${productId}`);
+      hasLoggedScreenView.current = true;
     }
-  }, [trackPageView, productId]);
+  }, [trackScreenView, productId]);
 
   // 상품 데이터가 로드되면 상품 뷰 로그 (한 번만)
   useEffect(() => {

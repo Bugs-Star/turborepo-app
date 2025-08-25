@@ -1,32 +1,24 @@
 /**
- * - sendImmediate: 즉시 전송 (중요 로그)
- * - flushAll: 배치 전송 (모든 로그)
+ * 스키마 기반 로거
+ *
+ * 로그를 생성하고 백엔드로 전송
  *
  * 사용법:
  * import { logger } from '@/lib/logger';
  *
- * logger.log('product_click', {
- *   product_id: 'prod_001',
- *   product_name: '아메리카노',
- *   product_price: 4500
+ * logger.log('view_screen', {
+ *   screen_name: '/products',
+ *   previous_screen_name: '/home'
  * });
  */
 
-import { LogData, EventName, DEFAULT_BATCH_CONFIG } from "@repo/types";
-
-// === 타입 정의 ===
-interface LoggerState {
-  memoryQueue: LogData[];
-  batchSize: number;
-  flushInterval: number;
-  autoFlushInterval?: NodeJS.Timeout;
-}
-
-interface Logger {
-  log: (eventName: EventName, payload: any) => void;
-  getQueueSize: () => number;
-  forceFlush: () => void;
-}
+import {
+  NewLogData,
+  NewEventName,
+  ViewScreenPayload,
+  ClickInteractionPayload,
+  InteractionType,
+} from "@repo/types";
 
 // === SSR 안전 유틸리티 함수들 ===
 
@@ -36,10 +28,11 @@ interface Logger {
 const isBrowser = () => typeof window !== "undefined";
 
 /**
- * 안전한 localStorage 접근
+ * 로컬 스토리지에서 값 가져오기 (SSR 안전)
  */
-const getLocalStorage = (key: string, defaultValue: string = ""): string => {
+const getLocalStorage = (key: string, defaultValue: string): string => {
   if (!isBrowser()) return defaultValue;
+
   try {
     return localStorage.getItem(key) || defaultValue;
   } catch {
@@ -48,10 +41,11 @@ const getLocalStorage = (key: string, defaultValue: string = ""): string => {
 };
 
 /**
- * 안전한 sessionStorage 접근
+ * 세션 스토리지에서 값 가져오기 (SSR 안전)
  */
-const getSessionStorage = (key: string, defaultValue: string = ""): string => {
+const getSessionStorage = (key: string, defaultValue: string): string => {
   if (!isBrowser()) return defaultValue;
+
   try {
     return sessionStorage.getItem(key) || defaultValue;
   } catch {
@@ -59,160 +53,32 @@ const getSessionStorage = (key: string, defaultValue: string = ""): string => {
   }
 };
 
-// === 순수 함수들 ===
+// === 로거 인터페이스 ===
+
+interface Logger {
+  log: (
+    eventName: NewEventName,
+    payload: ViewScreenPayload | ClickInteractionPayload
+  ) => void;
+  getQueueSize: () => number;
+  forceFlush: () => void;
+}
+
+// === 로거 생성 ===
 
 /**
- * 이벤트 수집 함수
- */
-const collectEvent = (eventName: EventName, payload: any) => ({
-  type: eventName,
-  data: payload,
-  timestamp: new Date().toISOString(),
-});
-
-/**
- * 로그 포맷팅 함수
- */
-const formatLog = (rawEvent: any): LogData => {
-  const deviceId = getLocalStorage("deviceId", "unknown");
-  const sessionId = getSessionStorage("sessionId", "unknown");
-  const userId = getLocalStorage("userId", "");
-
-  return {
-    event_name: rawEvent.type,
-    event_timestamp: rawEvent.timestamp,
-    user_id: userId || undefined,
-    device_id: deviceId,
-    session_id: sessionId,
-    payload: rawEvent.data,
-  };
-};
-
-/**
- * 중요 로그 판별 함수
- */
-const isCritical = (log: LogData): boolean => {
-  const criticalEvents: string[] = [
-    "login_failure", // 즉시 전송 (보안 중요)
-    "signup_failure", // 즉시 전송 (보안 중요)
-    "critical_error", // 즉시 전송 (중요한 시스템 오류만)
-  ];
-
-  // error 이벤트의 경우 payload의 is_critical 값 확인
-  if (log.event_name === "error") {
-    return log.payload?.is_critical === true;
-  }
-
-  return criticalEvents.includes(log.event_name);
-};
-
-/**
- * 페이지 정보 수집 함수 (SSR 안전)
- */
-const getPageInfo = () => {
-  if (!isBrowser()) {
-    return {
-      url: "",
-      title: "",
-      referrer: "",
-    };
-  }
-
-  return {
-    url: window.location.href,
-    title: document.title,
-    referrer: document.referrer,
-  };
-};
-
-// === 부수 효과 함수들 ===
-
-/**
- * 즉시 전송 함수
- */
-const sendImmediate = async (logs: LogData[]): Promise<void> => {
-  if (!isBrowser()) return;
-
-  // 개발 환경에서는 콘솔에도 출력
-  if (process.env.NODE_ENV === "development") {
-    console.log("🚨 즉시 전송:", {
-      count: logs.length,
-      logs: logs.map((log) => ({
-        event_name: log.event_name,
-        timestamp: log.event_timestamp,
-        payload: log.payload,
-      })),
-    });
-  }
-
-  try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3002";
-
-    // sendBeacon API 사용 (페이지 언로드 시에도 안전하게 전송)
-    if (navigator.sendBeacon) {
-      const success = navigator.sendBeacon(
-        `${apiUrl}/logs/immediate`,
-        JSON.stringify({ logs: logs }) // 배치와 동일한 구조로 통일
-      );
-      if (success) return;
-    }
-
-    // sendBeacon 실패 시 fetch 사용
-    await fetch(`${apiUrl}/logs/immediate`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ logs: logs }), // 배치와 동일한 구조로 통일
-    });
-  } catch (error) {
-    console.error("❌ 즉시 전송 실패:", error);
-  }
-};
-
-/**
- * 배치 전송 함수
- */
-const sendBatch = async (logs: LogData[]): Promise<void> => {
-  if (!isBrowser()) return;
-
-  // 개발 환경에서는 콘솔에도 출력
-  if (process.env.NODE_ENV === "development") {
-    console.log("📊 배치 전송:", {
-      count: logs.length,
-      logs: logs.map((log) => ({
-        event_name: log.event_name,
-        timestamp: log.event_timestamp,
-        payload: log.payload,
-      })),
-    });
-  }
-
-  try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3002";
-
-    await fetch(`${apiUrl}/logs/batch`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ logs: logs }), // 백엔드 구조와 통일
-    });
-  } catch (error) {
-    console.error("❌ 배치 전송 실패:", error);
-  }
-};
-
-// === 로거 생성 함수 ===
-
-/**
- * 로거 인스턴스 생성
+ * 스키마 기반 로거 생성
  */
 const createLogger = (): Logger => {
-  const state: LoggerState = {
+  const state: {
+    memoryQueue: NewLogData[];
+    batchSize: number;
+    flushInterval: number;
+    autoFlushInterval?: NodeJS.Timeout;
+  } = {
     memoryQueue: [],
-    batchSize: DEFAULT_BATCH_CONFIG.events.size,
-    flushInterval: DEFAULT_BATCH_CONFIG.events.timeout,
+    batchSize: 20,
+    flushInterval: 5000,
   };
 
   // 자동 플러시 설정
@@ -232,17 +98,6 @@ const createLogger = (): Logger => {
 
     window.addEventListener("beforeunload", () => {
       if (state.memoryQueue.length > 0) {
-        // 개발 환경에서는 콘솔에도 출력
-        if (process.env.NODE_ENV === "development") {
-          console.log("📤 페이지 종료 시 로그 전송:", {
-            count: state.memoryQueue.length,
-            logs: state.memoryQueue.map((log) => ({
-              event_name: log.event_name,
-              timestamp: log.event_timestamp,
-              payload: log.payload,
-            })),
-          });
-        }
         sendImmediate(state.memoryQueue);
       }
     });
@@ -258,20 +113,147 @@ const createLogger = (): Logger => {
     sendBatch(logsToSend);
   };
 
-  // 메인 로그 함수
-  const log = (eventName: EventName, payload: any = {}) => {
-    // SSR 중에는 로그를 수집하지 않음
+  // 즉시 전송 함수
+  const sendImmediate = async (logs: NewLogData[]): Promise<void> => {
     if (!isBrowser()) return;
 
-    const rawEvent = collectEvent(eventName, payload);
-    const formattedLog = formatLog(rawEvent);
+    if (process.env.NODE_ENV === "development") {
+      console.log("🚨 즉시 전송:", {
+        count: logs.length,
+        logs: logs.map((log) => ({
+          event_name: log.event_name,
+          timestamp: log.event_timestamp,
+          payload: log.payload,
+        })),
+      });
+    }
 
-    if (isCritical(formattedLog)) {
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3002";
+
+      if (navigator.sendBeacon) {
+        const success = navigator.sendBeacon(
+          `${apiUrl}/logs/immediate`,
+          JSON.stringify({ logs: logs })
+        );
+        if (success) return;
+      }
+
+      await fetch(`${apiUrl}/logs/immediate`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ logs: logs }),
+      });
+    } catch (error) {
+      console.error("❌ 즉시 전송 실패:", error);
+    }
+  };
+
+  // 배치 전송 함수
+  const sendBatch = async (logs: NewLogData[]): Promise<void> => {
+    if (!isBrowser()) return;
+
+    if (process.env.NODE_ENV === "development") {
+      console.log("📊 배치 전송:", {
+        count: logs.length,
+        logs: logs.map((log) => ({
+          event_name: log.event_name,
+          timestamp: log.event_timestamp,
+          payload: log.payload,
+        })),
+      });
+    }
+
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3002";
+
+      await fetch(`${apiUrl}/logs/batch`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ logs: logs }),
+      });
+    } catch (error) {
+      console.error("❌ 배치 전송 실패:", error);
+    }
+  };
+
+  // 메인 로그 함수
+  const log = (
+    eventName: NewEventName,
+    payload: ViewScreenPayload | ClickInteractionPayload
+  ) => {
+    if (!isBrowser()) return;
+
+    // 사용자 식별 정보 초기화 (필요시)
+    const initializeUserIdentifiers = () => {
+      // 디바이스 ID 생성 (없으면 새로 생성)
+      let deviceId = getLocalStorage("deviceId", "");
+      if (!deviceId) {
+        deviceId = `device_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        try {
+          localStorage.setItem("deviceId", deviceId);
+        } catch (e) {
+          console.warn("로컬 스토리지 접근 불가:", e);
+        }
+      }
+
+      // 세션 ID 생성 (없으면 새로 생성)
+      let sessionId = getSessionStorage("sessionId", "");
+      if (!sessionId) {
+        sessionId = `sess_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        try {
+          sessionStorage.setItem("sessionId", sessionId);
+        } catch (e) {
+          console.warn("세션 스토리지 접근 불가:", e);
+        }
+      }
+
+      return { deviceId, sessionId };
+    };
+
+    const { deviceId, sessionId } = initializeUserIdentifiers();
+
+    // 스키마로 로그 생성
+    const newLogData: NewLogData = {
+      event_name: eventName,
+      event_timestamp: new Date().toISOString(),
+      user_id: getLocalStorage("userId", ""),
+      session_id: sessionId,
+      device_id: deviceId,
+      platform: "Web",
+      app_version: "1.0.0",
+      payload: payload,
+    };
+
+    // 중요 로그 판별 (실패/에러만 즉시 전송)
+    const isCritical = (log: NewLogData): boolean => {
+      // click_interaction에서 실패/에러 체크
+      if (log.event_name === "click_interaction") {
+        const payload = log.payload as ClickInteractionPayload;
+
+        // 실패/에러 관련 상호작용만 즉시 전송
+        const criticalInteractions: InteractionType[] = [
+          "login_failure",
+          "signup_failure",
+          "critical_error",
+        ];
+
+        return criticalInteractions.includes(payload.interaction_type);
+      }
+
+      return false;
+    };
+
+    if (isCritical(newLogData)) {
       // 중요 로그는 즉시 전송
-      sendImmediate([formattedLog]);
+      sendImmediate([newLogData]);
     } else {
       // 일반 로그는 메모리 큐에 추가
-      state.memoryQueue.push(formattedLog);
+      state.memoryQueue.push(newLogData);
 
       // 배치 크기에 도달하면 전송
       if (state.memoryQueue.length >= state.batchSize) {
@@ -306,3 +288,12 @@ export const logger: Logger = (() => {
   }
   return loggerInstance;
 })();
+
+// 타입 export
+export type {
+  NewLogData,
+  NewEventName,
+  ViewScreenPayload,
+  ClickInteractionPayload,
+  InteractionType,
+} from "@repo/types";

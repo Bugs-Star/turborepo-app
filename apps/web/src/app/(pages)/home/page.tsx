@@ -22,19 +22,19 @@ export default function HomePage() {
   const { handleProductClick, handlePromoClick, handleEventClick } =
     useHomeActions();
 
-  // 페이지 뷰 로거
-  const { trackPageView } = useAnalytics();
+  // 화면 조회 로거
+  const { trackScreenView } = useAnalytics();
 
   // 중복 로깅 방지를 위한 ref
-  const hasLoggedPageView = useRef(false);
+  const hasLoggedScreenView = useRef(false);
 
-  // 페이지 로드 시 페이지 뷰 로그 (브라우저에서만 실행, 한 번만)
+  // 페이지 로드 시 화면 조회 로그 (브라우저에서만 실행, 한 번만)
   useEffect(() => {
-    if (typeof window !== "undefined" && !hasLoggedPageView.current) {
-      trackPageView("/home");
-      hasLoggedPageView.current = true;
+    if (typeof window !== "undefined" && !hasLoggedScreenView.current) {
+      trackScreenView("/home");
+      hasLoggedScreenView.current = true;
     }
-  }, [trackPageView]);
+  }, [trackScreenView]);
 
   return (
     <AsyncWrapper

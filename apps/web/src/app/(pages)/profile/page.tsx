@@ -16,20 +16,20 @@ export default function ProfilePage() {
   const { user, isLoading } = useAuthStore();
 
   // 로거 훅들
-  const { trackPageView } = useAnalytics();
+  const { trackScreenView } = useAnalytics();
   const { handleProfileEditClick, handleOrderHistoryClick, handleLogout } =
     useProfileActions();
 
   // 중복 로깅 방지를 위한 ref
-  const hasLoggedPageView = useRef(false);
+  const hasLoggedScreenView = useRef(false);
 
-  // 페이지 로드 시 페이지 뷰 로그 (브라우저에서만 실행, 한 번만)
+  // 페이지 로드 시 화면 조회 로그 (브라우저에서만 실행, 한 번만)
   useEffect(() => {
-    if (typeof window !== "undefined" && !hasLoggedPageView.current) {
-      trackPageView("/profile");
-      hasLoggedPageView.current = true;
+    if (typeof window !== "undefined" && !hasLoggedScreenView.current) {
+      trackScreenView("/profile");
+      hasLoggedScreenView.current = true;
     }
-  }, [trackPageView]);
+  }, [trackScreenView]);
 
   return (
     <AuthGuard backgroundColor="bg-gray-50" title="내 프로필" showHeader={true}>
