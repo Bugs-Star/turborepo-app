@@ -16,6 +16,7 @@
  */
 
 import { LogData, EventName, DEFAULT_BATCH_CONFIG } from "@repo/types";
+import { api } from "./api";
 
 class FrontendLogger {
   // === Storage: 메모리 큐 관리 ===
@@ -104,15 +105,21 @@ class FrontendLogger {
       })),
     });
 
-    // 실제 API 호출 (백엔드 구현 후 활성화)
-    // if (navigator.sendBeacon) {
-    //   navigator.sendBeacon('/api/logs/immediate', JSON.stringify(logs));
-    // } else {
-    //   fetch('/api/logs/immediate', {
-    //     method: 'POST',
-    //     body: JSON.stringify(logs)
-    //   });
-    // }
+    // API 서버로 즉시 로그 전송
+    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002';
+    if (navigator.sendBeacon) {
+      navigator.sendBeacon(`${apiBaseUrl}/logs/immediate`, JSON.stringify(logs));
+    } else {
+      fetch(`${apiBaseUrl}/logs/immediate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(logs)
+      }).then(() => {
+        console.log("✅ 즉시 로그 전송 성공");
+      }).catch((error) => {
+        console.error("❌ 즉시 전송 실패:", error);
+      });
+    }
   }
 
   // 배치 전송 (모든 로그)
@@ -131,16 +138,18 @@ class FrontendLogger {
       })),
     });
 
-    // 실제 API 호출 (백엔드 구현 후 활성화)
-    // fetch('/api/logs/batch', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify({ logs })
-    // }).then(() => {
-    //   this.clearMemoryQueue();
-    // }).catch((error) => {
-    //   console.error("배치 전송 실패:", error);
-    // });
+    // API 서버로 배치 로그 전송
+    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002';
+    fetch(`${apiBaseUrl}/logs/batch`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ logs })
+    }).then(() => {
+      console.log("✅ 배치 로그 전송 성공");
+      this.clearMemoryQueue();
+    }).catch((error) => {
+      console.error("❌ 배치 전송 실패:", error);
+    });
 
     // 임시로 큐 정리
     this.clearMemoryQueue();

@@ -59,16 +59,4 @@ router.post('/immediate', (req, res) => {
   }
 });
 
-// 테스트용 엔드포인트
-router.get('/test', (req, res) => {
-  res.json({ 
-    message: '로그 API가 정상적으로 작동합니다.',
-    endpoints: {
-      batch: 'POST /logs/batch - 일반 로그 배치 처리',
-      immediate: 'POST /logs/immediate - 중요 로그 즉시 처리'
-    },
-    timestamp: new Date().toISOString()
-  });
-});
-
 export default router;
