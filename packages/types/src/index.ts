@@ -2,10 +2,10 @@
  * @repo/types - 카페앱 공통 타입 패키지
  *
  * 주요 export:
- * - LogData: 로그 데이터 기본 구조
- * - EventName: 이벤트 타입 정의
- * - EventPayload: 일반 이벤트 상세 정보
- * - CriticalPayload: 중요 로그 상세 정보
+ * - NewLogData: 로그 데이터 기본 구조 (v2)
+ * - NewEventName: 이벤트 타입 정의 (v2)
+ * - ViewScreenPayload: 화면 조회 이벤트 (v2)
+ * - ClickInteractionPayload: 클릭 상호작용 이벤트 (v2)
  */
 
 // 로그 데이터 타입들

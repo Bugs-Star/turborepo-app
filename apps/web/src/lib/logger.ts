@@ -100,7 +100,7 @@ const createLogger = (): Logger => {
   } = {
     memoryQueue: [],
     batchSize: 20,
-    flushInterval: 5000,
+    flushInterval: 10000,
     offlineStorage: new OfflineLogStorage(),
     isOnline: navigator.onLine,
   };
