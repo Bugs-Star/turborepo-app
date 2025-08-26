@@ -19,6 +19,7 @@ import {
   ClickInteractionPayload,
   InteractionType,
 } from "@repo/types";
+import { OfflineLogStorage } from "./offlineStorage";
 
 // === SSR 안전 유틸리티 함수들 ===
 
@@ -26,6 +27,24 @@ import {
  * 브라우저 환경인지 확인
  */
 const isBrowser = () => typeof window !== "undefined";
+
+/**
+ * 배열을 지정된 크기의 청크로 나눕니다.
+ * @param array - 나눌 배열
+ * @param size - 각 청크의 크기
+ * @returns 청크 배열
+ */
+const chunk = <T>(array: T[], size: number): T[][] => {
+  if (size <= 0) {
+    throw new Error("Chunk size must be greater than 0");
+  }
+
+  const chunks: T[][] = [];
+  for (let i = 0; i < array.length; i += size) {
+    chunks.push(array.slice(i, i + size));
+  }
+  return chunks;
+};
 
 /**
  * 로컬 스토리지에서 값 가져오기 (SSR 안전)
@@ -62,6 +81,7 @@ interface Logger {
   ) => void;
   getQueueSize: () => number;
   forceFlush: () => void;
+  flushOfflineLogs: () => Promise<void>;
 }
 
 // === 로거 생성 ===
@@ -75,10 +95,77 @@ const createLogger = (): Logger => {
     batchSize: number;
     flushInterval: number;
     autoFlushInterval?: NodeJS.Timeout;
+    offlineStorage: OfflineLogStorage;
+    isOnline: boolean;
   } = {
     memoryQueue: [],
     batchSize: 20,
     flushInterval: 5000,
+    offlineStorage: new OfflineLogStorage(),
+    isOnline: navigator.onLine,
+  };
+
+  // 네트워크 상태 감지
+  const setupNetworkDetection = () => {
+    if (!isBrowser()) return;
+
+    window.addEventListener("online", () => {
+      state.isOnline = true;
+      console.log("🌐 네트워크 연결됨 - 오프라인 로그 전송 시작");
+
+      // 네트워크 복구 시 약간의 지연 후 전송 (안정성 확보)
+      setTimeout(() => {
+        flushOfflineLogs().catch((error) => {
+          console.error("❌ 네트워크 복구 시 로그 전송 실패:", error);
+        });
+      }, 2000);
+    });
+
+    window.addEventListener("offline", () => {
+      state.isOnline = false;
+      console.log("📴 네트워크 연결 끊김 - 오프라인 모드로 전환");
+    });
+  };
+
+  // 오프라인 로그 전송
+  const flushOfflineLogs = async () => {
+    try {
+      const pendingLogs = await state.offlineStorage.getPendingLogs();
+      if (pendingLogs.length === 0) return;
+
+      console.log(`📤 오프라인 로그 ${pendingLogs.length}개 전송 시작`);
+
+      // 배치로 전송
+      const batches = chunk(pendingLogs, state.batchSize);
+      let successCount = 0;
+
+      for (const batch of batches) {
+        try {
+          await sendBatch(batch);
+          successCount += batch.length;
+        } catch (error) {
+          console.error("❌ 배치 전송 실패:", error);
+          // 실패한 배치는 다시 IndexedDB에 저장됨 (sendBatch에서 처리)
+        }
+      }
+
+      // 성공적으로 전송된 로그들만 마킹
+      if (successCount > 0) {
+        const logIds = Array.from({ length: successCount }, (_, i) => i + 1);
+        await state.offlineStorage.markLogsAsSent(logIds);
+        console.log(`✅ ${successCount}개 오프라인 로그 전송 완료`);
+      }
+
+      // 전송 실패한 로그가 있는지 확인
+      const remainingLogs = await state.offlineStorage.getPendingLogs();
+      if (remainingLogs.length > 0) {
+        console.log(
+          `⚠️ ${remainingLogs.length}개 로그 전송 실패 - 다음 네트워크 복구 시 재시도`
+        );
+      }
+    } catch (error) {
+      console.error("❌ 오프라인 로그 전송 실패:", error);
+    }
   };
 
   // 자동 플러시 설정
@@ -96,9 +183,39 @@ const createLogger = (): Logger => {
   const setupPageUnload = () => {
     if (!isBrowser()) return;
 
-    window.addEventListener("beforeunload", () => {
+    window.addEventListener("beforeunload", async () => {
+      // 메모리 큐의 로그들을 IndexedDB에 저장
       if (state.memoryQueue.length > 0) {
-        sendImmediate(state.memoryQueue);
+        try {
+          for (const log of state.memoryQueue) {
+            await state.offlineStorage.saveLog(log);
+          }
+          console.log(
+            `💾 페이지 언로드 시 ${state.memoryQueue.length}개 로그 저장`
+          );
+        } catch (error) {
+          console.error("❌ 페이지 언로드 시 로그 저장 실패:", error);
+        }
+      }
+
+      // IndexedDB의 pending 로그들을 sendBeacon으로 전송 시도
+      try {
+        const pendingLogs = await state.offlineStorage.getPendingLogs();
+        if (pendingLogs.length > 0 && navigator.sendBeacon) {
+          const apiUrl =
+            process.env.NEXT_PUBLIC_API_URL || "http://localhost:3002";
+          const success = navigator.sendBeacon(
+            `${apiUrl}/logs/batch`,
+            JSON.stringify({ logs: pendingLogs })
+          );
+          if (success) {
+            console.log(
+              `📤 페이지 언로드 시 ${pendingLogs.length}개 로그 전송 성공`
+            );
+          }
+        }
+      } catch (error) {
+        console.error("❌ 페이지 언로드 시 로그 전송 실패:", error);
       }
     });
   };
@@ -131,6 +248,7 @@ const createLogger = (): Logger => {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3002";
 
+      // sendBeacon 우선 시도
       if (navigator.sendBeacon) {
         const success = navigator.sendBeacon(
           `${apiUrl}/logs/immediate`,
@@ -139,15 +257,32 @@ const createLogger = (): Logger => {
         if (success) return;
       }
 
-      await fetch(`${apiUrl}/logs/immediate`, {
+      // fetch로 재시도
+      const response = await fetch(`${apiUrl}/logs/immediate`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ logs: logs }),
       });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
     } catch (error) {
       console.error("❌ 즉시 전송 실패:", error);
+
+      // 실패한 로그들을 IndexedDB에 저장
+      try {
+        for (const log of logs) {
+          await state.offlineStorage.saveLog(log);
+        }
+        console.log(
+          `💾 즉시 전송 실패 로그 ${logs.length}개를 오프라인 저장소에 저장`
+        );
+      } catch (dbError) {
+        console.error("❌ IndexedDB 저장 실패:", dbError);
+      }
     }
   };
 
@@ -169,15 +304,33 @@ const createLogger = (): Logger => {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3002";
 
-      await fetch(`${apiUrl}/logs/batch`, {
+      const response = await fetch(`${apiUrl}/logs/batch`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ logs: logs }),
       });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
     } catch (error) {
       console.error("❌ 배치 전송 실패:", error);
+
+      // 실패한 로그들을 IndexedDB에 저장
+      try {
+        for (const log of logs) {
+          await state.offlineStorage.saveLog(log);
+        }
+        console.log(`💾 ${logs.length}개 로그를 오프라인 저장소에 저장`);
+      } catch (dbError) {
+        console.error("❌ IndexedDB 저장 실패:", dbError);
+        // 최후의 수단: 메모리에 임시 저장
+        state.memoryQueue.push(...logs);
+      }
+
+      throw error;
     }
   };
 
@@ -266,15 +419,57 @@ const createLogger = (): Logger => {
   const getQueueSize = () => state.memoryQueue.length;
 
   // 초기화 (클라이언트에서만)
-  if (isBrowser()) {
-    setupAutoFlush();
-    setupPageUnload();
-  }
+  const initialize = async () => {
+    if (!isBrowser()) return;
+
+    try {
+      await state.offlineStorage.init();
+      setupAutoFlush();
+      setupPageUnload();
+      setupNetworkDetection();
+
+      // 앱 시작 시 오프라인 로그 전송 시도
+      if (state.isOnline) {
+        setTimeout(() => {
+          flushOfflineLogs().catch((error) => {
+            console.error("❌ 앱 시작 시 오프라인 로그 전송 실패:", error);
+          });
+        }, 1000); // 1초 후 실행
+      }
+
+      console.log("✅ 로거 초기화 완료");
+    } catch (error) {
+      console.error("❌ 로거 초기화 실패:", error);
+      // 초기화 실패해도 기본 기능은 동작하도록 함
+    }
+  };
+
+  // 주기적 정리 작업 설정
+  const setupCleanup = () => {
+    if (!isBrowser()) return;
+
+    // 24시간마다 오래된 로그 정리
+    setInterval(
+      async () => {
+        try {
+          await state.offlineStorage.cleanupOldLogs(7); // 7일 이상 된 로그 정리
+        } catch (error) {
+          console.error("❌ 로그 정리 실패:", error);
+        }
+      },
+      24 * 60 * 60 * 1000
+    ); // 24시간
+  };
+
+  // 초기화 실행
+  initialize();
+  setupCleanup();
 
   return {
     log,
     getQueueSize,
     forceFlush,
+    flushOfflineLogs,
   };
 };
 
