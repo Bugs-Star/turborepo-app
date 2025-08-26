@@ -1,13 +1,11 @@
 import sharp from 'sharp';
 import fs from 'fs';
-import path from 'path';
-import os from 'os';
 
 /**
- * Multer 파일 버퍼를 압축하고 Base64로 변환
+ * Multer 파일 버퍼를 압축하고 Base64로 변환 (메모리 전용)
  * @param {Object} file - Multer 파일 객체 (buffer 포함)
  * @param {Object} options - 압축 옵션
- * @param {string} prefix - 임시 파일명 접두사
+ * @param {string} prefix - 임시 파일명 접두사 (사용되지 않음, 호환성용)
  * @returns {Promise<Object>} 압축 결과 (base64, 압축 정보)
  */
 export const compressMulterFile = async (file, options = {}, prefix = 'image') => {
@@ -15,23 +13,61 @@ export const compressMulterFile = async (file, options = {}, prefix = 'image') =
     throw new Error('유효한 파일이 제공되지 않았습니다.');
   }
 
-  // 임시 파일 생성
-  const tempDir = os.tmpdir();
-  const tempFilePath = path.join(tempDir, `${prefix}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}.jpg`);
-  
   try {
-    // 메모리에서 임시 파일로 저장
-    fs.writeFileSync(tempFilePath, file.buffer);
+    // 원본 파일 정보 (메모리에서 직접)
+    const originalBuffer = file.buffer;
+    const originalSize = originalBuffer.length;
+    const originalSizeKB = Math.round(originalSize / 1024 * 100) / 100;
+
+    // Sharp로 메타데이터 추출
+    const metadata = await sharp(originalBuffer).metadata();
     
-    // 이미지 압축 및 Base64 변환
-    const compressionResult = await compressImageWithComparison(tempFilePath, options);
+    // 압축 옵션 설정
+    const {
+      maxWidth = 800,
+      maxHeight = 600,
+      quality = 80,
+      format = 'jpeg'
+    } = options;
+
+    // 이미지 압축 (메모리에서 메모리로)
+    const compressedBuffer = await sharp(originalBuffer)
+      .resize(maxWidth, maxHeight, {
+        fit: 'inside',
+        withoutEnlargement: true
+      })
+      .jpeg({ quality })
+      .toBuffer();
+
+    // Base64 변환
+    const base64String = compressedBuffer.toString('base64');
+    const compressedBase64 = `data:image/jpeg;base64,${base64String}`;
     
-    return compressionResult;
-  } finally {
-    // 임시 파일 삭제
-    if (fs.existsSync(tempFilePath)) {
-      fs.unlinkSync(tempFilePath);
-    }
+    // 압축된 크기 정보
+    const compressedSize = compressedBuffer.length;
+    const compressedSizeKB = Math.round(compressedSize / 1024 * 100) / 100;
+    
+    // 압축률 계산
+    const compressionRatio = Math.round((1 - compressedSize / originalSize) * 100);
+    
+    return {
+      original: {
+        size: originalSize,
+        sizeKB: originalSizeKB,
+        width: metadata.width,
+        height: metadata.height
+      },
+      compressed: {
+        size: compressedSize,
+        sizeKB: compressedSizeKB,
+        base64: compressedBase64
+      },
+      compressionRatio,
+      savedSpace: originalSize - compressedSize
+    };
+  } catch (error) {
+    console.error('이미지 압축 오류:', error);
+    throw new Error('이미지 압축에 실패했습니다.');
   }
 };
 
