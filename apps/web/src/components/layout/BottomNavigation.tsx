@@ -3,18 +3,20 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { House, Menu, ShoppingCart, User } from "lucide-react";
-import { useCartCountFetch } from "@/hooks";
+import { useCartCountFetch, useAnalytics } from "@/hooks";
 
 export default function BottomNavigation() {
   const pathname = usePathname();
   const { data: cartCountData } = useCartCountFetch();
   const cartCount = cartCountData?.count || 0;
+  const { trackNavLinkClick } = useAnalytics();
 
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 py-3 z-50">
       <div className="flex justify-around items-center">
         <Link
           href="/home"
+          onClick={() => trackNavLinkClick("home", "HOME")}
           className={`flex flex-col items-center transition-colors ${
             pathname === "/home"
               ? "text-green-700"
@@ -29,6 +31,7 @@ export default function BottomNavigation() {
         </Link>
         <Link
           href="/menu"
+          onClick={() => trackNavLinkClick("menu", "MENU")}
           className={`flex flex-col items-center transition-colors ${
             pathname === "/menu"
               ? "text-green-700"
@@ -43,6 +46,7 @@ export default function BottomNavigation() {
         </Link>
         <Link
           href="/cart"
+          onClick={() => trackNavLinkClick("cart", "CART")}
           className={`flex flex-col items-center transition-colors relative ${
             pathname === "/cart"
               ? "text-green-700"
@@ -64,6 +68,7 @@ export default function BottomNavigation() {
         </Link>
         <Link
           href="/profile"
+          onClick={() => trackNavLinkClick("profile", "MY")}
           className={`flex flex-col items-center transition-colors ${
             pathname === "/profile"
               ? "text-green-700"

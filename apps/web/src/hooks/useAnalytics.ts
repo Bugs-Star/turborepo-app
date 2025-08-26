@@ -156,39 +156,15 @@ export const useAnalytics = () => {
     });
   }, []);
 
-  const trackGoToCheckout = useCallback(
+  const trackCreateOrder = useCallback(
     (totalAmount: number, itemCount: number) => {
       logger.log("click_interaction", {
-        interaction_type: "button_go_to_checkout",
-        target_id: "checkout",
+        interaction_type: "button_create_order",
+        target_id: "order",
         target_name: "주문하기",
         source_component: "cart_page",
         totalAmount: totalAmount,
         itemCount: itemCount,
-      });
-    },
-    []
-  );
-
-  const trackApplyCoupon = useCallback((couponCode: string) => {
-    logger.log("click_interaction", {
-      interaction_type: "button_apply_coupon",
-      target_id: couponCode,
-      target_name: "쿠폰 적용",
-      source_component: "checkout_page",
-      couponCode: couponCode,
-    });
-  }, []);
-
-  const trackConfirmPayment = useCallback(
-    (paymentMethod: string, finalAmount: number) => {
-      logger.log("click_interaction", {
-        interaction_type: "button_confirm_payment",
-        target_id: "payment",
-        target_name: "결제하기",
-        source_component: "checkout_page",
-        paymentMethod: paymentMethod,
-        finalAmount: finalAmount,
       });
     },
     []
@@ -390,9 +366,7 @@ export const useAnalytics = () => {
     trackIncreaseQuantity,
     trackDecreaseQuantity,
     trackRemoveItem,
-    trackGoToCheckout,
-    trackApplyCoupon,
-    trackConfirmPayment,
+    trackCreateOrder,
     trackPromotionClick,
     trackEventClick,
     trackEventParticipate,

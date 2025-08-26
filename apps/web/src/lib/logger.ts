@@ -151,8 +151,11 @@ const createLogger = (): Logger => {
 
       // 성공적으로 전송된 로그들만 마킹
       if (successCount > 0) {
-        const logIds = Array.from({ length: successCount }, (_, i) => i + 1);
-        await state.offlineStorage.markLogsAsSent(logIds);
+        // 실제 전송된 로그들의 ID를 가져와서 마킹
+        const sentLogIds = await state.offlineStorage.getLogIdsByPayloads(
+          pendingLogs.slice(0, successCount)
+        );
+        await state.offlineStorage.markLogsAsSent(sentLogIds);
         console.log(`✅ ${successCount}개 오프라인 로그 전송 완료`);
       }
 

@@ -196,6 +196,43 @@ export class OfflineLogStorage {
   }
 
   /**
+   * 페이로드로 로그 ID 조회
+   */
+  async getLogIdsByPayloads(logs: NewLogData[]): Promise<number[]> {
+    if (!this.db) await this.init();
+
+    return new Promise((resolve, reject) => {
+      const transaction = this.db!.transaction(["logs"], "readonly");
+      const store = transaction.objectStore("logs");
+      const request = store.getAll();
+
+      request.onsuccess = () => {
+        const allLogs = request.result as StoredLog[];
+        const logIds: number[] = [];
+
+        logs.forEach((targetLog) => {
+          const foundLog = allLogs.find(
+            (storedLog) =>
+              storedLog.event_name === targetLog.event_name &&
+              storedLog.event_timestamp === targetLog.event_timestamp &&
+              storedLog.session_id === targetLog.session_id &&
+              storedLog.device_id === targetLog.device_id &&
+              storedLog.status === "pending"
+          );
+
+          if (foundLog && foundLog.id) {
+            logIds.push(foundLog.id);
+          }
+        });
+
+        resolve(logIds);
+      };
+
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  /**
    * 저장소 통계 조회
    */
   async getStats(): Promise<{ total: number; pending: number; sent: number }> {

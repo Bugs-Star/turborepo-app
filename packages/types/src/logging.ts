@@ -68,9 +68,7 @@ export type InteractionType =
   | "button_increase_quantity"
   | "button_decrease_quantity"
   | "button_remove_item"
-  | "button_go_to_checkout"
-  | "button_apply_coupon"
-  | "button_confirm_payment"
+  | "button_create_order"
   // 프로모션 및 이벤트
   | "event_card"
   | "promotion_card"
@@ -177,7 +175,6 @@ export interface CriticalPayload {
   // 에러 정보
   error_message?: string;
   error_code?: string;
-  stack_trace?: string;
   endpoint?: string;
 
   // 보안 정보
