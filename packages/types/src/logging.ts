@@ -79,7 +79,10 @@ export type InteractionType =
   // 기타 상호작용
   | "nav_link"
   | "button_view_more"
-  | "button_popup_close";
+  | "button_popup_close"
+  | "signup_attempt"
+  | "signup_success"
+  | "login_link";
 
 // ===== 기존 스키마 (v1) - 하위 호환성 유지 =====
 

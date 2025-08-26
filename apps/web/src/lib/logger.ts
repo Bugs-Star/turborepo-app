@@ -247,23 +247,22 @@ const createLogger = (): Logger => {
 
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3002";
+      const data = JSON.stringify({ logs: logs });
 
-      // sendBeacon 우선 시도
+      // sendBeacon 우선 시도 (페이지 언로드 시 안전)
       if (navigator.sendBeacon) {
-        const success = navigator.sendBeacon(
-          `${apiUrl}/logs/immediate`,
-          JSON.stringify({ logs: logs })
-        );
+        const blob = new Blob([data], { type: "application/json" });
+        const success = navigator.sendBeacon(`${apiUrl}/logs/immediate`, blob);
         if (success) return;
       }
 
-      // fetch로 재시도
+      // fallback으로 fetch 사용
       const response = await fetch(`${apiUrl}/logs/immediate`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ logs: logs }),
+        body: data,
       });
 
       if (!response.ok) {
