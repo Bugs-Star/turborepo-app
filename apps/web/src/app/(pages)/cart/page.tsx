@@ -24,23 +24,23 @@ export default function CartPage() {
   const { selectedMethod } = usePaymentStore();
 
   // 로거 훅들
-  const { trackPageView } = useAnalytics();
+  const { trackScreenView } = useAnalytics();
   const { handleCartView, handleCartRemove, handleOrderInitiate } =
     useCartAnalyticsActions();
 
   // 중복 로깅 방지를 위한 ref
-  const hasLoggedPageView = useRef(false);
+  const hasLoggedScreenView = useRef(false);
   const hasLoggedCartView = useRef(false);
 
   const total = summary?.totalAmount || 0;
 
-  // 페이지 로드 시 페이지 뷰 로그 (브라우저에서만 실행, 한 번만)
+  // 페이지 로드 시 화면 조회 로그 (브라우저에서만 실행, 한 번만)
   useEffect(() => {
-    if (typeof window !== "undefined" && !hasLoggedPageView.current) {
-      trackPageView("/cart");
-      hasLoggedPageView.current = true;
+    if (typeof window !== "undefined" && !hasLoggedScreenView.current) {
+      trackScreenView("/cart");
+      hasLoggedScreenView.current = true;
     }
-  }, [trackPageView]);
+  }, [trackScreenView]);
 
   // 장바구니 데이터가 로드되면 장바구니 뷰 로그 (한 번만)
   useEffect(() => {

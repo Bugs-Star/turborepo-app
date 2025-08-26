@@ -9,19 +9,19 @@ export const useHomeActions = () => {
     useAnalytics();
 
   const handleProductClick = (product: Product) => {
-    // 로거 호출 (기존 로직 유지)
+    // 로거 호출
     trackRecommendedProductClick(product);
     router.push(`/menu/${product._id}`);
   };
 
   const handlePromoClick = (promotionId: string) => {
-    // 로거 호출 (기존 로직 유지)
+    // 로거 호출
     trackPromotionView({ _id: promotionId, title: "프로모션" } as any);
     router.push(`/promotion/${promotionId}`);
   };
 
   const handleEventClick = (event: Event) => {
-    // 로거 호출 (기존 로직 유지)
+    // 로거 호출
     trackEventView(event);
     router.push(`/event/${event._id}`);
   };

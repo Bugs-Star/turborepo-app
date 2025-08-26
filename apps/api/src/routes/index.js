@@ -7,6 +7,7 @@ import eventRoutes from './events.js';
 import promotionRoutes from './promotions.js';
 import cartRoutes from './cart.js';
 import orderRoutes from './order.js';
+import logRoutes from './logs.js';
 
 const router = Router();
 
@@ -30,6 +31,9 @@ router.use('/cart', cartRoutes);
 
 // 주문 관련 라우트
 router.use('/order', orderRoutes);
+
+// 로그 관련 라우트
+router.use('/logs', logRoutes);
 
 // 테스트 라우트 (메인 라우터에 직접 추가)
 router.get('/order-test', (req, res) => {

@@ -5,12 +5,12 @@ import { useAnalytics } from "./useAnalytics";
 
 export const useMenuActions = () => {
   const router = useRouter();
-  const { trackProductClick, trackFilterChange } = useAnalytics();
+  const { trackProductClick, trackCategoryClick } = useAnalytics();
 
   const handleProductClick = useCallback(
     (product: Product, activeCategory: string) => {
       // 로거 호출
-      trackProductClick(product, activeCategory);
+      trackProductClick(product, "menu_product_grid");
       router.push(`/menu/${product._id}?category=${activeCategory}`);
     },
     [trackProductClick, router]
@@ -23,12 +23,12 @@ export const useMenuActions = () => {
       onCategoryChange?: (category: string) => void
     ) => {
       // 로거 호출
-      trackFilterChange(category, previousCategory);
+      trackCategoryClick(category);
 
       // 기존 카테고리 변경 로직 실행
       onCategoryChange?.(category);
     },
-    [trackFilterChange]
+    [trackCategoryClick]
   );
 
   return {

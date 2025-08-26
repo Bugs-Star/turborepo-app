@@ -27,24 +27,24 @@ export default function MenuPage() {
   });
 
   // 로거 훅들
-  const { trackPageView } = useAnalytics();
+  const { trackScreenView } = useAnalytics();
   const { handleProductClick, handleCategoryChange } = useMenuActions();
 
   // 중복 로깅 방지를 위한 ref
-  const hasLoggedPageView = useRef(false);
+  const hasLoggedScreenView = useRef(false);
 
   // URL 파라미터가 변경되면 refetch 실행
   useEffect(() => {
     refetch();
   }, [initialCategory, refetch]);
 
-  // 페이지 로드 시 페이지 뷰 로그 (브라우저에서만 실행, 한 번만)
+  // 페이지 로드 시 화면 조회 로그 (브라우저에서만 실행, 한 번만)
   useEffect(() => {
-    if (typeof window !== "undefined" && !hasLoggedPageView.current) {
-      trackPageView("/menu");
-      hasLoggedPageView.current = true;
+    if (typeof window !== "undefined" && !hasLoggedScreenView.current) {
+      trackScreenView("/menu");
+      hasLoggedScreenView.current = true;
     }
-  }, [trackPageView]);
+  }, [trackScreenView]);
 
   // 카테고리 변경 핸들러 (URL 업데이트 + 로깅)
   const handleCategoryChangeWithURL = (category: string) => {

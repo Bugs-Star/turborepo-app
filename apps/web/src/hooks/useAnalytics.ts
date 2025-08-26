@@ -1,11 +1,11 @@
 /**
- * 카페앱 사용자 행동 추적 훅
+ * 카페앱 사용자 행동 추적 훅 (스키마 v2)
  *
- * 현재 홈페이지에서 사용 중인 로거 함수들
+ * 스키마 기반으로 재구성된 분석 훅
  *
  * 사용법:
- * const { trackPageView, trackRecommendedProductClick } = useAnalytics();
- * trackPageView("/home");
+ * const { trackScreenView, trackProductClick } = useAnalytics();
+ * trackScreenView("/home");
  */
 
 import { useCallback } from "react";
@@ -15,295 +15,333 @@ import { Promotion, Event } from "@/lib/services";
 import { CartItemUI } from "@/types/cart";
 
 export const useAnalytics = () => {
-  // === 유틸리티 함수 ===
-  const getPageInfo = useCallback(
-    () => ({
-      page: typeof window !== "undefined" ? window.location.pathname : "",
-      page_title: typeof document !== "undefined" ? document.title : "",
-      referrer: typeof document !== "undefined" ? document.referrer : "",
-    }),
+  // === 화면 조회 이벤트 ===
+  const trackScreenView = useCallback(
+    (screenName: string, previousScreen?: string) => {
+      logger.log("view_screen", {
+        screen_name: screenName,
+        previous_screen_name: previousScreen,
+      });
+    },
     []
   );
 
   // === 상품 관련 이벤트 ===
-  const createProductLogData = useCallback(
-    (product: Product) => ({
-      product_id: product._id,
-      product_name: product.productName,
-      product_price: product.price,
-      category: product.category,
-      ...getPageInfo(),
-    }),
-    [getPageInfo]
-  );
-
-  const trackRecommendedProductClick = useCallback(
-    (product: Product) => {
-      logger.log("recommended_product_click", createProductLogData(product));
-    },
-    [createProductLogData]
-  );
-
-  // === 메뉴 페이지 전용 이벤트 ===
   const trackProductClick = useCallback(
-    (product: Product, activeCategory: string) => {
-      logger.log("product_click", {
-        ...createProductLogData(product),
-        filter_category: activeCategory,
+    (product: Product, sourceComponent?: string) => {
+      logger.log("click_interaction", {
+        interaction_type: "product_card",
+        target_id: product._id,
+        target_name: product.productName,
+        source_component: sourceComponent,
+        productCode: product._id,
+        productName: product.productName,
+        price: product.price,
+        category: product.category,
       });
     },
-    [createProductLogData]
+    []
   );
 
-  const trackFilterChange = useCallback(
-    (category: string, previousCategory?: string) => {
-      logger.log("filter_change", {
-        filter_category: category,
-        previous_category: previousCategory,
-        ...getPageInfo(),
+  const trackRecommendedProductClick = useCallback((product: Product) => {
+    logger.log("click_interaction", {
+      interaction_type: "product_card",
+      target_id: product._id,
+      target_name: product.productName,
+      source_component: "home_recommended_section",
+      productCode: product._id,
+      productName: product.productName,
+      price: product.price,
+      category: product.category,
+    });
+  }, []);
+
+  const trackProductView = useCallback((product: Product) => {
+    logger.log("click_interaction", {
+      interaction_type: "product_card",
+      target_id: product._id,
+      target_name: product.productName,
+      source_component: "product_detail_view",
+      productCode: product._id,
+      productName: product.productName,
+      price: product.price,
+      category: product.category,
+    });
+  }, []);
+
+  // === 카테고리 및 필터 이벤트 ===
+  const trackCategoryClick = useCallback((category: string) => {
+    logger.log("click_interaction", {
+      interaction_type: "category_link",
+      target_id: category,
+      target_name: category,
+      source_component: "category_filter",
+      categoryName: category,
+    });
+  }, []);
+
+  const trackSortOptionSelect = useCallback((sortOption: string) => {
+    logger.log("click_interaction", {
+      interaction_type: "sort_option_select",
+      target_id: sortOption,
+      target_name: sortOption,
+      source_component: "sort_filter",
+      sortOption: sortOption,
+    });
+  }, []);
+
+  // === 검색 이벤트 ===
+  const trackSearchSubmit = useCallback(
+    (searchKeyword: string, resultCount: number) => {
+      logger.log("click_interaction", {
+        interaction_type: "search_submit",
+        target_id: searchKeyword,
+        target_name: searchKeyword,
+        source_component: "search_bar",
+        searchKeyword: searchKeyword,
+        resultCount: resultCount,
       });
     },
-    [getPageInfo]
+    []
   );
 
-  const trackProductView = useCallback(
-    (product: Product, activeCategory: string) => {
-      logger.log("product_view", {
-        ...createProductLogData(product),
-        filter_category: activeCategory,
+  // === 장바구니 관련 이벤트 ===
+  const trackAddToCart = useCallback((product: Product, quantity: number) => {
+    logger.log("click_interaction", {
+      interaction_type: "button_add_to_cart",
+      target_id: product._id,
+      target_name: product.productName,
+      source_component: "product_detail",
+      productId: product._id,
+      quantity: quantity,
+      price: product.price,
+    });
+  }, []);
+
+  const trackIncreaseQuantity = useCallback(
+    (productId: string, currentQuantity: number) => {
+      logger.log("click_interaction", {
+        interaction_type: "button_increase_quantity",
+        target_id: productId,
+        target_name: "수량 증가",
+        source_component: "cart_item",
+        productId: productId,
+        currentQuantity: currentQuantity,
       });
     },
-    [createProductLogData]
+    []
   );
 
-  // === 상품 상세 페이지 전용 이벤트 ===
-  const trackProductDetailView = useCallback(
-    (product: Product) => {
-      logger.log("product_view", {
-        ...createProductLogData(product),
+  const trackDecreaseQuantity = useCallback(
+    (productId: string, currentQuantity: number) => {
+      logger.log("click_interaction", {
+        interaction_type: "button_decrease_quantity",
+        target_id: productId,
+        target_name: "수량 감소",
+        source_component: "cart_item",
+        productId: productId,
+        currentQuantity: currentQuantity,
       });
     },
-    [createProductLogData]
+    []
   );
 
-  const trackCartAdd = useCallback(
-    (product: Product, quantity: number) => {
-      logger.log("cart_add", {
-        ...createProductLogData(product),
-        quantity: quantity,
-        cart_total: product.price * quantity,
+  const trackRemoveItem = useCallback((item: CartItemUI) => {
+    logger.log("click_interaction", {
+      interaction_type: "button_remove_item",
+      target_id: item.id,
+      target_name: item.name,
+      source_component: "cart_item",
+      productId: item.id,
+    });
+  }, []);
+
+  const trackGoToCheckout = useCallback(
+    (totalAmount: number, itemCount: number) => {
+      logger.log("click_interaction", {
+        interaction_type: "button_go_to_checkout",
+        target_id: "checkout",
+        target_name: "주문하기",
+        source_component: "cart_page",
+        totalAmount: totalAmount,
+        itemCount: itemCount,
       });
     },
-    [createProductLogData]
+    []
   );
 
-  // === 장바구니 페이지 전용 이벤트 ===
-  const trackCartView = useCallback(
-    (itemCount: number, totalAmount: number) => {
-      logger.log("cart_view", {
-        ...getPageInfo(),
-        cart_item_count: itemCount,
-        cart_total: totalAmount,
-      });
-    },
-    [getPageInfo]
-  );
+  const trackApplyCoupon = useCallback((couponCode: string) => {
+    logger.log("click_interaction", {
+      interaction_type: "button_apply_coupon",
+      target_id: couponCode,
+      target_name: "쿠폰 적용",
+      source_component: "checkout_page",
+      couponCode: couponCode,
+    });
+  }, []);
 
-  const trackCartRemove = useCallback(
-    (item: CartItemUI) => {
-      logger.log("cart_remove", {
-        product_id: item.id,
-        product_name: item.name,
-        product_price: item.price,
-        quantity: item.quantity,
-        ...getPageInfo(),
+  const trackConfirmPayment = useCallback(
+    (paymentMethod: string, finalAmount: number) => {
+      logger.log("click_interaction", {
+        interaction_type: "button_confirm_payment",
+        target_id: "payment",
+        target_name: "결제하기",
+        source_component: "checkout_page",
+        paymentMethod: paymentMethod,
+        finalAmount: finalAmount,
       });
     },
-    [getPageInfo]
-  );
-
-  const trackOrderInitiate = useCallback(
-    (totalAmount: number, itemCount: number, paymentMethod?: string) => {
-      logger.log("order_initiate", {
-        order_total: totalAmount,
-        cart_item_count: itemCount,
-        payment_method: paymentMethod,
-        ...getPageInfo(),
-      });
-    },
-    [getPageInfo]
+    []
   );
 
   // === 프로모션/이벤트 관련 이벤트 ===
-  const trackPromotionView = useCallback(
-    (promotion: Promotion) => {
-      logger.log("promotion_view", {
-        promotion_id: promotion._id,
-        promotion_name: promotion.title,
-        ...getPageInfo(),
+  const trackPromotionClick = useCallback((promotion: Promotion) => {
+    logger.log("click_interaction", {
+      interaction_type: "promotion_card",
+      target_id: promotion._id,
+      target_name: promotion.title,
+      source_component: "promotion_section",
+      promotionId: promotion._id,
+      promotionName: promotion.title,
+    });
+  }, []);
+
+  const trackEventClick = useCallback((event: Event) => {
+    logger.log("click_interaction", {
+      interaction_type: "event_card",
+      target_id: event._id,
+      target_name: event.title,
+      source_component: "event_section",
+      eventId: event._id,
+      eventName: event.title,
+    });
+  }, []);
+
+  const trackEventParticipate = useCallback((eventId: string) => {
+    logger.log("click_interaction", {
+      interaction_type: "button_event_participate",
+      target_id: eventId,
+      target_name: "참여하기",
+      source_component: "event_detail",
+      eventId: eventId,
+    });
+  }, []);
+
+  const trackCouponDownload = useCallback(
+    (promotionId: string, couponCode: string) => {
+      logger.log("click_interaction", {
+        interaction_type: "button_coupon_download",
+        target_id: promotionId,
+        target_name: "쿠폰 받기",
+        source_component: "promotion_detail",
+        promotionId: promotionId,
+        couponCode: couponCode,
       });
     },
-    [getPageInfo]
+    []
   );
 
-  const trackEventView = useCallback(
-    (event: Event) => {
-      logger.log("event_view", {
-        event_id: event._id,
-        event_name: event.title,
-        ...getPageInfo(),
+  // === 광고 배너 이벤트 ===
+  const trackAdBannerClick = useCallback((adId: string, campaignId: string) => {
+    logger.log("click_interaction", {
+      interaction_type: "ad_banner",
+      target_id: adId,
+      target_name: "광고 배너",
+      source_component: "ad_section",
+      adId: adId,
+      campaignId: campaignId,
+    });
+  }, []);
+
+  // === 네비게이션 이벤트 ===
+  const trackNavLinkClick = useCallback(
+    (linkText: string, targetUrl: string) => {
+      logger.log("click_interaction", {
+        interaction_type: "nav_link",
+        target_id: targetUrl,
+        target_name: linkText,
+        source_component: "navigation",
+        linkText: linkText,
+        targetUrl: targetUrl,
       });
     },
-    [getPageInfo]
+    []
   );
 
-  // === 프로필 페이지 전용 이벤트 ===
-  const trackProfileEditClick = useCallback(() => {
-    logger.log("profile_edit_click", {
-      ...getPageInfo(),
+  // === 기타 상호작용 이벤트 ===
+  const trackViewMore = useCallback((pageNumber: number) => {
+    logger.log("click_interaction", {
+      interaction_type: "button_view_more",
+      target_id: `page_${pageNumber}`,
+      target_name: "더보기",
+      source_component: "product_list",
+      pageNumber: pageNumber,
     });
-  }, [getPageInfo]);
+  }, []);
 
-  const trackOrderHistoryClick = useCallback(() => {
-    logger.log("order_history_click", {
-      ...getPageInfo(),
+  const trackPopupClose = useCallback((popupId: string) => {
+    logger.log("click_interaction", {
+      interaction_type: "button_popup_close",
+      target_id: popupId,
+      target_name: "닫기",
+      source_component: "popup",
+      popupId: popupId,
     });
-  }, [getPageInfo]);
+  }, []);
+
+  // === 사용자 인증 이벤트 ===
+  const trackLoginSubmit = useCallback(() => {
+    logger.log("click_interaction", {
+      interaction_type: "button_login_submit",
+      target_id: "login",
+      target_name: "로그인",
+      source_component: "login_form",
+    });
+  }, []);
+
+  const trackSignupSubmit = useCallback(() => {
+    logger.log("click_interaction", {
+      interaction_type: "button_signup_submit",
+      target_id: "signup",
+      target_name: "가입하기",
+      source_component: "signup_form",
+    });
+  }, []);
 
   const trackLogout = useCallback(() => {
-    logger.log("logout", {
-      ...getPageInfo(),
-    });
-  }, [getPageInfo]);
-
-  // === 로그인 페이지 전용 이벤트 ===
-  const trackLoginAttempt = useCallback(
-    (email: string) => {
-      logger.log("login_attempt", {
-        email: email,
-        ...getPageInfo(),
-      });
-    },
-    [getPageInfo]
-  );
-
-  const trackLoginSuccess = useCallback(
-    (email: string) => {
-      logger.log("login_success", {
-        email: email,
-        ...getPageInfo(),
-      });
-    },
-    [getPageInfo]
-  );
-
-  const trackLoginFailure = useCallback(
-    (email: string, errorMessage: string) => {
-      logger.log("login_failure", {
-        email: email,
-        error_message: errorMessage,
-        ...getPageInfo(),
-      });
-    },
-    [getPageInfo]
-  );
-
-  const trackSignupLinkClick = useCallback(() => {
-    logger.log("signup_link_click", {
-      ...getPageInfo(),
-    });
-  }, [getPageInfo]);
-
-  // === 회원가입 페이지 전용 이벤트 ===
-  const trackSignupAttempt = useCallback(
-    (email: string, name: string) => {
-      logger.log("signup_attempt", {
-        email: email,
-        name: name,
-        ...getPageInfo(),
-      });
-    },
-    [getPageInfo]
-  );
-
-  const trackSignupSuccess = useCallback(
-    (email: string, name: string) => {
-      logger.log("signup_success", {
-        email: email,
-        name: name,
-        ...getPageInfo(),
-      });
-    },
-    [getPageInfo]
-  );
-
-  const trackSignupFailure = useCallback(
-    (email: string, name: string, errorMessage: string) => {
-      logger.log("signup_failure", {
-        email: email,
-        name: name,
-        error_message: errorMessage,
-        ...getPageInfo(),
-      });
-    },
-    [getPageInfo]
-  );
-
-  const trackLoginLinkClick = useCallback(() => {
-    logger.log("login_link_click", {
-      ...getPageInfo(),
-    });
-  }, [getPageInfo]);
-
-  // === 페이지 뷰 이벤트 ===
-  const trackPageView = useCallback((pageName?: string) => {
-    logger.log("page_view", {
-      page:
-        pageName ||
-        (typeof window !== "undefined" ? window.location.pathname : ""),
-      page_title: typeof document !== "undefined" ? document.title : "",
-      referrer: typeof document !== "undefined" ? document.referrer : "",
+    logger.log("click_interaction", {
+      interaction_type: "button_logout",
+      target_id: "logout",
+      target_name: "로그아웃",
+      source_component: "profile_menu",
     });
   }, []);
 
   return {
-    // 상품 관련
-    trackRecommendedProductClick,
+    trackScreenView,
     trackProductClick,
+    trackRecommendedProductClick,
     trackProductView,
-    trackProductDetailView,
-
-    // 장바구니 관련
-    trackCartAdd,
-    trackCartView,
-    trackCartRemove,
-    trackOrderInitiate,
-
-    // 필터 관련
-    trackFilterChange,
-
-    // 프로모션/이벤트 관련
-    trackPromotionView,
-    trackEventView,
-
-    // 프로필 페이지 관련
-    trackProfileEditClick,
-    trackOrderHistoryClick,
+    trackCategoryClick,
+    trackSortOptionSelect,
+    trackSearchSubmit,
+    trackAddToCart,
+    trackIncreaseQuantity,
+    trackDecreaseQuantity,
+    trackRemoveItem,
+    trackGoToCheckout,
+    trackApplyCoupon,
+    trackConfirmPayment,
+    trackPromotionClick,
+    trackEventClick,
+    trackEventParticipate,
+    trackCouponDownload,
+    trackAdBannerClick,
+    trackNavLinkClick,
+    trackViewMore,
+    trackPopupClose,
+    trackLoginSubmit,
+    trackSignupSubmit,
     trackLogout,
-
-    // 로그인 페이지 관련
-    trackLoginAttempt,
-    trackLoginSuccess,
-    trackLoginFailure,
-    trackSignupLinkClick,
-
-    // 회원가입 페이지 관련
-    trackSignupAttempt,
-    trackSignupSuccess,
-    trackSignupFailure,
-    trackLoginLinkClick,
-
-    // 페이지 관련
-    trackPageView,
   };
 };
