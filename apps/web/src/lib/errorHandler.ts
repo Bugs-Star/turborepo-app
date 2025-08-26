@@ -44,7 +44,6 @@ export interface ErrorContext {
   session_id: string;
   browser: string;
   timestamp: string;
-  stack_trace?: string;
   endpoint?: string;
   request_data?: any;
   response_data?: any;
@@ -203,7 +202,6 @@ const collectErrorContext = (error: any, context: string): ErrorContext => {
     session_id: getSessionId(),
     browser: typeof navigator !== "undefined" ? navigator.userAgent : "",
     timestamp: new Date().toISOString(),
-    stack_trace: error.stack,
     endpoint: error.config?.url,
     request_data: sanitizedError.config?.data,
     response_data: sanitizedError.response?.data,
@@ -296,17 +294,20 @@ export class ErrorHandler {
       // 4. 로깅 (중요도에 따라)
       if (classification.isCritical) {
         // 즉시 전송 (중요한 에러)
-        logger.log("critical_error", {
+        logger.log("click_interaction", {
+          interaction_type: "critical_error",
+          target_id: "error_handler",
+          target_name: "치명적 오류",
+          source_component: "error_handler",
           ...errorContext,
           priority: classification.priority,
           user_friendly_message: classification.userFriendlyMessage,
         });
       } else {
-        // 배치 전송 (일반적인 에러)
-        logger.log("error", {
-          ...errorContext,
-          priority: classification.priority,
-          user_friendly_message: classification.userFriendlyMessage,
+        // 배치 전송 (일반적인 에러) - 일반 로그로 처리
+        logger.log("view_screen", {
+          screen_name: "error_page",
+          previous_screen_name: errorContext.page,
         });
       }
 
@@ -318,7 +319,11 @@ export class ErrorHandler {
 
       // 최소한의 로깅 시도 (에러 핸들러 자체 에러는 항상 중요)
       try {
-        logger.log("critical_error", {
+        logger.log("click_interaction", {
+          interaction_type: "critical_error",
+          target_id: "error_handler",
+          target_name: "에러 핸들러 실패",
+          source_component: "error_handler",
           error_message: "Error handler failed",
           original_error: error.message,
           handler_error:

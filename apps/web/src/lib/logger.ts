@@ -100,7 +100,7 @@ const createLogger = (): Logger => {
   } = {
     memoryQueue: [],
     batchSize: 20,
-    flushInterval: 5000,
+    flushInterval: 10000,
     offlineStorage: new OfflineLogStorage(),
     isOnline: navigator.onLine,
   };
@@ -151,8 +151,11 @@ const createLogger = (): Logger => {
 
       // 성공적으로 전송된 로그들만 마킹
       if (successCount > 0) {
-        const logIds = Array.from({ length: successCount }, (_, i) => i + 1);
-        await state.offlineStorage.markLogsAsSent(logIds);
+        // 실제 전송된 로그들의 ID를 가져와서 마킹
+        const sentLogIds = await state.offlineStorage.getLogIdsByPayloads(
+          pendingLogs.slice(0, successCount)
+        );
+        await state.offlineStorage.markLogsAsSent(sentLogIds);
         console.log(`✅ ${successCount}개 오프라인 로그 전송 완료`);
       }
 
@@ -247,23 +250,22 @@ const createLogger = (): Logger => {
 
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3002";
+      const data = JSON.stringify({ logs: logs });
 
-      // sendBeacon 우선 시도
+      // sendBeacon 우선 시도 (페이지 언로드 시 안전)
       if (navigator.sendBeacon) {
-        const success = navigator.sendBeacon(
-          `${apiUrl}/logs/immediate`,
-          JSON.stringify({ logs: logs })
-        );
+        const blob = new Blob([data], { type: "application/json" });
+        const success = navigator.sendBeacon(`${apiUrl}/logs/immediate`, blob);
         if (success) return;
       }
 
-      // fetch로 재시도
+      // fallback으로 fetch 사용
       const response = await fetch(`${apiUrl}/logs/immediate`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ logs: logs }),
+        body: data,
       });
 
       if (!response.ok) {

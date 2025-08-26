@@ -156,39 +156,15 @@ export const useAnalytics = () => {
     });
   }, []);
 
-  const trackGoToCheckout = useCallback(
+  const trackCreateOrder = useCallback(
     (totalAmount: number, itemCount: number) => {
       logger.log("click_interaction", {
-        interaction_type: "button_go_to_checkout",
-        target_id: "checkout",
+        interaction_type: "button_create_order",
+        target_id: "order",
         target_name: "주문하기",
         source_component: "cart_page",
         totalAmount: totalAmount,
         itemCount: itemCount,
-      });
-    },
-    []
-  );
-
-  const trackApplyCoupon = useCallback((couponCode: string) => {
-    logger.log("click_interaction", {
-      interaction_type: "button_apply_coupon",
-      target_id: couponCode,
-      target_name: "쿠폰 적용",
-      source_component: "checkout_page",
-      couponCode: couponCode,
-    });
-  }, []);
-
-  const trackConfirmPayment = useCallback(
-    (paymentMethod: string, finalAmount: number) => {
-      logger.log("click_interaction", {
-        interaction_type: "button_confirm_payment",
-        target_id: "payment",
-        target_name: "결제하기",
-        source_component: "checkout_page",
-        paymentMethod: paymentMethod,
-        finalAmount: finalAmount,
       });
     },
     []
@@ -317,6 +293,67 @@ export const useAnalytics = () => {
     });
   }, []);
 
+  // === 로그인/회원가입 실패 이벤트 (즉시 전송) ===
+  const trackLoginFailure = useCallback(
+    (email: string, errorMessage: string) => {
+      logger.log("click_interaction", {
+        interaction_type: "login_failure",
+        target_id: "login",
+        target_name: "로그인 실패",
+        source_component: "login_form",
+        email: email,
+        error_message: errorMessage,
+      });
+    },
+    []
+  );
+
+  const trackSignupFailure = useCallback(
+    (email: string, name: string, errorMessage: string) => {
+      logger.log("click_interaction", {
+        interaction_type: "signup_failure",
+        target_id: "signup",
+        target_name: "회원가입 실패",
+        source_component: "signup_form",
+        email: email,
+        name: name,
+        error_message: errorMessage,
+      });
+    },
+    []
+  );
+
+  const trackSignupAttempt = useCallback((email: string, name: string) => {
+    logger.log("click_interaction", {
+      interaction_type: "signup_attempt",
+      target_id: "signup",
+      target_name: "회원가입 시도",
+      source_component: "signup_form",
+      email: email,
+      name: name,
+    });
+  }, []);
+
+  const trackSignupSuccess = useCallback((email: string, name: string) => {
+    logger.log("click_interaction", {
+      interaction_type: "signup_success",
+      target_id: "signup",
+      target_name: "회원가입 성공",
+      source_component: "signup_form",
+      email: email,
+      name: name,
+    });
+  }, []);
+
+  const trackLoginLinkClick = useCallback(() => {
+    logger.log("click_interaction", {
+      interaction_type: "login_link",
+      target_id: "login_link",
+      target_name: "로그인 링크",
+      source_component: "signup_form",
+    });
+  }, []);
+
   return {
     trackScreenView,
     trackProductClick,
@@ -329,9 +366,7 @@ export const useAnalytics = () => {
     trackIncreaseQuantity,
     trackDecreaseQuantity,
     trackRemoveItem,
-    trackGoToCheckout,
-    trackApplyCoupon,
-    trackConfirmPayment,
+    trackCreateOrder,
     trackPromotionClick,
     trackEventClick,
     trackEventParticipate,
@@ -343,5 +378,10 @@ export const useAnalytics = () => {
     trackLoginSubmit,
     trackSignupSubmit,
     trackLogout,
+    trackLoginFailure,
+    trackSignupFailure,
+    trackSignupAttempt,
+    trackSignupSuccess,
+    trackLoginLinkClick,
   };
 };

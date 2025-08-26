@@ -3,7 +3,7 @@ import { CartItemUI } from "@/types/cart";
 import { useAnalytics } from "./useAnalytics";
 
 export const useCartAnalyticsActions = () => {
-  const { trackRemoveItem, trackGoToCheckout } = useAnalytics();
+  const { trackRemoveItem, trackCreateOrder } = useAnalytics();
 
   const handleCartView = useCallback(
     (itemCount: number, totalAmount: number) => {
@@ -23,9 +23,9 @@ export const useCartAnalyticsActions = () => {
 
   const handleOrderInitiate = useCallback(
     (totalAmount: number, itemCount: number, paymentMethod?: string) => {
-      trackGoToCheckout(totalAmount, itemCount);
+      trackCreateOrder(totalAmount, itemCount);
     },
-    [trackGoToCheckout]
+    [trackCreateOrder]
   );
 
   return {
