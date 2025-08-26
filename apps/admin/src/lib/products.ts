@@ -54,6 +54,12 @@ export interface GetProductsResponse {
 export const ProductsService = {
   // 상품 추가
   addProduct: async (payload: AddProductPayload): Promise<ProductResponse> => {
+    console.log({
+      name: payload.productImg?.name,
+      type: payload.productImg?.type,
+      size: payload.productImg?.size,
+    });
+
     const formData = new FormData();
     formData.append("productCode", payload.productCode);
     formData.append("productName", payload.productName);
@@ -111,7 +117,7 @@ export const ProductsService = {
       formData.append("recommendedOrder", payload.recommendedOrder.toString());
     }
 
-    const response = await axiosInstance.post("/admin/products", formData);
+    const response = await axiosInstance.put("/admin/products", formData);
 
     return response.data;
   },

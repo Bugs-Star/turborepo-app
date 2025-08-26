@@ -1,29 +1,20 @@
 "use client";
 import SearchableTable from "@/components/SearchableTable";
-
-interface Customer {
-  name: string;
-  email: string;
-  joined: string;
-  recent: string;
-}
-
-const customers: Customer[] = [
-  {
-    name: "김지연",
-    email: "jiyeon.kim@example.com",
-    joined: "2023-01-15",
-    recent: "최근 구매: 에스프레소",
-  },
-  {
-    name: "이서준",
-    email: "seojun.lee@example.com",
-    joined: "2023-03-10",
-    recent: "신규 주문 생성",
-  },
-];
+import { useGetAllCustomers } from "@/hooks/useGetAllCustomers";
 
 const CustomerList = () => {
+  const { data, isLoading, isError } = useGetAllCustomers(1, 15);
+
+  if (isLoading) return <p>Loading...</p>;
+  if (isError) return <p>Error fetching customer data</p>;
+
+  const customers = data?.users.map((user) => ({
+    name: user.name,
+    email: user.email,
+    joined: new Date(user.createdAt).toLocaleDateString("ko-KR"),
+    recent: "-", // 최근 활동 API 없으니 placeholder
+  }));
+
   return (
     <SearchableTable
       title="고객 목록"
@@ -43,7 +34,7 @@ const CustomerList = () => {
           ),
         },
       ]}
-      data={customers}
+      data={customers || []}
     />
   );
 };
