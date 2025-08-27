@@ -59,31 +59,51 @@ export class OfflineLogStorage {
 
   /**
    * 로그 저장
+   * @deprecated Use saveLogsBatch instead for better performance
    */
   async saveLog(log: NewLogData): Promise<void> {
+    console.warn(
+      "saveLog is deprecated. Use saveLogsBatch instead for better performance."
+    );
+    return this.saveLogsBatch([log]);
+  }
+
+  /**
+   * 로그 배치 저장 (성능 최적화)
+   */
+  async saveLogsBatch(logs: NewLogData[]): Promise<void> {
     if (!this.db) await this.init();
+    if (logs.length === 0) return;
 
     return new Promise((resolve, reject) => {
       const transaction = this.db!.transaction(["logs"], "readwrite");
       const store = transaction.objectStore("logs");
 
-      const storedLog: StoredLog = {
-        ...log,
-        status: "pending",
-        createdAt: new Date().toISOString(),
-      };
+      let completed = 0;
+      const total = logs.length;
 
-      const request = store.add(storedLog);
+      logs.forEach((log) => {
+        const storedLog: StoredLog = {
+          ...log,
+          status: "pending",
+          createdAt: new Date().toISOString(),
+        };
 
-      request.onsuccess = () => {
-        console.log("📝 로그 저장 완료:", log.event_name);
-        resolve();
-      };
+        const request = store.add(storedLog);
 
-      request.onerror = () => {
-        console.error("❌ 로그 저장 실패:", request.error);
-        reject(request.error);
-      };
+        request.onsuccess = () => {
+          completed++;
+          if (completed === total) {
+            console.log(`📝 ${total}개 로그 배치 저장 완료`);
+            resolve();
+          }
+        };
+
+        request.onerror = () => {
+          console.error("❌ 배치 로그 저장 실패:", request.error);
+          reject(request.error);
+        };
+      });
     });
   }
 
@@ -155,6 +175,62 @@ export class OfflineLogStorage {
         };
         getRequest.onerror = () => reject(getRequest.error);
       });
+    });
+  }
+
+  /**
+   * 전송 완료된 로그들 배치 마킹 (성능 최적화)
+   */
+  async markLogsAsSentBatch(logIds: number[]): Promise<void> {
+    if (!this.db) await this.init();
+    if (logIds.length === 0) return;
+
+    return new Promise((resolve, reject) => {
+      const transaction = this.db!.transaction(["logs"], "readwrite");
+      const store = transaction.objectStore("logs");
+
+      // 한 번에 모든 로그 조회
+      const getAllRequest = store.getAll();
+
+      getAllRequest.onsuccess = () => {
+        const allLogs = getAllRequest.result as StoredLog[];
+        const logsToUpdate = allLogs.filter(
+          (log) => log.id && logIds.includes(log.id)
+        );
+
+        if (logsToUpdate.length === 0) {
+          console.log("⚠️ 마킹할 로그를 찾을 수 없습니다");
+          resolve();
+          return;
+        }
+
+        let completed = 0;
+        const total = logsToUpdate.length;
+
+        // 배치로 상태 업데이트
+        logsToUpdate.forEach((log) => {
+          log.status = "sent";
+          const putRequest = store.put(log);
+
+          putRequest.onsuccess = () => {
+            completed++;
+            if (completed === total) {
+              console.log(`✅ ${total}개 로그 배치 마킹 완료`);
+              resolve();
+            }
+          };
+
+          putRequest.onerror = () => {
+            console.error("❌ 로그 마킹 실패:", putRequest.error);
+            reject(putRequest.error);
+          };
+        });
+      };
+
+      getAllRequest.onerror = () => {
+        console.error("❌ 로그 조회 실패:", getAllRequest.error);
+        reject(getAllRequest.error);
+      };
     });
   }
 

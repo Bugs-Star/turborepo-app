@@ -28,36 +28,34 @@ export const AuthGuard = ({
   const { showWarning } = useToast();
 
   // 인증 상태 확인
-  const verifyAuth = useCallback(async () => {
+  const verifyAuth = async () => {
     if (!isClient) return;
 
     try {
       const isValid = await checkAuth();
       if (!isValid) {
         showWarning("로그인이 필요한 서비스입니다.");
-        // 잠시 로딩 화면을 보여주기 위해 약간의 지연
-        const timer = setTimeout(() => {
+        // 사용자가 경고 메시지를 읽을 수 있도록 적절한 지연
+        setTimeout(() => {
           router.push("/login");
-        }, 800);
-
-        return () => clearTimeout(timer);
+        }, 400);
       } else {
         setIsCheckingAuth(false);
       }
     } catch (error) {
       console.error("인증 확인 중 오류:", error);
       showWarning("로그인이 필요한 서비스입니다.");
-      const timer = setTimeout(() => {
+      setTimeout(() => {
         router.push("/login");
-      }, 800);
-
-      return () => clearTimeout(timer);
+      }, 400);
     }
-  }, [router, isClient, checkAuth, showWarning]);
+  };
 
   useEffect(() => {
-    verifyAuth();
-  }, [verifyAuth]);
+    if (isClient) {
+      verifyAuth();
+    }
+  }, [isClient]);
 
   // 서버에서는 항상 로딩 상태로 시작하여 하이드레이션 오류 방지
   if (!isClient) {
