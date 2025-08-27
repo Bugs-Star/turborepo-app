@@ -1,5 +1,6 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 import { handleError } from "./errorHandler";
+import { AxiosErrorResponse } from "@/types";
 
 // API 기본 설정
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3002";
@@ -34,7 +35,7 @@ const processQueue = (error: unknown, token: string | null = null) => {
 };
 
 // 토큰 갱신 처리 함수 (단순화)
-const handleTokenRefresh = async (originalRequest: any) => {
+const handleTokenRefresh = async (originalRequest: AxiosRequestConfig) => {
   // Zustand store에서 토큰 가져오기
   const { useAuthStore } = await import("@/stores/authStore");
   const refreshToken = useAuthStore.getState().tokens.refreshToken;
@@ -68,12 +69,15 @@ const handleTokenRefresh = async (originalRequest: any) => {
     processQueue(null, accessToken);
 
     // 원래 요청 재시도
-    originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+    if (originalRequest.headers) {
+      originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+    }
     return apiClient(originalRequest);
   } catch (refreshError: unknown) {
     console.error(
       "❌ 토큰 갱신 실패:",
-      (refreshError as any)?.response?.data || (refreshError as Error)?.message
+      (refreshError as AxiosErrorResponse)?.response?.data ||
+        (refreshError as Error)?.message
     );
 
     // 사용자에게 알림
