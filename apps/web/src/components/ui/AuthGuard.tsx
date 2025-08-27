@@ -28,7 +28,7 @@ export const AuthGuard = ({
   const { showWarning } = useToast();
 
   // 인증 상태 확인
-  const verifyAuth = useCallback(async () => {
+  const verifyAuth = async () => {
     if (!isClient) return;
 
     try {
@@ -53,11 +53,13 @@ export const AuthGuard = ({
 
       return () => clearTimeout(timer);
     }
-  }, [router, isClient, checkAuth, showWarning]);
+  };
 
   useEffect(() => {
-    verifyAuth();
-  }, [verifyAuth]);
+    if (isClient) {
+      verifyAuth();
+    }
+  }, [isClient]);
 
   // 서버에서는 항상 로딩 상태로 시작하여 하이드레이션 오류 방지
   if (!isClient) {
