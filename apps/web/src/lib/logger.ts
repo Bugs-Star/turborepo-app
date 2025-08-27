@@ -149,7 +149,7 @@ const createLogger = (): Logger => {
       process.env.NEXT_PUBLIC_LOG_FLUSH_INTERVAL || "10000"
     ),
     offlineStorage: new OfflineLogStorage(),
-    isOnline: navigator.onLine,
+    isOnline: typeof navigator !== "undefined" ? navigator.onLine : true,
     performanceMetrics: {
       totalLogsSent: 0,
       totalLogsStored: 0,
@@ -255,7 +255,7 @@ const createLogger = (): Logger => {
       // IndexedDB의 pending 로그들을 sendBeacon으로 전송 시도
       try {
         const pendingLogs = await state.offlineStorage.getPendingLogs();
-        if (pendingLogs.length > 0 && navigator.sendBeacon) {
+        if (pendingLogs.length > 0 && typeof navigator !== "undefined" && navigator.sendBeacon) {
           const apiUrl =
             process.env.NEXT_PUBLIC_API_URL || "http://localhost:3002";
           const success = navigator.sendBeacon(
@@ -309,7 +309,7 @@ const createLogger = (): Logger => {
         const data = JSON.stringify({ logs: logs });
 
         // sendBeacon 우선 시도 (페이지 언로드 시 안전)
-        if (navigator.sendBeacon) {
+        if (typeof navigator !== "undefined" && navigator.sendBeacon) {
           const blob = new Blob([data], { type: "application/json" });
           const success = navigator.sendBeacon(
             `${apiUrl}/logs/immediate`,
