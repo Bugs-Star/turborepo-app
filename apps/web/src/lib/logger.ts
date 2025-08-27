@@ -50,7 +50,12 @@ const chunk = <T>(array: T[], size: number): T[][] => {
  * 성능 메트릭 업데이트
  */
 const updatePerformanceMetrics = (
-  metrics: any,
+  metrics: {
+    totalLogsSent: number;
+    totalLogsStored: number;
+    averageSendTime: number;
+    lastSendTime: number;
+  },
   logsCount: number,
   sendTime: number,
   isStored: boolean = false

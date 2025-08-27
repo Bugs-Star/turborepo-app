@@ -16,12 +16,12 @@ const apiClient: AxiosInstance = axios.create({
 // 토큰 갱신 중인지 확인하는 플래그
 let isRefreshing = false;
 let failedQueue: Array<{
-  resolve: (value?: any) => void;
-  reject: (error?: any) => void;
+  resolve: (value?: unknown) => void;
+  reject: (error?: unknown) => void;
 }> = [];
 
 // 대기 중인 요청들을 처리하는 함수
-const processQueue = (error: any, token: string | null = null) => {
+const processQueue = (error: unknown, token: string | null = null) => {
   failedQueue.forEach(({ resolve, reject }) => {
     if (error) {
       reject(error);
@@ -70,10 +70,10 @@ const handleTokenRefresh = async (originalRequest: any) => {
     // 원래 요청 재시도
     originalRequest.headers.Authorization = `Bearer ${accessToken}`;
     return apiClient(originalRequest);
-  } catch (refreshError: any) {
+  } catch (refreshError: unknown) {
     console.error(
       "❌ 토큰 갱신 실패:",
-      refreshError.response?.data || refreshError.message
+      (refreshError as any)?.response?.data || (refreshError as Error)?.message
     );
 
     // 사용자에게 알림

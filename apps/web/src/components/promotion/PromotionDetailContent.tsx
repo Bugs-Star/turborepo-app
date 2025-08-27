@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { Promotion } from "@/lib/services";
 
 interface PromotionDetailContentProps {
@@ -19,10 +20,11 @@ export default function PromotionDetailContent({
     <div className="flex-1">
       {/* 상단 이미지 섹션 - 이미지를 배경으로 사용 */}
       <div className="h-64 relative">
-        <img
+        <Image
           src={promotion.promotionImg}
           alt={promotion.title}
-          className="w-full h-full object-cover"
+          fill
+          className="object-cover"
         />
       </div>
 

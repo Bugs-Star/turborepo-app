@@ -186,7 +186,7 @@ export const orderService = {
   },
 
   // 주문 생성
-  createOrder: async (orderData: any) => {
+  createOrder: async (orderData: { paymentMethod: string }) => {
     return await api.post("/order", orderData);
   },
 

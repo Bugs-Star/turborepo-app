@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { Event } from "@/lib/services";
 
 interface EventSectionProps {
@@ -22,9 +23,11 @@ export default function EventSection({
             onClick={() => onEventClick?.(event)}
           >
             <div className="flex-shrink-0">
-              <img
+              <Image
                 src={event.eventImg}
                 alt={event.title}
+                width={64}
+                height={64}
                 className="w-16 h-16 rounded-lg object-cover"
               />
             </div>

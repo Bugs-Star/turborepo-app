@@ -20,9 +20,11 @@ export const useInfiniteProductFetch = (
 
   // InfiniteData 타입 가드
   const isInfiniteData = (
-    data: any
+    data: unknown
   ): data is InfiniteData<ProductsResponse> => {
-    return data && "pages" in data;
+    return Boolean(
+      data && typeof data === "object" && data !== null && "pages" in data
+    );
   };
 
   // 모든 페이지의 상품들을 하나의 배열로 합치기

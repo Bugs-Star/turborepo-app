@@ -7,7 +7,7 @@ export const useErrorHandler = () => {
   const showToastRef = useRef(showToast);
   showToastRef.current = showToast;
 
-  const handleError = useCallback((error: any, fallbackMessage: string) => {
+  const handleError = useCallback((error: Error, fallbackMessage: string) => {
     // 통합 에러 핸들러로 에러 처리
     handleError(error, "GENERAL_ERROR");
 

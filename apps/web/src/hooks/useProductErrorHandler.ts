@@ -26,31 +26,31 @@ export const useProductErrorHandler = () => {
   const { handleError } = useErrorHandler();
 
   const handleProductError = useCallback(
-    (error: any, context: ProductErrorContext, customMessage?: string) => {
+    (error: unknown, context: ProductErrorContext, customMessage?: string) => {
       const defaultMessage = PRODUCT_ERROR_MESSAGES[context];
       const message = customMessage || defaultMessage;
 
-      handleError(error, message);
+      handleError(error as Error, message);
     },
     [handleError]
   );
 
   const handleProductListError = useCallback(
-    (error: any) => {
+    (error: unknown) => {
       handleProductError(error, "products-list");
     },
     [handleProductError]
   );
 
   const handleProductDetailError = useCallback(
-    (error: any) => {
+    (error: unknown) => {
       handleProductError(error, "product-detail");
     },
     [handleProductError]
   );
 
   const handleRecommendedMenuError = useCallback(
-    (error: any) => {
+    (error: unknown) => {
       handleProductError(error, "recommended-menu");
     },
     [handleProductError]

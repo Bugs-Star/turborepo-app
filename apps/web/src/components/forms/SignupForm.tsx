@@ -45,9 +45,9 @@ export default function SignupForm() {
         setTimeout(() => {
           window.location.href = "/home";
         }, 1500);
-      } catch (error: any) {
+      } catch (error: unknown) {
         // 통합 에러 핸들러로 에러 처리
-        handleError(error, "SIGNUP_FORM");
+        handleError(error as Error, "SIGNUP_FORM");
 
         // 사용자에게 친화적인 메시지 표시
         const errorMessage = getUserFriendlyMessage(error);

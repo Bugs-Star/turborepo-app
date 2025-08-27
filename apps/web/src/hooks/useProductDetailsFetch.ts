@@ -47,7 +47,7 @@ export const useProductDetailsFetch = (
     if (product && options.onSuccess) {
       options.onSuccess(product);
     }
-  }, [product, options.onSuccess]);
+  }, [product, options.onSuccess, options]);
 
   // onError 콜백 처리
   useEffect(() => {
@@ -56,7 +56,7 @@ export const useProductDetailsFetch = (
       options.onError(errorMessage);
       console.error("상품 조회 오류:", error);
     }
-  }, [error, options.onError]);
+  }, [error, options.onError, options]);
 
   // 상품이 없을 때 에러 처리
   const finalError = error

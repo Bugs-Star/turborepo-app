@@ -45,8 +45,8 @@ export interface ErrorContext {
   browser: string;
   timestamp: string;
   endpoint?: string;
-  request_data?: any;
-  response_data?: any;
+  request_data?: unknown;
+  response_data?: unknown;
 }
 
 /**

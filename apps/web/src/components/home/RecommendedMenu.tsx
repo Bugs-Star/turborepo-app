@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { Product } from "@/types";
 import { useRecommendedMenuFetch } from "@/hooks/useRecommendedMenuFetch";
 import { SectionAsyncWrapper } from "@/components/ui";
@@ -22,9 +23,11 @@ export default function RecommendedMenu({
           onClick={() => onProductClick?.(product)}
         >
           <div className="w-32 h-32 rounded-t-lg overflow-hidden">
-            <img
+            <Image
               src={product.productImg}
               alt={product.productName}
+              width={128}
+              height={128}
               className="w-full h-full object-cover"
             />
           </div>

@@ -64,9 +64,9 @@ export const usePayment = () => {
         setError("주문 처리 중 오류가 발생했습니다.");
         showToast("주문 처리 중 오류가 발생했습니다.", "error");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       // 통합 에러 핸들러로 에러 처리
-      handleError(error, "PAYMENT_PROCESS");
+      handleError(error as Error, "PAYMENT_PROCESS");
 
       // 사용자에게 친화적인 메시지 표시
       const errorMessage = getUserFriendlyMessage(error);

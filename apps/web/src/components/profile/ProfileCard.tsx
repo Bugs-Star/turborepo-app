@@ -1,6 +1,7 @@
 "use client";
 
 import React, { memo } from "react";
+import Image from "next/image";
 import { User } from "lucide-react";
 
 interface ProfileCardProps {
@@ -18,9 +19,11 @@ const ProfileCard: React.FC<ProfileCardProps> = memo(({ user }) => {
       <div className="flex items-center space-x-4">
         <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center">
           {user.profileImg ? (
-            <img
+            <Image
               src={user.profileImg}
               alt={user.name}
+              width={64}
+              height={64}
               className="w-16 h-16 rounded-full object-cover"
             />
           ) : (

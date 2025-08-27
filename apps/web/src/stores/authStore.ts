@@ -195,7 +195,7 @@ export const useAuthStore = create<AuthState>()(
           const user = await authService.getCurrentUser();
           set({ user });
           return true;
-        } catch (error) {
+        } catch {
           // 토큰이 만료된 경우 갱신 시도
           const refreshed = await get().refreshTokens();
           if (refreshed) {
