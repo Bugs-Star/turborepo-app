@@ -7,8 +7,14 @@ export const useRecommendedMenuFetch = () => {
     pageSize: 10,
   });
 
+  // result.data가 ProductsResponse 타입인지 확인
+  const products =
+    "products" in (result.data || {})
+      ? (result.data as any)?.products || []
+      : [];
+
   return {
-    data: { products: result.data?.products || [] },
+    data: { products },
     isLoading: result.isLoading,
     error: result.error?.message || null,
     refetch: result.refetch,

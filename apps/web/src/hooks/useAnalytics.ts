@@ -293,6 +293,24 @@ export const useAnalytics = () => {
     });
   }, []);
 
+  const trackProfileEditClick = useCallback(() => {
+    logger.log("click_interaction", {
+      interaction_type: "button_profile_edit",
+      target_id: "profile_edit",
+      target_name: "프로필 편집",
+      source_component: "profile_menu",
+    });
+  }, []);
+
+  const trackOrderHistoryClick = useCallback(() => {
+    logger.log("click_interaction", {
+      interaction_type: "button_order_history",
+      target_id: "order_history",
+      target_name: "주문 내역",
+      source_component: "profile_menu",
+    });
+  }, []);
+
   // === 로그인/회원가입 실패 이벤트 (즉시 전송) ===
   const trackLoginFailure = useCallback(
     (email: string, errorMessage: string) => {
@@ -378,6 +396,8 @@ export const useAnalytics = () => {
     trackLoginSubmit,
     trackSignupSubmit,
     trackLogout,
+    trackProfileEditClick,
+    trackOrderHistoryClick,
     trackLoginFailure,
     trackSignupFailure,
     trackSignupAttempt,
