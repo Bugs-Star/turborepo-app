@@ -35,10 +35,13 @@ export const useForm = <T extends Record<string, FormFieldValue>>(
     isValid: false,
   };
 
-  // 폼 초기화
+  // 폼 초기화 - 컴포넌트 마운트 시에만 실행
   useEffect(() => {
-    initializeForm(formKey, initialData);
-  }, [formKey, initialData, initializeForm]);
+    // 이미 초기화된 폼이 아닌 경우에만 초기화
+    if (!formData[formKey]) {
+      initializeForm(formKey, initialData);
+    }
+  }, [formKey, formData, initialData, initializeForm]);
 
   // 필드 값 변경
   const setFieldValue = useCallback(
