@@ -37,11 +37,8 @@ export default function ProfileEditForm({ onCancel }: ProfileEditFormProps) {
   } = useProfileImage();
 
   // 로딩 훅들 사용
-  const {
-    isLoading: isInitialLoading,
-    startLoading: startInitialLoading,
-    stopLoading: stopInitialLoading,
-  } = useLoading("profile-initial");
+  const { startLoading: startInitialLoading, stopLoading: stopInitialLoading } =
+    useLoading("profile-initial");
   const { isLoading, startLoading, stopLoading } = useLoading("profile-edit");
 
   const { validateForm, setSubmitting, state } = useProfileForm();

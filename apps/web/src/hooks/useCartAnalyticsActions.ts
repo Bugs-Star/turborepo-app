@@ -5,13 +5,10 @@ import { useAnalytics } from "./useAnalytics";
 export const useCartAnalyticsActions = () => {
   const { trackRemoveItem, trackCreateOrder } = useAnalytics();
 
-  const handleCartView = useCallback(
-    (itemCount: number, totalAmount: number) => {
-      // 장바구니 뷰는 화면 조회로 처리되므로 별도 로깅 불필요
-      // trackScreenView가 이미 호출됨
-    },
-    []
-  );
+  const handleCartView = useCallback(() => {
+    // 장바구니 뷰는 화면 조회로 처리되므로 별도 로깅 불필요
+    // trackScreenView가 이미 호출됨
+  }, []);
 
   const handleCartRemove = useCallback(
     (item: CartItemUI) => {
@@ -22,7 +19,7 @@ export const useCartAnalyticsActions = () => {
   );
 
   const handleOrderInitiate = useCallback(
-    (totalAmount: number, itemCount: number, paymentMethod?: string) => {
+    (totalAmount: number, itemCount: number) => {
       trackCreateOrder(totalAmount, itemCount);
     },
     [trackCreateOrder]

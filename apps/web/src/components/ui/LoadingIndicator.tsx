@@ -14,11 +14,8 @@ export const LoadingIndicator = ({
   children,
   fallback,
 }: LoadingIndicatorProps) => {
-  // loadingKey가 있을 때만 useLoading 호출
-  const { isLoading } =
-    loadingKey && loadingKey.trim() !== ""
-      ? useLoading(loadingKey)
-      : { isLoading: false };
+  // 항상 useLoading 호출 (loadingKey가 없으면 빈 문자열 전달)
+  const { isLoading } = useLoading(loadingKey || "");
 
   if (isLoading) {
     return (
@@ -38,12 +35,8 @@ export const LoadingIndicator = ({
 
 // 특정 로딩 키에 대한 인디케이터
 export const LoadingSpinner = ({ loadingKey }: { loadingKey: string }) => {
-  // loadingKey가 유효한지 확인
-  if (!loadingKey || loadingKey.trim() === "") {
-    return null;
-  }
-
-  const { isLoading } = useLoading(loadingKey);
+  // 항상 useLoading 호출 (loadingKey가 없으면 빈 문자열 전달)
+  const { isLoading } = useLoading(loadingKey || "");
 
   if (!isLoading) return null;
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import Image from "next/image";
 import { CartItemUI } from "@/types/cart";
 import { Trash2 } from "lucide-react";
 
@@ -36,9 +36,11 @@ export default function CartItem({
       <div className="flex items-center space-x-4">
         {/* Product Image */}
         <div className="flex-shrink-0">
-          <img
+          <Image
             src={item.imageUrl}
             alt={item.name}
+            width={80}
+            height={80}
             className="w-20 h-20 rounded-lg object-cover object-center"
           />
         </div>

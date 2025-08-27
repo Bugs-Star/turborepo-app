@@ -37,24 +37,21 @@ export const useOrderHistoryFetch = () => {
 
   const { isAuthenticated } = useAuthStore();
 
-  const fetchOrderHistory = useCallback(
-    async (page: number = 1, limit: number = 10) => {
-      try {
-        setLoading(true);
-        setError(null);
+  const fetchOrderHistory = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-        const response = await orderService.getOrderHistory();
-        setOrderHistory(response.orders);
-        setPagination(response.pagination);
-      } catch (err) {
-        console.error("주문 내역 조회 실패:", err);
-        setError("주문 내역을 불러오는데 실패했습니다.");
-      } finally {
-        setLoading(false);
-      }
-    },
-    []
-  );
+      const response = await orderService.getOrderHistory();
+      setOrderHistory(response.orders);
+      setPagination(response.pagination);
+    } catch (err) {
+      console.error("주문 내역 조회 실패:", err);
+      setError("주문 내역을 불러오는데 실패했습니다.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     // 인증된 상태일 때만 주문 내역 조회

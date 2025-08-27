@@ -1,9 +1,5 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
-import {
-  normalizeProductImage,
-  normalizeProductsImage,
-} from "@/utils/imageUtils";
-import { handleError, getUserFriendlyMessage } from "./errorHandler";
+import { handleError } from "./errorHandler";
 
 // API 기본 설정
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3002";

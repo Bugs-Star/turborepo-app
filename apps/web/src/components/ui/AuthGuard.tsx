@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, ReactNode, useCallback } from "react";
+import { useEffect, useState, ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { BottomNavigation } from "@/components/layout";
 import { useAuthStore } from "@/stores/authStore";

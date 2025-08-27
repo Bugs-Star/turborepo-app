@@ -29,7 +29,7 @@ const initialState = {
 
 export const usePaymentStore = create<PaymentState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       ...initialState,
 
       setSelectedMethod: (method) => {

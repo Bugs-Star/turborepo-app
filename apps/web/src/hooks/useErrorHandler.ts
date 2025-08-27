@@ -1,6 +1,6 @@
 import { useCallback, useRef } from "react";
 import { useToast } from "@/hooks";
-import { handleError, getUserFriendlyMessage } from "@/lib/errorHandler";
+import { getUserFriendlyMessage } from "@/lib/errorHandler";
 
 export const useErrorHandler = () => {
   const { showToast } = useToast();
