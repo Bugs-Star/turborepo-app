@@ -47,6 +47,48 @@ const chunk = <T>(array: T[], size: number): T[][] => {
 };
 
 /**
+ * 메모리 효율적인 청크 처리 함수
+ * @param array - 처리할 배열
+ * @param size - 각 청크의 크기
+ * @param processor - 각 청크를 처리하는 함수
+ */
+const processInChunks = async <T>(
+  array: T[],
+  size: number,
+  processor: (chunk: T[]) => Promise<void>
+): Promise<void> => {
+  if (size <= 0) {
+    throw new Error("Chunk size must be greater than 0");
+  }
+
+  for (let i = 0; i < array.length; i += size) {
+    const chunk = array.slice(i, Math.min(i + size, array.length));
+    await processor(chunk);
+  }
+};
+
+/**
+ * 성능 메트릭 업데이트
+ */
+const updatePerformanceMetrics = (
+  metrics: any,
+  logsCount: number,
+  sendTime: number,
+  isStored: boolean = false
+) => {
+  metrics.totalLogsSent += logsCount;
+  if (isStored) {
+    metrics.totalLogsStored += logsCount;
+  }
+
+  // 평균 전송 시간 계산
+  const totalTime =
+    metrics.averageSendTime * (metrics.totalLogsSent - logsCount) + sendTime;
+  metrics.averageSendTime = totalTime / metrics.totalLogsSent;
+  metrics.lastSendTime = sendTime;
+};
+
+/**
  * 로컬 스토리지에서 값 가져오기 (SSR 안전)
  */
 const getLocalStorage = (key: string, defaultValue: string): string => {
@@ -82,6 +124,12 @@ interface Logger {
   getQueueSize: () => number;
   forceFlush: () => void;
   flushOfflineLogs: () => Promise<void>;
+  getPerformanceMetrics: () => {
+    totalLogsSent: number;
+    totalLogsStored: number;
+    averageSendTime: number;
+    lastSendTime: number;
+  };
 }
 
 // === 로거 생성 ===
@@ -90,6 +138,13 @@ interface Logger {
  * 스키마 기반 로거 생성
  */
 const createLogger = (): Logger => {
+  // 중요 로그 판별을 위한 Set (O(1) 검색 최적화)
+  const CRITICAL_INTERACTIONS = new Set<InteractionType>([
+    "login_failure",
+    "signup_failure",
+    "critical_error",
+  ]);
+
   const state: {
     memoryQueue: NewLogData[];
     batchSize: number;
@@ -97,12 +152,26 @@ const createLogger = (): Logger => {
     autoFlushInterval?: NodeJS.Timeout;
     offlineStorage: OfflineLogStorage;
     isOnline: boolean;
+    performanceMetrics: {
+      totalLogsSent: number;
+      totalLogsStored: number;
+      averageSendTime: number;
+      lastSendTime: number;
+    };
   } = {
     memoryQueue: [],
-    batchSize: 20,
-    flushInterval: 10000,
+    batchSize: parseInt(process.env.NEXT_PUBLIC_LOG_BATCH_SIZE || "20"),
+    flushInterval: parseInt(
+      process.env.NEXT_PUBLIC_LOG_FLUSH_INTERVAL || "10000"
+    ),
     offlineStorage: new OfflineLogStorage(),
     isOnline: navigator.onLine,
+    performanceMetrics: {
+      totalLogsSent: 0,
+      totalLogsStored: 0,
+      averageSendTime: 0,
+      lastSendTime: 0,
+    },
   };
 
   // 네트워크 상태 감지
@@ -149,13 +218,13 @@ const createLogger = (): Logger => {
         }
       }
 
-      // 성공적으로 전송된 로그들만 마킹
+      // 성공적으로 전송된 로그들만 배치 마킹
       if (successCount > 0) {
-        // 실제 전송된 로그들의 ID를 가져와서 마킹
+        // 실제 전송된 로그들의 ID를 가져와서 배치 마킹
         const sentLogIds = await state.offlineStorage.getLogIdsByPayloads(
           pendingLogs.slice(0, successCount)
         );
-        await state.offlineStorage.markLogsAsSent(sentLogIds);
+        await state.offlineStorage.markLogsAsSentBatch(sentLogIds);
         console.log(`✅ ${successCount}개 오프라인 로그 전송 완료`);
       }
 
@@ -187,17 +256,15 @@ const createLogger = (): Logger => {
     if (!isBrowser()) return;
 
     window.addEventListener("beforeunload", async () => {
-      // 메모리 큐의 로그들을 IndexedDB에 저장
+      // 메모리 큐의 로그들을 IndexedDB에 배치 저장
       if (state.memoryQueue.length > 0) {
         try {
-          for (const log of state.memoryQueue) {
-            await state.offlineStorage.saveLog(log);
-          }
+          await state.offlineStorage.saveLogsBatch(state.memoryQueue);
           console.log(
-            `💾 페이지 언로드 시 ${state.memoryQueue.length}개 로그 저장`
+            `💾 페이지 언로드 시 ${state.memoryQueue.length}개 로그 배치 저장`
           );
         } catch (error) {
-          console.error("❌ 페이지 언로드 시 로그 저장 실패:", error);
+          console.error("❌ 페이지 언로드 시 로그 배치 저장 실패:", error);
         }
       }
 
@@ -233,8 +300,11 @@ const createLogger = (): Logger => {
     sendBatch(logsToSend);
   };
 
-  // 즉시 전송 함수
-  const sendImmediate = async (logs: NewLogData[]): Promise<void> => {
+  // 즉시 전송 함수 (재시도 로직 포함)
+  const sendImmediate = async (
+    logs: NewLogData[],
+    retries = 2
+  ): Promise<void> => {
     if (!isBrowser()) return;
 
     if (process.env.NODE_ENV === "development") {
@@ -248,49 +318,66 @@ const createLogger = (): Logger => {
       });
     }
 
-    try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3002";
-      const data = JSON.stringify({ logs: logs });
-
-      // sendBeacon 우선 시도 (페이지 언로드 시 안전)
-      if (navigator.sendBeacon) {
-        const blob = new Blob([data], { type: "application/json" });
-        const success = navigator.sendBeacon(`${apiUrl}/logs/immediate`, blob);
-        if (success) return;
-      }
-
-      // fallback으로 fetch 사용
-      const response = await fetch(`${apiUrl}/logs/immediate`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: data,
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-    } catch (error) {
-      console.error("❌ 즉시 전송 실패:", error);
-
-      // 실패한 로그들을 IndexedDB에 저장
+    for (let attempt = 1; attempt <= retries; attempt++) {
       try {
-        for (const log of logs) {
-          await state.offlineStorage.saveLog(log);
+        const apiUrl =
+          process.env.NEXT_PUBLIC_API_URL || "http://localhost:3002";
+        const data = JSON.stringify({ logs: logs });
+
+        // sendBeacon 우선 시도 (페이지 언로드 시 안전)
+        if (navigator.sendBeacon) {
+          const blob = new Blob([data], { type: "application/json" });
+          const success = navigator.sendBeacon(
+            `${apiUrl}/logs/immediate`,
+            blob
+          );
+          if (success) return;
         }
-        console.log(
-          `💾 즉시 전송 실패 로그 ${logs.length}개를 오프라인 저장소에 저장`
-        );
-      } catch (dbError) {
-        console.error("❌ IndexedDB 저장 실패:", dbError);
+
+        // fallback으로 fetch 사용
+        const response = await fetch(`${apiUrl}/logs/immediate`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: data,
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+
+        // 성공 시 즉시 반환
+        return;
+      } catch (error) {
+        console.error(`❌ 즉시 전송 실패 (시도 ${attempt}/${retries}):`, error);
+
+        // 마지막 시도가 아니면 짧은 지연 후 재시도
+        if (attempt < retries) {
+          const delay = 500 * attempt; // 500ms, 1000ms
+          console.log(`🔄 ${delay}ms 후 재시도...`);
+          await new Promise((resolve) => setTimeout(resolve, delay));
+          continue;
+        }
+
+        // 모든 재시도 실패 시 IndexedDB에 저장
+        try {
+          await state.offlineStorage.saveLogsBatch(logs);
+          console.log(
+            `💾 즉시 전송 실패 로그 ${logs.length}개를 오프라인 저장소에 배치 저장`
+          );
+        } catch (dbError) {
+          console.error("❌ IndexedDB 배치 저장 실패:", dbError);
+        }
       }
     }
   };
 
-  // 배치 전송 함수
-  const sendBatch = async (logs: NewLogData[]): Promise<void> => {
+  // 배치 전송 함수 (재시도 로직 포함)
+  const sendBatch = async (logs: NewLogData[], retries = 3): Promise<void> => {
     if (!isBrowser()) return;
+
+    const startTime = performance.now();
 
     if (process.env.NODE_ENV === "development") {
       console.log("📊 배치 전송:", {
@@ -303,36 +390,63 @@ const createLogger = (): Logger => {
       });
     }
 
-    try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3002";
-
-      const response = await fetch(`${apiUrl}/logs/batch`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ logs: logs }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-    } catch (error) {
-      console.error("❌ 배치 전송 실패:", error);
-
-      // 실패한 로그들을 IndexedDB에 저장
+    for (let attempt = 1; attempt <= retries; attempt++) {
       try {
-        for (const log of logs) {
-          await state.offlineStorage.saveLog(log);
-        }
-        console.log(`💾 ${logs.length}개 로그를 오프라인 저장소에 저장`);
-      } catch (dbError) {
-        console.error("❌ IndexedDB 저장 실패:", dbError);
-        // 최후의 수단: 메모리에 임시 저장
-        state.memoryQueue.push(...logs);
-      }
+        const apiUrl =
+          process.env.NEXT_PUBLIC_API_URL || "http://localhost:3002";
 
-      throw error;
+        const response = await fetch(`${apiUrl}/logs/batch`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ logs: logs }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+
+        // 성능 메트릭 업데이트
+        const sendTime = performance.now() - startTime;
+        updatePerformanceMetrics(
+          state.performanceMetrics,
+          logs.length,
+          sendTime
+        );
+
+        // 성공 시 즉시 반환
+        return;
+      } catch (error) {
+        console.error(`❌ 배치 전송 실패 (시도 ${attempt}/${retries}):`, error);
+
+        // 마지막 시도가 아니면 지수 백오프로 재시도
+        if (attempt < retries) {
+          const delay = Math.min(1000 * Math.pow(2, attempt - 1), 5000); // 최대 5초
+          console.log(`🔄 ${delay}ms 후 재시도...`);
+          await new Promise((resolve) => setTimeout(resolve, delay));
+          continue;
+        }
+
+        // 모든 재시도 실패 시 IndexedDB에 저장
+        try {
+          await state.offlineStorage.saveLogsBatch(logs);
+          const sendTime = performance.now() - startTime;
+          updatePerformanceMetrics(
+            state.performanceMetrics,
+            logs.length,
+            sendTime,
+            true
+          );
+          console.log(`💾 ${logs.length}개 로그를 오프라인 저장소에 배치 저장`);
+        } catch (dbError) {
+          console.error("❌ IndexedDB 배치 저장 실패:", dbError);
+          // 최후의 수단: 메모리에 임시 저장
+          state.memoryQueue.push(...logs);
+        }
+
+        throw error;
+      }
     }
   };
 
@@ -391,13 +505,7 @@ const createLogger = (): Logger => {
         const payload = log.payload as ClickInteractionPayload;
 
         // 실패/에러 관련 상호작용만 즉시 전송
-        const criticalInteractions: InteractionType[] = [
-          "login_failure",
-          "signup_failure",
-          "critical_error",
-        ];
-
-        return criticalInteractions.includes(payload.interaction_type);
+        return CRITICAL_INTERACTIONS.has(payload.interaction_type);
       }
 
       return false;
@@ -419,6 +527,9 @@ const createLogger = (): Logger => {
 
   // 큐 크기 반환
   const getQueueSize = () => state.memoryQueue.length;
+
+  // 성능 메트릭 반환
+  const getPerformanceMetrics = () => ({ ...state.performanceMetrics });
 
   // 초기화 (클라이언트에서만)
   const initialize = async () => {
@@ -472,6 +583,7 @@ const createLogger = (): Logger => {
     getQueueSize,
     forceFlush,
     flushOfflineLogs,
+    getPerformanceMetrics,
   };
 };
 
