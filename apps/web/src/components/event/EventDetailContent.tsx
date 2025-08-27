@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { Event } from "@/lib/services";
 
 interface EventDetailContentProps {
@@ -17,19 +18,18 @@ export default function EventDetailContent({ event }: EventDetailContentProps) {
     <div className="flex-1">
       {/* 상단 이미지 섹션 - 이미지를 배경으로 사용 */}
       <div className="h-64 relative">
-        <img
+        <Image
           src={event.eventImg}
           alt={event.title}
-          className="w-full h-full object-cover"
+          fill
+          className="object-cover"
         />
       </div>
 
       {/* 하단 상세 정보 섹션 - 흰색 배경 */}
       <div className="px-6 py-6 bg-white">
         {/* 이벤트 제목 */}
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">
-          {event.title}
-        </h2>
+        <h2 className="text-2xl font-bold text-gray-900 mb-4">{event.title}</h2>
 
         {/* 이벤트 기간 */}
         <p className="text-green-700 font-semibold text-sm mb-6">

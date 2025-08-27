@@ -23,8 +23,8 @@ export const useCartFetch = () => {
     // 클라이언트에서만 인증 상태 체크
     enabled: isClient && isAuthenticated,
     // 401 에러는 재시도하지 않음
-    retry: (failureCount, error: any) => {
-      if (error?.response?.status === 401) {
+    retry: (failureCount, error: Error) => {
+      if ((error as any)?.response?.status === 401) {
         return false;
       }
       return failureCount < 1;

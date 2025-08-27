@@ -1,11 +1,14 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { useFormStore } from "@/stores/formStore";
 
 // 기본 폼 훅
 export const useForm = <T extends Record<string, any>>(
   formKey: string,
   initialData: T,
-  validationRules?: Record<string, (value: any, allData?: any) => string | undefined>
+  validationRules?: Record<
+    string,
+    (value: any, allData?: any) => string | undefined
+  >
 ) => {
   const {
     formData,
@@ -20,8 +23,14 @@ export const useForm = <T extends Record<string, any>>(
   } = useFormStore();
 
   // 폼 데이터와 에러 상태 구독
-  const data = (formData[formKey] || {}) as T;
-  const errors = formErrors[formKey] || {};
+  const data = useMemo(
+    () => (formData[formKey] || {}) as T,
+    [formData, formKey]
+  );
+  const errors = useMemo(
+    () => formErrors[formKey] || {},
+    [formErrors, formKey]
+  );
   const state = formStates[formKey] || {
     isSubmitting: false,
     isDirty: false,
@@ -31,7 +40,7 @@ export const useForm = <T extends Record<string, any>>(
   // 폼 초기화
   useEffect(() => {
     initializeForm(formKey, initialData);
-  }, [formKey]);
+  }, [formKey, initialData, initializeForm]);
 
   // 필드 값 변경
   const setFieldValue = useCallback(

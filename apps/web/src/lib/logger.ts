@@ -47,31 +47,15 @@ const chunk = <T>(array: T[], size: number): T[][] => {
 };
 
 /**
- * 메모리 효율적인 청크 처리 함수
- * @param array - 처리할 배열
- * @param size - 각 청크의 크기
- * @param processor - 각 청크를 처리하는 함수
- */
-const processInChunks = async <T>(
-  array: T[],
-  size: number,
-  processor: (chunk: T[]) => Promise<void>
-): Promise<void> => {
-  if (size <= 0) {
-    throw new Error("Chunk size must be greater than 0");
-  }
-
-  for (let i = 0; i < array.length; i += size) {
-    const chunk = array.slice(i, Math.min(i + size, array.length));
-    await processor(chunk);
-  }
-};
-
-/**
  * 성능 메트릭 업데이트
  */
 const updatePerformanceMetrics = (
-  metrics: any,
+  metrics: {
+    totalLogsSent: number;
+    totalLogsStored: number;
+    averageSendTime: number;
+    lastSendTime: number;
+  },
   logsCount: number,
   sendTime: number,
   isStored: boolean = false

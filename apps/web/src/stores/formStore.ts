@@ -2,7 +2,7 @@ import { create } from "zustand";
 
 interface FormState {
   // 폼 데이터들
-  formData: Record<string, Record<string, any>>;
+  formData: Record<string, Record<string, unknown>>;
 
   // 폼 에러들
   formErrors: Record<string, Record<string, string | undefined>>;
@@ -18,7 +18,7 @@ interface FormState {
   >;
 
   // 액션들
-  setFormData: (formKey: string, field: string, value: any) => void;
+  setFormData: (formKey: string, field: string, value: unknown) => void;
   setFormErrors: (
     formKey: string,
     field: string,
@@ -34,12 +34,15 @@ interface FormState {
   ) => void;
 
   // 폼 초기화
-  initializeForm: (formKey: string, initialData: Record<string, any>) => void;
+  initializeForm: (
+    formKey: string,
+    initialData: Record<string, unknown>
+  ) => void;
   resetForm: (formKey: string) => void;
   clearForm: (formKey: string) => void;
 
   // 유틸리티 함수들
-  getFormData: (formKey: string) => Record<string, any>;
+  getFormData: (formKey: string) => Record<string, unknown>;
   getFormErrors: (formKey: string) => Record<string, string | undefined>;
   getFormState: (formKey: string) => {
     isSubmitting: boolean;
@@ -56,7 +59,7 @@ export const useFormStore = create<FormState>((set, get) => ({
   formErrors: {},
   formStates: {},
 
-  setFormData: (formKey: string, field: string, value: any) => {
+  setFormData: (formKey: string, field: string, value: unknown) => {
     set((state) => ({
       formData: {
         ...state.formData,
@@ -110,7 +113,7 @@ export const useFormStore = create<FormState>((set, get) => ({
     }));
   },
 
-  initializeForm: (formKey: string, initialData: Record<string, any>) => {
+  initializeForm: (formKey: string, initialData: Record<string, unknown>) => {
     set((state) => ({
       formData: {
         ...state.formData,

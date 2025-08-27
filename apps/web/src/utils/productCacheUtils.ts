@@ -235,7 +235,7 @@ export const getProductListCache = (
 export const setProductCache = (
   queryClient: QueryClient,
   productId: string,
-  data: any
+  data: unknown
 ) => {
   return queryClient.setQueryData(["product", productId], data);
 };
@@ -247,7 +247,7 @@ export const setProductListCache = (
   queryClient: QueryClient,
   category: string | undefined,
   isRecommended: boolean | undefined,
-  data: any
+  data: unknown
 ) => {
   return queryClient.setQueryData(
     ["products", "list", category, isRecommended],

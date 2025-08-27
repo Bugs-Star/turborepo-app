@@ -204,7 +204,7 @@ export const hasQueryData = (
 /**
  * 캐시 데이터의 타입을 확인합니다.
  */
-export const isQueryDataOfType = <T>(
+export const isQueryDataOfType = (
   queryClient: QueryClient,
   queryKey: string[]
 ): boolean => {

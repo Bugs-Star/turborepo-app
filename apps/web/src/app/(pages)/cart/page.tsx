@@ -13,7 +13,6 @@ import {
   useAnalytics,
   useCartAnalyticsActions,
 } from "@/hooks";
-import { usePaymentStore } from "@/stores/paymentStore";
 
 export default function CartPage() {
   const { cartItems, summary, isLoading, error, isFetching } = useCartFetch();
@@ -21,7 +20,6 @@ export default function CartPage() {
     useCartActions();
   const { isProcessing, handlePaymentClick } = usePayment();
   const { goToMenu } = useNavigation();
-  const { selectedMethod } = usePaymentStore();
 
   // 로거 훅들
   const { trackScreenView } = useAnalytics();
@@ -45,7 +43,7 @@ export default function CartPage() {
   // 장바구니 데이터가 로드되면 장바구니 뷰 로그 (한 번만)
   useEffect(() => {
     if (cartItems && summary && !hasLoggedCartView.current) {
-      handleCartView(summary.totalItems, summary.totalAmount);
+      handleCartView();
       hasLoggedCartView.current = true;
     }
   }, [cartItems, summary, handleCartView, isLoading, isFetching, error]);
@@ -61,7 +59,7 @@ export default function CartPage() {
 
   // 주문 시작 로깅 핸들러
   const handlePaymentClickWithLogging = () => {
-    handleOrderInitiate(total, summary?.totalItems || 0, selectedMethod);
+    handleOrderInitiate(total, summary?.totalItems || 0);
     handlePaymentClick();
   };
 

@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 
 interface ProfileImageSectionProps {
   imagePreview: string;
@@ -16,9 +17,11 @@ const ProfileImageSection: React.FC<ProfileImageSectionProps> = ({
   return (
     <div className="flex flex-col items-center mb-8">
       <div className="relative w-24 h-24 mb-4 group">
-        <img
+        <Image
           src={imagePreview}
           alt="프로필 이미지"
+          width={96}
+          height={96}
           className={`w-full h-full rounded-full object-cover transition-opacity duration-200 ${
             isOptimizing ? "opacity-50" : "opacity-100"
           }`}

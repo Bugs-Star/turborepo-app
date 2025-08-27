@@ -5,11 +5,11 @@ import {
   EventSection,
 } from "@/components/home";
 import { Product } from "@/types";
-import { Event } from "@/lib/services";
+import { Event, Promotion } from "@/lib/services";
 
 interface HomeContentProps {
-  promotions: any[];
-  events: any[];
+  promotions: Promotion[];
+  events: Event[];
   promotionsLoading: boolean;
   onProductClick: (product: Product) => void;
   onPromoClick: (promotionId: string) => void;

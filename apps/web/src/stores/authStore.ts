@@ -24,14 +24,6 @@ interface AuthState {
   checkAuth: () => Promise<boolean>;
 }
 
-// 기본 사용자 정보
-const defaultUser: User = {
-  _id: "",
-  name: "고객",
-  email: "",
-  profileImg: "/images/user.png",
-};
-
 export const useAuthStore = create<AuthState>()(
   persist(
     (set, get) => ({
@@ -79,7 +71,7 @@ export const useAuthStore = create<AuthState>()(
         set({ isLoading: true });
         try {
           // 1. 회원가입 요청
-          const signupResponse = await authService.signup({
+          await authService.signup({
             name,
             email,
             password,
@@ -178,8 +170,8 @@ export const useAuthStore = create<AuthState>()(
             return true;
           }
           return false;
-        } catch (error) {
-          console.error("토큰 갱신 실패:", error);
+        } catch {
+          console.error("토큰 갱신 실패");
           get().clearAuth();
           return false;
         }
@@ -203,7 +195,7 @@ export const useAuthStore = create<AuthState>()(
           const user = await authService.getCurrentUser();
           set({ user });
           return true;
-        } catch (error) {
+        } catch {
           // 토큰이 만료된 경우 갱신 시도
           const refreshed = await get().refreshTokens();
           if (refreshed) {

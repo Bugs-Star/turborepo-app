@@ -65,7 +65,7 @@ export const useDelayedLoading = (key: string, delay: number = 300) => {
     return () => {
       clearTimeout(timeoutId);
     };
-  }, [key, delay, startLoading]);
+  }, [delay, startLoading]);
 
   const stopDelayedLoading = useCallback(() => {
     stopLoading();

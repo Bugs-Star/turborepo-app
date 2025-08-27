@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { ChevronRight, ChevronDown } from "lucide-react";
 import { useExpanded } from "@/hooks";
 
@@ -62,9 +63,11 @@ export default function OrderHistoryItem({ order }: OrderHistoryItemProps) {
             key={`${order._id}-${item.productId}-${index}`}
             className="flex items-center space-x-3"
           >
-            <img
+            <Image
               src={item.productImg}
               alt={item.productName}
+              width={48}
+              height={48}
               className="w-12 h-12 rounded-lg object-cover object-center"
             />
             <div className="flex-1 min-w-0">

@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 interface ProductImageProps {
   src: string;
   alt: string;
@@ -12,10 +14,11 @@ export default function ProductImage({ src, alt }: ProductImageProps) {
 
   return (
     <div className="relative w-full h-80 bg-gray-100">
-      <img
+      <Image
         src={src}
         alt={alt}
-        className="w-full h-full object-cover"
+        fill
+        className="object-cover"
         onError={handleImageError}
       />
       {/* 그라데이션 오버레이 요소 */}

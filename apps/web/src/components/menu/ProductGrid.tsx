@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { Product } from "@/lib";
 import { useRouter } from "next/navigation";
 import {
@@ -39,10 +40,11 @@ function ProductCard({
     >
       {/* Product Image */}
       <div className="aspect-square bg-gray-100 relative overflow-hidden">
-        <img
+        <Image
           src={product.productImg}
           alt={product.productName}
-          className="w-full h-full object-cover"
+          fill
+          className="object-cover"
           onError={handleImageError}
         />
       </div>

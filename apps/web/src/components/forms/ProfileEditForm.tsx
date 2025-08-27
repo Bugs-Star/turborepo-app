@@ -37,11 +37,8 @@ export default function ProfileEditForm({ onCancel }: ProfileEditFormProps) {
   } = useProfileImage();
 
   // 로딩 훅들 사용
-  const {
-    isLoading: isInitialLoading,
-    startLoading: startInitialLoading,
-    stopLoading: stopInitialLoading,
-  } = useLoading("profile-initial");
+  const { startLoading: startInitialLoading, stopLoading: stopInitialLoading } =
+    useLoading("profile-initial");
   const { isLoading, startLoading, stopLoading } = useLoading("profile-edit");
 
   const { validateForm, setSubmitting, state } = useProfileForm();
@@ -68,16 +65,22 @@ export default function ProfileEditForm({ onCancel }: ProfileEditFormProps) {
         if (user.profileImg) {
           setImagePreview(user.profileImg);
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error("프로필 정보 로드 오류:", error);
-        handleError(error, "프로필 정보를 불러오는데 실패했습니다.");
+        handleError(error as Error, "프로필 정보를 불러오는데 실패했습니다.");
       } finally {
         stopInitialLoading();
       }
     };
 
     loadUserProfile();
-  }, [setFieldValue, startInitialLoading, stopInitialLoading, handleError]);
+  }, [
+    setFieldValue,
+    startInitialLoading,
+    stopInitialLoading,
+    handleError,
+    setImagePreview,
+  ]);
 
   const handleSave = async () => {
     // 전체 폼 유효성 검사
@@ -116,12 +119,12 @@ export default function ProfileEditForm({ onCancel }: ProfileEditFormProps) {
 
         showToast("프로필이 성공적으로 업데이트되었습니다.", "success");
         onCancel();
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error("프로필 업데이트 오류:", error);
 
         // 백엔드에서 전달된 에러 메시지가 있으면 사용, 없으면 기본 메시지
         const errorMessage =
-          error.response?.data?.message ||
+          (error as any)?.response?.data?.message ||
           "프로필 업데이트 중 오류가 발생했습니다.";
         showToast(errorMessage, "error");
       } finally {

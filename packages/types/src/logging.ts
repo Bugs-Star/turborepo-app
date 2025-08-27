@@ -53,6 +53,8 @@ export type InteractionType =
   | "button_login_submit"
   | "button_signup_submit"
   | "button_logout"
+  | "button_profile_edit"
+  | "button_order_history"
   // 실패/에러 (즉시 전송)
   | "login_failure"
   | "signup_failure"

@@ -29,6 +29,7 @@ export const useProducts = (options: UseProductsOptions = {}) => {
   // React Hook 규칙을 준수하기 위해 항상 두 Hook을 모두 호출
   const infiniteQuery = useInfiniteQuery({
     queryKey: ["products", "infinite", category, isRecommended],
+    initialPageParam: 1,
     queryFn: async ({ pageParam }) => {
       try {
         return await productService.getProducts({

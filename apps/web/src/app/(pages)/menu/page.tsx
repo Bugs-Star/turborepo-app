@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, Suspense } from "react";
 import { BottomNavigation } from "@/components/layout";
 import { useInfiniteProductFetch } from "@/hooks";
 import ProductGrid from "@/components/menu/ProductGrid";
@@ -9,7 +9,8 @@ import { AsyncWrapper, PageHeader, InfiniteScroll } from "@/components/ui";
 import CategoryFilter from "@/components/menu/CategoryFilter";
 import { useAnalytics, useMenuActions } from "@/hooks";
 
-export default function MenuPage() {
+// useSearchParams를 사용하는 컴포넌트를 분리
+function MenuContent() {
   const searchParams = useSearchParams();
   const initialCategory = searchParams.get("category") || "beverage";
 
@@ -81,7 +82,7 @@ export default function MenuPage() {
           {(filteredProducts, activeCategory) => (
             <div className="flex-1 px-4 pb-6">
               <InfiniteScroll
-                onLoadMore={fetchNextPage}
+                onLoadMore={() => fetchNextPage?.()}
                 hasMore={hasNextPage}
                 loading={isFetchingNextPage}
                 threshold={0.1}
@@ -101,5 +102,26 @@ export default function MenuPage() {
         <BottomNavigation />
       </div>
     </AsyncWrapper>
+  );
+}
+
+// 로딩 컴포넌트
+function MenuLoading() {
+  return (
+    <div className="min-h-screen bg-white flex flex-col pb-20">
+      <PageHeader title="메뉴" />
+      <div className="flex-1 flex items-center justify-center">
+        <div className="text-gray-500">메뉴를 불러오는 중...</div>
+      </div>
+      <BottomNavigation />
+    </div>
+  );
+}
+
+export default function MenuPage() {
+  return (
+    <Suspense fallback={<MenuLoading />}>
+      <MenuContent />
+    </Suspense>
   );
 }
