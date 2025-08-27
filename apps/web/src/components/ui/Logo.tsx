@@ -39,6 +39,7 @@ export default function Logo({
           alt="Bugs Star Logo"
           {...imageProps}
           className={`${image} object-contain`}
+          unoptimized
         />
       </div>
       {title && (

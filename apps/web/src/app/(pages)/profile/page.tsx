@@ -62,14 +62,14 @@ export default function ProfilePage() {
               <ProfileMenuItem
                 icon={User}
                 title="프로필 편집"
-                href="/profile/edit"
+                href="profile/edit"
                 variant="default"
                 onClick={handleProfileEditClick}
               />
               <ProfileMenuItem
                 icon={Clock}
                 title="결제 내역"
-                href="/order-history"
+                href="order-history"
                 variant="default"
                 onClick={handleOrderHistoryClick}
               />

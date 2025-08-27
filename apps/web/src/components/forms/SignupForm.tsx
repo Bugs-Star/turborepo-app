@@ -43,7 +43,7 @@ export default function SignupForm() {
 
         // 로그 전송 완료 후 홈 페이지로 리다이렉트
         setTimeout(() => {
-          window.location.href = "/home";
+          window.location.href = "home";
         }, 1500);
       } catch (error: unknown) {
         // 통합 에러 핸들러로 에러 처리
@@ -132,7 +132,7 @@ export default function SignupForm() {
           <p className="text-gray-600">
             계정이 없으신가요?{" "}
             <Link
-              href="/login"
+              href="login"
               className="text-green-700 hover:underline font-bold"
               onClick={handleLoginLinkClick}
             >

@@ -59,7 +59,7 @@ export const usePayment = () => {
         queryClient.invalidateQueries({ queryKey: ["cart"] });
         queryClient.invalidateQueries({ queryKey: ["cartCount"] });
         // 즉시 주문 내역 페이지로 이동
-        router.push("/order-history");
+        router.push("order-history");
       } else {
         setError("주문 처리 중 오류가 발생했습니다.");
         showToast("주문 처리 중 오류가 발생했습니다.", "error");

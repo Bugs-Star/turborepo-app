@@ -37,7 +37,7 @@ export const AuthGuard = ({
         showWarning("로그인이 필요한 서비스입니다.");
         // 사용자가 경고 메시지를 읽을 수 있도록 적절한 지연
         setTimeout(() => {
-          router.push("/login");
+          router.push("login");
         }, 400);
       } else {
         setIsCheckingAuth(false);
@@ -46,7 +46,7 @@ export const AuthGuard = ({
       console.error("인증 확인 중 오류:", error);
       showWarning("로그인이 필요한 서비스입니다.");
       setTimeout(() => {
-        router.push("/login");
+        router.push("login");
       }, 400);
     }
   }, [isClient, checkAuth, showWarning, router]);

@@ -44,7 +44,7 @@ const handleTokenRefresh = async (originalRequest: AxiosRequestConfig) => {
     processQueue(new Error("No refresh token"), null);
     isRefreshing = false;
     useAuthStore.getState().clearAuth();
-    window.location.href = "/login";
+    window.location.href = "login";
     return Promise.reject(new Error("No refresh token"));
   }
 
@@ -96,7 +96,7 @@ const handleTokenRefresh = async (originalRequest: AxiosRequestConfig) => {
     setTimeout(() => {
       processQueue(refreshError, null);
       useAuthStore.getState().clearAuth();
-      window.location.href = "/login?message=session_expired";
+      window.location.href = "login?message=session_expired";
     }, 3000);
 
     return Promise.reject(refreshError);
