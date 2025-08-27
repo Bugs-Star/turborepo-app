@@ -4,7 +4,8 @@ import {
   RecommendedMenu,
   EventSection,
 } from "@/components/home";
-import { Product, Event } from "@/lib/services";
+import { Product } from "@/types";
+import { Event } from "@/lib/services";
 
 interface HomeContentProps {
   promotions: any[];

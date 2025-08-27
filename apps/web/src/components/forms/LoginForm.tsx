@@ -31,14 +31,14 @@ export default function LoginForm() {
 
     if (validateForm()) {
       // 로그인 시도 로그
-      handleLoginAttempt(formData.email);
+      handleLoginAttempt();
 
       setSubmitting(true);
       try {
         await login(formData.email, formData.password);
 
         // 로그인 성공 로그
-        handleLoginSuccess(formData.email);
+        handleLoginSuccess();
 
         // 큐에 있는 모든 로그를 강제로 전송
         await logger.forceFlush();

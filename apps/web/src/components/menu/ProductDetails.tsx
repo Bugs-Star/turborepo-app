@@ -1,4 +1,4 @@
-import { Product } from "@/lib/services";
+import { Product } from "@/types";
 
 // 가격 포맷팅 함수
 const formatPrice = (price: number) => {

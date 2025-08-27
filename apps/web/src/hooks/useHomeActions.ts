@@ -5,7 +5,7 @@ import { useAnalytics } from "./useAnalytics";
 
 export const useHomeActions = () => {
   const router = useRouter();
-  const { trackRecommendedProductClick, trackPromotionView, trackEventView } =
+  const { trackRecommendedProductClick, trackPromotionClick, trackEventClick } =
     useAnalytics();
 
   const handleProductClick = (product: Product) => {
@@ -16,13 +16,13 @@ export const useHomeActions = () => {
 
   const handlePromoClick = (promotionId: string) => {
     // 로거 호출
-    trackPromotionView({ _id: promotionId, title: "프로모션" } as any);
+    trackPromotionClick({ _id: promotionId, title: "프로모션" } as any);
     router.push(`/promotion/${promotionId}`);
   };
 
   const handleEventClick = (event: Event) => {
     // 로거 호출
-    trackEventView(event);
+    trackEventClick(event);
     router.push(`/event/${event._id}`);
   };
 

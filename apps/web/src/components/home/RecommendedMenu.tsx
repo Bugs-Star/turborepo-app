@@ -1,6 +1,6 @@
 "use client";
 
-import { Product } from "@/lib/services";
+import { Product } from "@/types";
 import { useRecommendedMenuFetch } from "@/hooks/useRecommendedMenuFetch";
 import { SectionAsyncWrapper } from "@/components/ui";
 
@@ -15,7 +15,7 @@ export default function RecommendedMenu({
 
   const renderProductList = () => (
     <div className="flex gap-4 px-6 overflow-x-auto pb-2">
-      {products?.products?.map((product) => (
+      {products?.products?.map((product: Product) => (
         <div
           key={product._id}
           className="flex-shrink-0 w-32 bg-white rounded-lg shadow-sm border cursor-pointer hover:shadow-md transition-shadow"

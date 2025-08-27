@@ -1,4 +1,4 @@
-import { Product } from "@/lib/services";
+import { Product } from "@/types";
 import { ShoppingCart } from "lucide-react";
 import { Button } from "@repo/ui/button";
 import { useCart } from "@/hooks/useCart";

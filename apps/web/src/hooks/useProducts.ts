@@ -7,6 +7,7 @@ import type { ProductQueryParams, ProductsResponse } from "@/types/product";
 interface UseProductsOptions extends ProductQueryParams {
   mode?: "list" | "infinite";
   enabled?: boolean;
+  pageSize?: number;
 }
 
 /**

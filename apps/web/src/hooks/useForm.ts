@@ -5,7 +5,7 @@ import { useFormStore } from "@/stores/formStore";
 export const useForm = <T extends Record<string, any>>(
   formKey: string,
   initialData: T,
-  validationRules?: Record<string, (value: any) => string | undefined>
+  validationRules?: Record<string, (value: any, allData?: any) => string | undefined>
 ) => {
   const {
     formData,
