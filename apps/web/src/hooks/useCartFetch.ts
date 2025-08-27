@@ -2,8 +2,12 @@ import { useQuery } from "@tanstack/react-query";
 import { cartService } from "@/lib/services";
 import { useAuthStore } from "@/stores/authStore";
 import { useState, useEffect } from "react";
-import { CartResponse, CartItemUI, transformCartForUI } from "@/types/cart";
-import { AxiosErrorResponse } from "@/types";
+import {
+  CartResponse,
+  CartItemUI,
+  transformCartForUI,
+  AxiosErrorResponse,
+} from "@/types";
 
 export const useCartFetch = () => {
   const [isClient, setIsClient] = useState(false);
