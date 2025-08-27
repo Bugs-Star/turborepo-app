@@ -16,6 +16,7 @@ import ProfileField from "./ProfileField";
 import { userService } from "@/lib/services";
 import { useToast } from "@/hooks";
 import { useAuthStore } from "@/stores/authStore";
+import { AxiosErrorResponse } from "@/types";
 
 interface ProfileEditFormProps {
   onCancel: () => void;
@@ -124,7 +125,7 @@ export default function ProfileEditForm({ onCancel }: ProfileEditFormProps) {
 
         // 백엔드에서 전달된 에러 메시지가 있으면 사용, 없으면 기본 메시지
         const errorMessage =
-          (error as any)?.response?.data?.message ||
+          (error as AxiosErrorResponse)?.response?.data?.message ||
           "프로필 업데이트 중 오류가 발생했습니다.";
         showToast(errorMessage, "error");
       } finally {

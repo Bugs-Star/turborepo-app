@@ -2,7 +2,12 @@ import { useQuery } from "@tanstack/react-query";
 import { cartService } from "@/lib/services";
 import { useAuthStore } from "@/stores/authStore";
 import { useState, useEffect } from "react";
-import { CartResponse, CartItemUI, transformCartForUI } from "@/types/cart";
+import {
+  CartResponse,
+  CartItemUI,
+  transformCartForUI,
+  AxiosErrorResponse,
+} from "@/types";
 
 export const useCartFetch = () => {
   const [isClient, setIsClient] = useState(false);
@@ -24,7 +29,7 @@ export const useCartFetch = () => {
     enabled: isClient && isAuthenticated,
     // 401 에러는 재시도하지 않음
     retry: (failureCount, error: Error) => {
-      if ((error as any)?.response?.status === 401) {
+      if ((error as AxiosErrorResponse)?.response?.status === 401) {
         return false;
       }
       return failureCount < 1;

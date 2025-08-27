@@ -10,9 +10,8 @@
 
 import { useCallback } from "react";
 import { logger } from "@/lib/logger";
-import { Product } from "@/types";
+import { Product, CartItemUI } from "@/types";
 import { Promotion, Event } from "@/lib/services";
-import { CartItemUI } from "@/types/cart";
 
 export const useAnalytics = () => {
   // === 화면 조회 이벤트 ===

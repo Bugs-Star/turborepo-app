@@ -1,4 +1,5 @@
 import { useProducts } from "./useProducts";
+import { ProductsResponse } from "@/types";
 
 export const useRecommendedMenuFetch = () => {
   const result = useProducts({
@@ -10,7 +11,7 @@ export const useRecommendedMenuFetch = () => {
   // result.data가 ProductsResponse 타입인지 확인
   const products =
     "products" in (result.data || {})
-      ? (result.data as any)?.products || []
+      ? (result.data as ProductsResponse)?.products || []
       : [];
 
   return {

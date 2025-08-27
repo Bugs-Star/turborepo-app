@@ -392,10 +392,11 @@ export class ErrorHandler {
 }
 
 // 편의를 위한 함수들
-export const handleError = (error: any, context: string) =>
+export const handleError = (error: unknown, context: string) =>
   ErrorHandler.handle(error, context);
-export const handleCriticalError = (error: any, context: string) =>
+export const handleCriticalError = (error: unknown, context: string) =>
   ErrorHandler.handleCritical(error, context);
-export const getUserFriendlyMessage = (error: any) =>
+export const getUserFriendlyMessage = (error: unknown) =>
   ErrorHandler.getUserFriendlyMessage(error);
-export const isCriticalError = (error: any) => ErrorHandler.isCritical(error);
+export const isCriticalError = (error: unknown) =>
+  ErrorHandler.isCritical(error);

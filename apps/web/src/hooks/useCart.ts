@@ -1,7 +1,7 @@
 import { cartService } from "@/lib/services";
 import { useToast, useDelayedLoading } from "@/hooks";
 import { useQueryClient } from "@tanstack/react-query";
-import { CartResponse } from "@/types/cart";
+import { CartResponse } from "@/types";
 import {
   updateCartResponse,
   removeItemFromCart,

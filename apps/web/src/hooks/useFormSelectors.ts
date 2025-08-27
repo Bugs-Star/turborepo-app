@@ -1,8 +1,9 @@
 import { useCallback } from "react";
 import { useFormStore } from "@/stores/formStore";
+import { FormFieldValue } from "@/types";
 
 // 특정 폼 데이터만 구독하는 훅
-export const useFormDataSelector = <T = any>(
+export const useFormDataSelector = <T = FormFieldValue>(
   formKey: string,
   field: string
 ): T => {
@@ -33,7 +34,7 @@ export const useFormActions = (formKey: string) => {
   const { setFormData, setFormErrors, setFormState } = useFormStore();
 
   const setFieldValue = useCallback(
-    (field: string, value: any) => {
+    (field: string, value: FormFieldValue) => {
       setFormData(formKey, field, value);
     },
     [formKey, setFormData]

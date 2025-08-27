@@ -1,14 +1,12 @@
 import { useCallback, useEffect, useMemo } from "react";
 import { useFormStore } from "@/stores/formStore";
+import { FormFieldValue, ValidationRule } from "@/types";
 
 // 기본 폼 훅
-export const useForm = <T extends Record<string, any>>(
+export const useForm = <T extends Record<string, FormFieldValue>>(
   formKey: string,
   initialData: T,
-  validationRules?: Record<
-    string,
-    (value: any, allData?: any) => string | undefined
-  >
+  validationRules?: Record<string, ValidationRule>
 ) => {
   const {
     formData,
@@ -37,14 +35,17 @@ export const useForm = <T extends Record<string, any>>(
     isValid: false,
   };
 
-  // 폼 초기화
+  // 폼 초기화 - 컴포넌트 마운트 시에만 실행
   useEffect(() => {
-    initializeForm(formKey, initialData);
-  }, [formKey, initialData, initializeForm]);
+    // 이미 초기화된 폼이 아닌 경우에만 초기화
+    if (!formData[formKey]) {
+      initializeForm(formKey, initialData);
+    }
+  }, [formKey, formData, initialData, initializeForm]);
 
   // 필드 값 변경
   const setFieldValue = useCallback(
-    (field: keyof T, value: any) => {
+    (field: keyof T, value: FormFieldValue) => {
       setFormData(formKey, field as string, value);
 
       // 실시간 에러 제거
@@ -65,7 +66,11 @@ export const useForm = <T extends Record<string, any>>(
 
   // 필드 유효성 검사
   const validateField = useCallback(
-    (field: keyof T, value: any, allData?: any): string | undefined => {
+    (
+      field: keyof T,
+      value: FormFieldValue,
+      allData?: Record<string, FormFieldValue>
+    ): string | undefined => {
       if (!validationRules || !validationRules[field as string]) {
         return undefined;
       }
@@ -145,8 +150,8 @@ export const useForm = <T extends Record<string, any>>(
 // 로그인 폼 전용 훅
 export const useLoginForm = () => {
   const validationRules = {
-    email: (value: string): string | undefined => {
-      if (!value.trim()) {
+    email: (value: FormFieldValue): string | undefined => {
+      if (typeof value !== "string" || !value.trim()) {
         return "이메일을 입력해주세요.";
       }
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
@@ -154,8 +159,8 @@ export const useLoginForm = () => {
       }
       return undefined;
     },
-    password: (value: string): string | undefined => {
-      if (!value.trim()) {
+    password: (value: FormFieldValue): string | undefined => {
+      if (typeof value !== "string" || !value.trim()) {
         return "비밀번호를 입력해주세요.";
       }
       return undefined;
@@ -168,8 +173,8 @@ export const useLoginForm = () => {
 // 회원가입 폼 전용 훅
 export const useSignupForm = () => {
   const validationRules = {
-    name: (value: string): string | undefined => {
-      if (!value.trim()) {
+    name: (value: FormFieldValue): string | undefined => {
+      if (typeof value !== "string" || !value.trim()) {
         return "이름을 입력해주세요.";
       }
       if (value.length < 2) {
@@ -180,8 +185,8 @@ export const useSignupForm = () => {
       }
       return undefined;
     },
-    email: (value: string): string | undefined => {
-      if (!value.trim()) {
+    email: (value: FormFieldValue): string | undefined => {
+      if (typeof value !== "string" || !value.trim()) {
         return "이메일을 입력해주세요.";
       }
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
@@ -189,8 +194,8 @@ export const useSignupForm = () => {
       }
       return undefined;
     },
-    password: (value: string): string | undefined => {
-      if (!value.trim()) {
+    password: (value: FormFieldValue): string | undefined => {
+      if (typeof value !== "string" || !value.trim()) {
         return "비밀번호를 입력해주세요.";
       }
       if (value.length < 5) {
@@ -201,8 +206,11 @@ export const useSignupForm = () => {
       }
       return undefined;
     },
-    confirmPassword: (value: string, allData?: any): string | undefined => {
-      if (!value.trim()) {
+    confirmPassword: (
+      value: FormFieldValue,
+      allData?: Record<string, FormFieldValue>
+    ): string | undefined => {
+      if (typeof value !== "string" || !value.trim()) {
         return "비밀번호 확인을 입력해주세요.";
       }
       if (allData && value !== allData.password) {
@@ -222,8 +230,8 @@ export const useSignupForm = () => {
 // 프로필 편집 폼 전용 훅
 export const useProfileForm = () => {
   const validationRules = {
-    name: (value: string): string | undefined => {
-      if (!value.trim()) {
+    name: (value: FormFieldValue): string | undefined => {
+      if (typeof value !== "string" || !value.trim()) {
         return "이름을 입력해주세요.";
       }
       if (value.length < 2) {
@@ -234,7 +242,10 @@ export const useProfileForm = () => {
       }
       return undefined;
     },
-    currentPassword: (value: string, allData?: any): string | undefined => {
+    currentPassword: (
+      value: FormFieldValue,
+      allData?: Record<string, FormFieldValue>
+    ): string | undefined => {
       const { newPassword } = allData || {};
 
       // 새 비밀번호를 변경하려는 경우에만 현재 비밀번호 필수
@@ -244,24 +255,35 @@ export const useProfileForm = () => {
 
       return undefined;
     },
-    newPassword: (value: string, allData?: any): string | undefined => {
+    newPassword: (
+      value: FormFieldValue,
+      allData?: Record<string, FormFieldValue>
+    ): string | undefined => {
       const { currentPassword } = allData || {};
 
-      if (value && value.length < 5) {
+      if (typeof value === "string" && value && value.length < 5) {
         return "비밀번호는 5글자 이상 입력해주세요.";
       }
-      if (value && value.length > 15) {
+      if (typeof value === "string" && value && value.length > 15) {
         return "비밀번호는 15글자 이하로 입력해주세요.";
       }
 
       // 새 비밀번호가 현재 비밀번호와 동일한지 검증
-      if (value && currentPassword && value === currentPassword) {
+      if (
+        typeof value === "string" &&
+        value &&
+        currentPassword &&
+        value === currentPassword
+      ) {
         return "새 비밀번호는 현재 비밀번호와 달라야 합니다.";
       }
 
       return undefined;
     },
-    confirmPassword: (value: string, allData?: any): string | undefined => {
+    confirmPassword: (
+      value: FormFieldValue,
+      allData?: Record<string, FormFieldValue>
+    ): string | undefined => {
       const { newPassword } = allData || {};
 
       // 새 비밀번호가 입력되지 않았는데 확인 비밀번호가 입력된 경우
