@@ -1,11 +1,11 @@
 import Image from "next/image";
 import { Product } from "@/lib";
 import { useRouter } from "next/navigation";
+import { createImageErrorHandler } from "@/utils";
 import {
-  createImageErrorHandler,
-  formatPrice,
-  getProductStatus,
-} from "@/utils";
+  formatProductPrice,
+  getProductStockStatus,
+} from "@/utils/productUtils";
 
 // 개별 상품 카드 컴포넌트
 interface ProductCardProps {
@@ -20,8 +20,8 @@ function ProductCard({
   onProductClick,
 }: ProductCardProps) {
   const router = useRouter();
-  const productStatus = getProductStatus(product);
-  const isOutOfStock = productStatus.isOutOfStock;
+  const productStatus = getProductStockStatus(product);
+  const isOutOfStock = productStatus.status === "out-of-stock";
 
   const handleImageError = createImageErrorHandler();
 
@@ -55,7 +55,7 @@ function ProductCard({
           {product.productName}
         </h3>
         <p className="text-sm font-semibold text-green-700">
-          {formatPrice(product.price)}
+          {formatProductPrice(product.price)}
         </p>
       </div>
 

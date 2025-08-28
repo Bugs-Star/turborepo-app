@@ -2,11 +2,7 @@ import { Product } from "@/types";
 import { ShoppingCart } from "lucide-react";
 import { Button } from "@repo/ui/button";
 import { useCart } from "@/hooks/useCart";
-
-// 가격 포맷팅 함수
-const formatPrice = (price: number) => {
-  return price.toLocaleString() + "원";
-};
+import { formatProductPrice } from "@/utils/productUtils";
 
 interface AddToCartButtonProps {
   product: Product;
@@ -80,7 +76,7 @@ export default function AddToCartButton({
           <ShoppingCart className="w-5 h-5 mr-2" />
           <span>{isLoading ? "추가 중..." : "장바구니에 추가"}</span>
         </div>
-        <span>{formatPrice(totalPrice)}</span>
+        <span>{formatProductPrice(totalPrice)}</span>
       </Button>
     </div>
   );
