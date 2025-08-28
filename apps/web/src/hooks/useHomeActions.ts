@@ -1,6 +1,6 @@
 import { useRouter } from "next/navigation";
 import { Product } from "@/types";
-import { Event } from "@/lib/services";
+import { Event, Promotion } from "@/lib/services";
 import { useAnalytics } from "./useAnalytics";
 
 export const useHomeActions = () => {
@@ -16,7 +16,7 @@ export const useHomeActions = () => {
 
   const handlePromoClick = (promotionId: string) => {
     // 로거 호출
-    trackPromotionClick({ _id: promotionId, title: "프로모션" } as any);
+    trackPromotionClick({ _id: promotionId, title: "프로모션" } as Promotion);
     router.push(`promotion/${promotionId}`);
   };
 
