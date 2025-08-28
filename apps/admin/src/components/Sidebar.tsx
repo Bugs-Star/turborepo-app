@@ -16,7 +16,7 @@ const menuItems = [
   { label: "이벤트, 추천메뉴 관리", icon: Coffee, path: "/event-menu" },
   { label: "제품 관리", icon: ShoppingCart, path: "/product-management" },
   { label: "고객 관리", icon: Users, path: "/customer-management" },
-  { label: "광고 관리", icon: Megaphone, path: "/ads-management" },
+  { label: "광고 관리", icon: Megaphone, path: "/promo-management" },
   { label: "보고서", icon: BarChart3, path: "/dashboard" },
 ];
 

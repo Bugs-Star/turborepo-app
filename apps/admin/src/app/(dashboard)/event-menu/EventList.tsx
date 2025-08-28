@@ -14,6 +14,7 @@ const EventList = () => {
   useEffect(() => {
     if (data?.events) {
       setEvents(data.events);
+      console.log(data, "데이터");
     }
   }, [data]);
 
