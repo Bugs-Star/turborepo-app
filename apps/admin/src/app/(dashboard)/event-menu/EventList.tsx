@@ -18,6 +18,10 @@ const EventList = () => {
     }
   }, [data]);
 
+  const handleEdit = () => {
+    console.log("edit");
+  };
+
   const handleDelete = (id: string) => {
     setEvents((prev) => prev.filter((item) => item._id !== id));
   };
@@ -56,6 +60,7 @@ const EventList = () => {
             }))
           )
         }
+        onEdit={handleEdit}
         onDelete={handleDelete}
         renderExtra={(item) => (
           <span className="text-gray-600 text-sm">{item.description}</span>

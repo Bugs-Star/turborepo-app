@@ -17,6 +17,7 @@ interface BaseItem {
 interface DraggableListProps<T extends BaseItem> {
   items: T[];
   onReorder: (newItems: T[]) => void;
+  onEdit?: (id: string) => void;
   onDelete?: (id: string) => void;
   renderExtra?: (item: T) => React.ReactNode;
 }
@@ -35,6 +36,7 @@ const formatDate = (iso?: string) => {
 const DraggableList = <T extends BaseItem>({
   items,
   onReorder,
+  onEdit,
   onDelete,
   renderExtra,
 }: DraggableListProps<T>) => {
@@ -104,15 +106,29 @@ const DraggableList = <T extends BaseItem>({
                         </div>
                       )}
 
-                      {/* Delete button */}
-                      {onDelete && (
-                        <button
-                          onClick={() => onDelete(item.id)}
-                          className="bg-[#D74753] text-white px-2 py-1 rounded hover:bg-[#C03F4A] cursor-pointer"
-                        >
-                          삭제
-                        </button>
-                      )}
+                      {/* Actions */}
+                      <div className="flex items-center gap-2">
+                        {onEdit && (
+                          <button
+                            type="button"
+                            onClick={() => onEdit(item.id)}
+                            className="bg-orange-500 text-white px-3 py-1 rounded hover:bg-orange-600 transition cursor-pointer"
+                            aria-label="수정"
+                          >
+                            수정
+                          </button>
+                        )}
+                        {onDelete && (
+                          <button
+                            type="button"
+                            onClick={() => onDelete(item.id)}
+                            className="bg-[#D74753] text-white px-3 py-1 rounded hover:bg-[#C03F4A] transition cursor-pointer"
+                            aria-label="삭제"
+                          >
+                            삭제
+                          </button>
+                        )}
+                      </div>
                     </div>
                   )}
                 </Draggable>
