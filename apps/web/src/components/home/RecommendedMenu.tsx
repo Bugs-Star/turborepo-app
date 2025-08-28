@@ -15,7 +15,7 @@ export default function RecommendedMenu({
   const { data: products, isLoading, error } = useRecommendedMenuFetch();
 
   const renderProductList = () => (
-    <div className="flex gap-4 px-6 overflow-x-auto pb-2">
+    <div className="flex gap-4 px-6 overflow-x-auto pb-2 scrollbar-hide">
       {products?.products?.map((product: Product) => (
         <div
           key={product._id}

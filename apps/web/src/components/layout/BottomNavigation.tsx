@@ -15,7 +15,7 @@ export default function BottomNavigation() {
     <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 py-3 z-50">
       <div className="flex justify-around items-center">
         <Link
-          href="home"
+          href="/home"
           onClick={() => trackNavLinkClick("home", "HOME")}
           className={`flex flex-col items-center transition-colors ${
             pathname === "/home"
@@ -30,7 +30,7 @@ export default function BottomNavigation() {
           <span className="text-xs">HOME</span>
         </Link>
         <Link
-          href="menu"
+          href="/menu"
           onClick={() => trackNavLinkClick("menu", "MENU")}
           className={`flex flex-col items-center transition-colors ${
             pathname === "/menu"
@@ -45,7 +45,7 @@ export default function BottomNavigation() {
           <span className="text-xs">MENU</span>
         </Link>
         <Link
-          href="cart"
+          href="/cart"
           onClick={() => trackNavLinkClick("cart", "CART")}
           className={`flex flex-col items-center transition-colors relative ${
             pathname === "/cart"
@@ -67,7 +67,7 @@ export default function BottomNavigation() {
           <span className="text-xs">CART</span>
         </Link>
         <Link
-          href="profile"
+          href="/profile"
           onClick={() => trackNavLinkClick("profile", "MY")}
           className={`flex flex-col items-center transition-colors ${
             pathname === "/profile"
