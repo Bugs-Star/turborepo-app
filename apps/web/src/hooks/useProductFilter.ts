@@ -8,6 +8,7 @@ interface UseProductFilterParams {
   initialSortOption?: SortOption;
   debounceDelay?: number;
   onSearchLog?: (keyword: string, resultCount: number) => void;
+  onSortLog?: (sortOption: string) => void;
 }
 
 interface UseProductFilterReturn {
@@ -30,6 +31,7 @@ export function useProductFilter({
   initialSortOption = "latest",
   debounceDelay = SEARCH_DEBOUNCE_DELAY,
   onSearchLog,
+  onSortLog,
 }: UseProductFilterParams): UseProductFilterReturn {
   // 상태 관리
   const [searchTerm, setSearchTerm] = useState("");
@@ -98,9 +100,13 @@ export function useProductFilter({
     setSearchTerm(term);
   }, []);
 
-  const handleSort = useCallback((option: SortOption) => {
-    setSortOption(option);
-  }, []);
+  const handleSort = useCallback(
+    (option: SortOption) => {
+      setSortOption(option);
+      onSortLog?.(option);
+    },
+    [onSortLog]
+  );
 
   return {
     // 상태

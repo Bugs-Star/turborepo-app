@@ -29,7 +29,8 @@ function MenuContent() {
   });
 
   // 로거 훅들
-  const { trackScreenView, trackSearchSubmit } = useAnalytics();
+  const { trackScreenView, trackSearchSubmit, trackSortOptionSelect } =
+    useAnalytics();
 
   // 상품 필터링 훅 사용
   const {
@@ -42,6 +43,7 @@ function MenuContent() {
     products,
     initialSortOption: "latest",
     onSearchLog: trackSearchSubmit,
+    onSortLog: trackSortOptionSelect,
   });
   const { handleProductClick, handleCategoryChange } = useMenuActions();
 
