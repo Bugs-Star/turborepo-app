@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import type { Product, SortOption, SortFunction } from "@/types/product";
 import { useDebounce } from "./useDebounce";
 import { SEARCH_DEBOUNCE_DELAY } from "@/types/constants";
@@ -7,6 +7,8 @@ interface UseProductFilterParams {
   products: Product[];
   initialSortOption?: SortOption;
   debounceDelay?: number;
+  onSearchLog?: (keyword: string, resultCount: number) => void;
+  onSortLog?: (sortOption: string) => void;
 }
 
 interface UseProductFilterReturn {
@@ -28,6 +30,8 @@ export function useProductFilter({
   products,
   initialSortOption = "latest",
   debounceDelay = SEARCH_DEBOUNCE_DELAY,
+  onSearchLog,
+  onSortLog,
 }: UseProductFilterParams): UseProductFilterReturn {
   // 상태 관리
   const [searchTerm, setSearchTerm] = useState("");
@@ -35,6 +39,9 @@ export function useProductFilter({
 
   // 디바운싱된 검색어
   const debouncedSearchTerm = useDebounce(searchTerm, debounceDelay);
+
+  // 검색 로그를 위한 ref
+  const previousResultCount = useRef<number>(0);
 
   // 정렬 함수
   const sortProducts: SortFunction = useCallback(
@@ -74,14 +81,32 @@ export function useProductFilter({
     return sortProducts(filteredProducts, sortOption);
   }, [filteredProducts, sortOption, sortProducts]);
 
+  // 검색 결과 변화 감지 및 로그 생성
+  useEffect(() => {
+    const currentResultCount = filteredProducts.length;
+
+    // 조건: 검색어가 있고 + 결과 수가 변경되었을 때
+    if (
+      debouncedSearchTerm.trim() &&
+      currentResultCount !== previousResultCount.current
+    ) {
+      onSearchLog?.(debouncedSearchTerm, currentResultCount);
+      previousResultCount.current = currentResultCount;
+    }
+  }, [debouncedSearchTerm, filteredProducts.length, onSearchLog]);
+
   // 핸들러
   const handleSearch = useCallback((term: string) => {
     setSearchTerm(term);
   }, []);
 
-  const handleSort = useCallback((option: SortOption) => {
-    setSortOption(option);
-  }, []);
+  const handleSort = useCallback(
+    (option: SortOption) => {
+      setSortOption(option);
+      onSortLog?.(option);
+    },
+    [onSortLog]
+  );
 
   return {
     // 상태

@@ -239,11 +239,16 @@ const createLogger = (): Logger => {
   const setupPageUnload = () => {
     if (!isBrowser()) return;
 
-    window.addEventListener("beforeunload", async () => {
-      // 메모리 큐의 로그들을 IndexedDB에 배치 저장
+    window.addEventListener("beforeunload", () => {
+      // 메모리 큐의 로그들을 IndexedDB에 배치 저장 (동기적으로)
       if (state.memoryQueue.length > 0) {
         try {
-          await state.offlineStorage.saveLogsBatch(state.memoryQueue);
+          // 동기적으로 저장 (async/await 제거)
+          state.offlineStorage
+            .saveLogsBatch(state.memoryQueue)
+            .catch((error) => {
+              console.error("❌ 페이지 언로드 시 로그 배치 저장 실패:", error);
+            });
           console.log(
             `💾 페이지 언로드 시 ${state.memoryQueue.length}개 로그 배치 저장`
           );
@@ -252,22 +257,39 @@ const createLogger = (): Logger => {
         }
       }
 
-      // IndexedDB의 pending 로그들을 sendBeacon으로 전송 시도
+      // IndexedDB의 pending 로그들을 sendBeacon으로 전송 시도 (동기적으로)
       try {
-        const pendingLogs = await state.offlineStorage.getPendingLogs();
-        if (pendingLogs.length > 0 && typeof navigator !== "undefined" && navigator.sendBeacon) {
-          const apiUrl =
-            process.env.NEXT_PUBLIC_API_URL || "http://localhost:3002";
-          const success = navigator.sendBeacon(
-            `${apiUrl}/logs/batch`,
-            JSON.stringify({ logs: pendingLogs })
-          );
-          if (success) {
-            console.log(
-              `📤 페이지 언로드 시 ${pendingLogs.length}개 로그 전송 성공`
-            );
-          }
-        }
+        // 동기적으로 pending 로그 가져오기
+        state.offlineStorage
+          .getPendingLogs()
+          .then((pendingLogs) => {
+            if (
+              pendingLogs.length > 0 &&
+              typeof navigator !== "undefined" &&
+              navigator.sendBeacon
+            ) {
+              const apiUrl =
+                process.env.NEXT_PUBLIC_API_URL || "http://localhost:3002";
+
+              // Blob으로 Content-Type 명시
+              const blob = new Blob([JSON.stringify({ logs: pendingLogs })], {
+                type: "application/json",
+              });
+
+              const success = navigator.sendBeacon(
+                `${apiUrl}/logs/batch`,
+                blob
+              );
+              if (success) {
+                console.log(
+                  `📤 페이지 언로드 시 ${pendingLogs.length}개 로그 전송 성공`
+                );
+              }
+            }
+          })
+          .catch((error) => {
+            console.error("❌ 페이지 언로드 시 로그 전송 실패:", error);
+          });
       } catch (error) {
         console.error("❌ 페이지 언로드 시 로그 전송 실패:", error);
       }
