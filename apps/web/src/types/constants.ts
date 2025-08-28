@@ -17,7 +17,7 @@ export const DEFAULT_PAGE_SIZE = 10;
 export const MAX_PAGE_SIZE = 100;
 
 // 검색 관련 상수
-export const SEARCH_DEBOUNCE_DELAY = 300; // ms
+export const SEARCH_DEBOUNCE_DELAY = 500; // ms
 export const MIN_SEARCH_LENGTH = 1;
 
 // UI 관련 상수

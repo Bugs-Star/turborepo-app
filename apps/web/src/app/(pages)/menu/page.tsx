@@ -28,6 +28,9 @@ function MenuContent() {
     pageSize: 10,
   });
 
+  // 로거 훅들
+  const { trackScreenView, trackSearchSubmit } = useAnalytics();
+
   // 상품 필터링 훅 사용
   const {
     searchTerm,
@@ -38,10 +41,8 @@ function MenuContent() {
   } = useProductFilter({
     products,
     initialSortOption: "latest",
+    onSearchLog: trackSearchSubmit,
   });
-
-  // 로거 훅들
-  const { trackScreenView } = useAnalytics();
   const { handleProductClick, handleCategoryChange } = useMenuActions();
 
   // 중복 로깅 방지를 위한 ref
