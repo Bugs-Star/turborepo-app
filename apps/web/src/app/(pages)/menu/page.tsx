@@ -7,7 +7,8 @@ import { useInfiniteProductFetch } from "@/hooks";
 import ProductGrid from "@/components/menu/ProductGrid";
 import { AsyncWrapper, PageHeader, InfiniteScroll } from "@/components/ui";
 import CategoryFilter from "@/components/menu/CategoryFilter";
-import { useAnalytics, useMenuActions } from "@/hooks";
+import SearchBox from "@/components/menu/SearchBox";
+import { useAnalytics, useMenuActions, useProductFilter } from "@/hooks";
 
 // useSearchParams를 사용하는 컴포넌트를 분리
 function MenuContent() {
@@ -25,6 +26,18 @@ function MenuContent() {
   } = useInfiniteProductFetch({
     category: initialCategory,
     pageSize: 10,
+  });
+
+  // 상품 필터링 훅 사용
+  const {
+    searchTerm,
+    sortOption,
+    sortedAndFilteredProducts,
+    handleSearch,
+    handleSort,
+  } = useProductFilter({
+    products,
+    initialSortOption: "latest",
   });
 
   // 로거 훅들
@@ -66,9 +79,9 @@ function MenuContent() {
       <div className="min-h-screen bg-white flex flex-col pb-20">
         <PageHeader title="메뉴" />
 
-        {/* Category Filter with Product Grid */}
+        {/* Category Filter */}
         <CategoryFilter
-          products={products}
+          products={sortedAndFilteredProducts}
           initialCategory={initialCategory}
           onCategoryChange={handleCategoryChangeWithURL}
           onFilterChange={(category, previousCategory) =>
@@ -79,22 +92,34 @@ function MenuContent() {
             )
           }
         >
-          {(filteredProducts, activeCategory) => (
-            <div className="flex-1 px-4 pb-6">
-              <InfiniteScroll
-                onLoadMore={() => fetchNextPage?.()}
-                hasMore={hasNextPage}
-                loading={isFetchingNextPage}
-                threshold={0.1}
-                rootMargin="100px"
-              >
-                <ProductGrid
-                  products={filteredProducts}
-                  activeCategory={activeCategory}
-                  onProductClick={handleProductClick}
+          {(categoryFilteredProducts, activeCategory) => (
+            <>
+              {/* Search Box */}
+              <div className="px-4 pb-4">
+                <SearchBox
+                  onSearch={handleSearch}
+                  onSortChange={handleSort}
+                  searchTerm={searchTerm}
+                  sortOption={sortOption}
                 />
-              </InfiniteScroll>
-            </div>
+              </div>
+
+              <div className="flex-1 px-4 pb-6">
+                <InfiniteScroll
+                  onLoadMore={() => fetchNextPage?.()}
+                  hasMore={hasNextPage}
+                  loading={isFetchingNextPage}
+                  threshold={0.1}
+                  rootMargin="100px"
+                >
+                  <ProductGrid
+                    products={categoryFilteredProducts}
+                    activeCategory={activeCategory}
+                    onProductClick={handleProductClick}
+                  />
+                </InfiniteScroll>
+              </div>
+            </>
           )}
         </CategoryFilter>
 

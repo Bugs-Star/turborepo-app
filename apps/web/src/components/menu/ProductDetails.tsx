@@ -1,9 +1,5 @@
 import { Product } from "@/types";
-
-// 가격 포맷팅 함수
-const formatPrice = (price: number) => {
-  return price.toLocaleString() + "원";
-};
+import { formatProductPrice } from "@/utils/productUtils";
 
 interface ProductDetailsProps {
   product: Product;
@@ -30,7 +26,7 @@ export default function ProductDetails({
         {product.productName}
       </h2>
       <p className="text-xl font-semibold text-green-700 mb-4">
-        {formatPrice(product.price)}
+        {formatProductPrice(product.price)}
       </p>
 
       <p className="text-gray-600 text-sm leading-relaxed mb-6">

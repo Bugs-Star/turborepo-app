@@ -12,9 +12,9 @@ export default function ProductHeader({ productName }: ProductHeaderProps) {
 
   const handleBackClick = () => {
     if (category) {
-      router.push(`menu?category=${category}`);
+      router.push(`/menu?category=${category}`);
     } else {
-      router.push("menu");
+      router.push("/menu");
     }
   };
 
