@@ -1,5 +1,6 @@
 export { useToast } from "./useToast";
 export { useInfiniteProductFetch } from "./useInfiniteProductFetch";
+export { useHybridProductFetch } from "./useHybridProductFetch";
 export { useRecommendedMenuFetch } from "./useRecommendedMenuFetch";
 export { useEventFetch } from "./useEventFetch";
 export { useEventDetailFetch } from "./useEventDetailFetch";

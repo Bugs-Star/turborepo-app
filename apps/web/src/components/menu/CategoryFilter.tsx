@@ -1,40 +1,23 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { Product, ProductCategory } from "@/types/product";
-
-// ProductCategory 타입을 재사용 (중복 제거)
-type CategoryType = ProductCategory;
+import { CATEGORY_MAPPING, validateCategory } from "@/utils/categoryUtils";
 
 interface CategoryFilterProps {
   products: Product[];
   initialCategory?: string; // 기존 호환성을 위해 string 유지
-  onCategoryChange?: (category: CategoryType) => void;
+  onCategoryChange?: (category: ProductCategory) => void;
   onFilterChange?: (
-    category: CategoryType,
-    previousCategory?: CategoryType
+    category: ProductCategory,
+    previousCategory?: ProductCategory
   ) => void;
   children: (
     filteredProducts: Product[],
-    activeCategory: CategoryType
+    activeCategory: ProductCategory
   ) => React.ReactNode;
 }
 
-// 공통 카테고리 매핑 (중복 제거)
-const CATEGORY_MAPPING: Record<CategoryType, string> = {
-  beverage: "음료",
-  food: "푸드",
-  goods: "상품",
-} as const;
-
-// 타입 안전한 카테고리 검증 함수
-const validateCategory = (category: unknown): CategoryType => {
-  if (typeof category === "string" && category in CATEGORY_MAPPING) {
-    return category as CategoryType;
-  }
-  return "beverage";
-};
-
 // 타입 가드 함수
-const isCategoryType = (value: unknown): value is CategoryType => {
+const isCategoryType = (value: unknown): value is ProductCategory => {
   return typeof value === "string" && value in CATEGORY_MAPPING;
 };
 
@@ -47,7 +30,7 @@ export default function CategoryFilter({
 }: CategoryFilterProps) {
   // 타입 검증을 통한 안전한 초기값 설정
   const validatedInitialCategory = validateCategory(initialCategory);
-  const [activeCategory, setActiveCategory] = useState<CategoryType>(
+  const [activeCategory, setActiveCategory] = useState<ProductCategory>(
     validatedInitialCategory
   );
   const [underlineStyle, setUnderlineStyle] = useState({
@@ -57,7 +40,7 @@ export default function CategoryFilter({
   const [isUnderlineReady, setIsUnderlineReady] = useState(false);
 
   const buttonRefs = useRef<{
-    [key in CategoryType]: HTMLButtonElement | null;
+    [key in ProductCategory]: HTMLButtonElement | null;
   }>({
     beverage: null,
     food: null,
@@ -65,9 +48,9 @@ export default function CategoryFilter({
   });
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const categories: CategoryType[] = Object.keys(
+  const categories: ProductCategory[] = Object.keys(
     CATEGORY_MAPPING
-  ) as CategoryType[];
+  ) as ProductCategory[];
 
   // 타입 안전한 필터링
   const filteredProducts = useMemo(() => {
@@ -84,7 +67,7 @@ export default function CategoryFilter({
   }, [products, activeCategory]);
 
   const handleCategoryChange = useCallback(
-    (category: CategoryType) => {
+    (category: ProductCategory) => {
       const previousCategory = activeCategory;
       setActiveCategory(category);
       onFilterChange?.(category, previousCategory);
@@ -173,11 +156,11 @@ export default function CategoryFilter({
 // 훅으로도 사용할 수 있도록 export
 export const useCategoryFilter = (products: Product[]) => {
   const [activeCategory, setActiveCategory] =
-    useState<CategoryType>("beverage");
+    useState<ProductCategory>("beverage");
 
-  const categories: CategoryType[] = Object.keys(
+  const categories: ProductCategory[] = Object.keys(
     CATEGORY_MAPPING
-  ) as CategoryType[];
+  ) as ProductCategory[];
 
   const filteredProducts = useMemo(() => {
     if (!products || !Array.isArray(products)) {
