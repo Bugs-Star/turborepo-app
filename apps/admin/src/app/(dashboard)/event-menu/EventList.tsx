@@ -1,10 +1,10 @@
 "use client";
 
 import DraggableList from "@/components/DraggableList";
-import { useGetAllEvents } from "@/hooks/useGetAllEvents";
 import { ArrowUpDown } from "lucide-react";
 import { useEffect, useState } from "react";
 import { EventItem } from "@/lib/events";
+import { useGetAllEvents } from "@/hooks/event/useGetAllEvents";
 
 const EventList = () => {
   const { data, isLoading, isError } = useGetAllEvents();

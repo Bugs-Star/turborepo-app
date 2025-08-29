@@ -8,9 +8,12 @@ interface BaseFormProps {
   buttonLabel?: string;
   headerExtra?: ReactNode;
   children?: ReactNode;
+
   imageFile: File | null;
   onImageChange: (file: File | null) => void;
-  onSubmit: () => void;
+
+  // ✨ form 이벤트를 받도록 변경
+  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void | Promise<void>;
 }
 
 const BaseForm = ({
@@ -33,7 +36,6 @@ const BaseForm = ({
     }
     const url = URL.createObjectURL(imageFile);
     setPreviewUrl(url);
-
     return () => URL.revokeObjectURL(url);
   }, [imageFile]);
 
@@ -42,7 +44,13 @@ const BaseForm = ({
   };
 
   return (
-    <div className="max-w-5xl mx-auto mt-5 bg-white p-8 rounded-lg">
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        onSubmit(e);
+      }}
+      className="max-w-5xl mx-auto mt-5 bg-white p-8 rounded-lg"
+    >
       <h1 className="text-xl font-bold mb-6">{title}</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* 이미지 업로드 */}
@@ -67,6 +75,7 @@ const BaseForm = ({
             )}
             <input
               type="file"
+              name="image" // ← FormData로 수집되도록 name 부여
               accept="image/*"
               className="hidden"
               onChange={handleFileChange}
@@ -79,17 +88,16 @@ const BaseForm = ({
           {headerExtra && <div className="mb-4">{headerExtra}</div>}
           {children}
 
-          {/* 업로드 버튼 */}
+          {/* 제출 버튼 */}
           <button
-            type="button"
-            onClick={onSubmit}
+            type="submit"
             className="w-full bg-[#005C14] hover:bg-green-900 text-white font-bold py-3 rounded-lg cursor-pointer"
           >
             {buttonLabel}
           </button>
         </div>
       </div>
-    </div>
+    </form>
   );
 };
 

@@ -112,7 +112,7 @@ const DraggableList = <T extends BaseItem>({
                           <button
                             type="button"
                             onClick={() => onEdit(item.id)}
-                            className="bg-orange-500 text-white px-3 py-1 rounded hover:bg-orange-600 transition cursor-pointer"
+                            className="bg-orange-400 text-sm text-white px-3 py-1 rounded-xl cursor-pointer"
                             aria-label="수정"
                           >
                             수정
@@ -122,7 +122,7 @@ const DraggableList = <T extends BaseItem>({
                           <button
                             type="button"
                             onClick={() => onDelete(item.id)}
-                            className="bg-[#D74753] text-white px-3 py-1 rounded hover:bg-[#C03F4A] transition cursor-pointer"
+                            className="bg-[#D74753] text-sm text-white px-3 py-1 rounded-xl cursor-pointer"
                             aria-label="삭제"
                           >
                             삭제

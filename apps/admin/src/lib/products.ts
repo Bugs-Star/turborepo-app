@@ -51,6 +51,11 @@ export interface GetProductsResponse {
   };
 }
 
+export interface DeleteProductResponse {
+  message?: string;
+  success?: boolean;
+}
+
 export const ProductsService = {
   // 상품 추가
   addProduct: async (payload: AddProductPayload): Promise<ProductResponse> => {
@@ -117,9 +122,18 @@ export const ProductsService = {
       formData.append("recommendedOrder", payload.recommendedOrder.toString());
     }
 
-    const response = await axiosInstance.put("/admin/products", formData);
+    const response = await axiosInstance.put(
+      `/admin/products/${productId}`,
+      formData
+    );
 
     return response.data;
+  },
+
+  // 상품 삭제 (DELETE /admin/products/{productId})
+  deleteProduct: async (productId: string): Promise<DeleteProductResponse> => {
+    const res = await axiosInstance.delete(`/admin/products/${productId}`);
+    return res.data;
   },
 
   // 모든 상품 조회

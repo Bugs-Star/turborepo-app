@@ -1,8 +1,8 @@
 "use client";
 import BaseForm from "@/components/BaseForm";
-import { useEditMenu } from "@/hooks/useEditMenu";
+import { useEditMenu } from "@/hooks/menu/useEditMenu";
 import { X, Coffee, Utensils, Gift } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 type CategoryType = "drink" | "food" | "product";
 
@@ -35,14 +35,55 @@ const EditMenu = ({ productId, initialData, onClose }: EditMenuProps) => {
   );
   const [image, setImage] = useState<File | null>(null);
 
-  const handleSubmit = (formData: FormData) => {
-    const payload: any = Object.fromEntries(formData.entries());
-    mutate({
-      ...payload,
-      price: Number(payload.price),
-      currentStock: Number(payload.currentStock),
-      optimalStock: Number(payload.optimalStock),
-      category: selectedCategory,
+  const categoryMap = {
+    drink: "beverage",
+    food: "food",
+    product: "goods",
+  } as const;
+
+  const handleSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
+    e.preventDefault();
+
+    const fd = new FormData(e.currentTarget); // ✅ HTMLFormElement 기반
+    // 이미지 필드명 통일 (서버가 productImg 기대한다면)
+    if (image) fd.set("productImg", image);
+    // UI 카테고리 → API 카테고리로 매핑
+    fd.set("category", categoryMap[selectedCategory]);
+
+    // 숫자 필드 정규화
+    const numKeys = ["price", "currentStock", "optimalStock"] as const;
+    numKeys.forEach((key) => {
+      const raw = fd.get(key)?.toString().trim();
+      if (!raw) {
+        fd.delete(key);
+      } else {
+        // 문자열 숫자 유지해도 되지만, JSON 변환 시 Number로
+        fd.set(key, String(Number(raw)));
+      }
+    });
+
+    // 👉 useEditMenu가 FormData를 받도록 구현되어 있다면 이대로 보내세요:
+    // mutate(fd);
+
+    // 👉 useEditMenu가 JSON(Object)을 받도록 구현되어 있다면 객체로 변환해서 보내세요:
+    const payload: any = Object.fromEntries(fd.entries());
+    // 숫자형으로 캐스팅
+    payload.price =
+      payload.price !== undefined ? Number(payload.price) : undefined;
+    payload.currentStock =
+      payload.currentStock !== undefined
+        ? Number(payload.currentStock)
+        : undefined;
+    payload.optimalStock =
+      payload.optimalStock !== undefined
+        ? Number(payload.optimalStock)
+        : undefined;
+
+    mutate(payload, {
+      onSuccess: () => {
+        alert("메뉴가 수정되었습니다!");
+        onClose();
+      },
     });
   };
 
@@ -69,9 +110,7 @@ const EditMenu = ({ productId, initialData, onClose }: EditMenuProps) => {
           buttonLabel="메뉴 수정"
           imageFile={image}
           onImageChange={setImage}
-          onSubmit={() =>
-            handleSubmit(new FormData(document.querySelector("form")!))
-          }
+          onSubmit={handleSubmit} // ✅ 이벤트 사용
           headerExtra={
             <div className="flex gap-3 mb-4">
               {categoryOptions.map(({ key, icon: Icon }) => (
@@ -88,7 +127,7 @@ const EditMenu = ({ productId, initialData, onClose }: EditMenuProps) => {
                   <Icon size={20} />
                 </button>
               ))}
-              <input type="hidden" name="category" value={selectedCategory} />
+              {/* 🔸 hidden input 불필요 — handleSubmit에서 카테고리 주입 */}
             </div>
           }
         >

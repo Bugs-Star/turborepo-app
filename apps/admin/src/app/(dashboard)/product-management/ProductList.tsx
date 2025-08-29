@@ -1,155 +1,83 @@
 "use client";
-
-import { useGetAllProducts } from "@/hooks/useGetAllProducts";
-import SearchableTable from "@/components/SearchableTable";
 import { useState } from "react";
+import DraggableList from "@/components/DraggableList";
 import EditMenu from "./EditMenu";
+import { useGetAllProducts } from "@/hooks/menu/useGetAllProducts";
+import { useDeleteMenu } from "@/hooks/menu/useDeleteMenu";
 
-interface Product {
+type UIProduct = {
   id: string;
-  image: string;
   name: string;
   code: string;
-  price: number;
+  image: string;
   category: "beverage" | "food" | "goods";
-  stock: string;
-  isLowStock: boolean;
-}
+  price: number;
+  currentStock?: number;
+  optimalStock?: number;
+  productContents?: string;
+};
 
-const ProductList = () => {
-  const [categoryFilter, setCategoryFilter] = useState<string | undefined>();
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+const apiToUiCategory = (c: "beverage" | "food" | "goods") =>
+  c === "beverage" ? "drink" : c === "goods" ? "product" : "food";
 
-  const { data, isLoading, isError } = useGetAllProducts({
-    category: categoryFilter as "beverage" | "food" | "goods",
-    page: 1,
-    limit: 100,
-  });
+export default function ProductList() {
+  const { data } = useGetAllProducts();
+  const products: UIProduct[] =
+    data?.products.map((p) => ({
+      id: p._id, // ✅ 여기서 productId 정의의 근원
+      name: p.productName,
+      code: p.productCode,
+      image: p.productImg,
+      category: p.category,
+      price: p.price,
+      currentStock: p.currentStock,
+      optimalStock: p.optimalStock,
+      productContents: p.productContents,
+    })) ?? [];
 
-  if (isLoading) return <div>로딩 중...</div>;
-  if (isError) return <div>데이터를 가져오는데 실패했습니다.</div>;
+  const [open, setOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [initialData, setInitialData] = useState<any | null>(null);
+  const { mutate: deleteMenu, isPending } = useDeleteMenu();
 
-  // 순수 JSON 데이터만 전달
-  const products =
-    data?.products.map((product) => ({
-      id: product._id,
-      image: product.productImg || "☕",
-      name: product.productName,
-      code: product.productCode,
-      price: product.price,
-      category: product.category,
-      stock: `${product.currentStock} / ${product.optimalStock}개`,
-      isLowStock: product.isLowStock,
-    })) || [];
-
-  const openEditMenuModal = (product: Product) => {
-    setSelectedProduct(product);
+  const handleEdit = (id: string) => {
+    const p = products.find((x) => x.id === id);
+    if (!p) return;
+    setEditingId(p.id); // ✅ 이 값이 EditMenu의 productId가 됩니다.
+    setInitialData({
+      productName: p.name,
+      productCode: p.code,
+      productContents: p.productContents,
+      category: apiToUiCategory(p.category), // UI category로 변환
+      price: p.price,
+      currentStock: p.currentStock,
+      optimalStock: p.optimalStock,
+    });
+    setOpen(true);
   };
 
-  const closeEditMenuModal = () => {
-    setSelectedProduct(null);
-  };
-
-  console.log(selectedProduct, "프로덕트");
   return (
     <>
-      <SearchableTable
-        title="모든 제품"
-        searchPlaceholder="제품명 또는 SKU 검색..."
-        filters={
-          <div className="flex gap-2">
-            <select
-              className="border border-gray-300 rounded-lg px-2 py-1 text-sm"
-              onChange={(e) =>
-                setCategoryFilter(
-                  e.target.value === "전체" ? undefined : e.target.value
-                )
-              }
-            >
-              <option>전체</option>
-              <option value="beverage">음료</option>
-              <option value="food">음식</option>
-              <option value="goods">상품</option>
-            </select>
-            <button className="border border-gray-300 rounded-lg px-3 py-1 text-sm">
-              재고순 정렬
-            </button>
-          </div>
-        }
-        columns={[
-          {
-            key: "image",
-            label: "제품 이미지",
-            render: (row) => (
-              <img
-                src={row.image}
-                alt={row.name}
-                className="w-12 h-12 object-cover rounded"
-              />
-            ),
-          },
-          { key: "name", label: "제품명" },
-          { key: "code", label: "제품코드" },
-          { key: "price", label: "가격" },
-          { key: "category", label: "카테고리" },
-          { key: "stock", label: "재고 수량" },
-          {
-            key: "isLowStock",
-            label: "재고 상태",
-            render: (row) =>
-              row.isLowStock ? (
-                <span className="text-yellow-600 font-bold">부족</span>
-              ) : (
-                <span className="text-green-600 font-bold">충분</span>
-              ),
-          },
-          {
-            key: "actions",
-            label: "",
-            render: (row) => (
-              <button
-                onClick={() => openEditMenuModal(row)}
-                className="bg-orange-400 text-sm text-white px-3 py-1 rounded-xl cursor-pointer"
-              >
-                수정
-              </button>
-            ),
-          },
-          {
-            key: "delete",
-            label: "",
-            render: (row) => (
-              <button className="bg-[#D74753] text-sm text-white px-3 py-1 rounded-xl cursor-pointer">
-                삭제
-              </button>
-            ),
-          },
-        ]}
-        data={products}
+      <DraggableList
+        items={products.map((p) => ({
+          id: p.id,
+          name: p.name,
+          image: p.image,
+        }))}
+        onReorder={() => {}}
+        onEdit={handleEdit}
+        onDelete={(id) => {
+          if (confirm("정말 삭제할까요?")) deleteMenu(id);
+        }}
       />
-      {selectedProduct && (
+
+      {open && editingId && (
         <EditMenu
-          productId={selectedProduct.id}
-          initialData={{
-            productCode: selectedProduct.code,
-            productName: selectedProduct.name,
-            category:
-              selectedProduct.category === "beverage"
-                ? "drink"
-                : selectedProduct.category === "food"
-                  ? "food"
-                  : "product",
-            price: selectedProduct.price,
-            currentStock: Number(selectedProduct.stock.split("/")[0]),
-            optimalStock: Number(
-              selectedProduct.stock.split("/")[1].replace(/[^0-9]/g, "")
-            ),
-          }}
-          onClose={closeEditMenuModal}
+          productId={editingId}
+          initialData={initialData ?? undefined}
+          onClose={() => setOpen(false)}
         />
       )}
     </>
   );
-};
-
-export default ProductList;
+}
