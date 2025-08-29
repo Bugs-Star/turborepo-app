@@ -25,7 +25,9 @@ export default function RootLayout({
       <body className={inter.className}>
         <ErrorBoundary>
           <QueryProvider>
-            {children}
+            <main className="h-screen overflow-y-scroll scrollbar-hide">
+              {children}
+            </main>
             <ToastContainer />
           </QueryProvider>
         </ErrorBoundary>

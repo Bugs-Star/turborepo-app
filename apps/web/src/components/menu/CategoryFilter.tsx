@@ -58,19 +58,21 @@ export default function CategoryFilter({
 
   return (
     <>
-      {/* Category Navigation */}
-      <div className="flex justify-center space-x-8 mb-6 pt-4">
-        {categories.map((category) => (
-          <button
-            key={category}
-            onClick={() => handleCategoryChange(category)}
-            className={`text-sm font-medium transition-colors cursor-pointer hover:text-gray-600 ${
-              activeCategory === category ? "text-black" : "text-gray-400"
-            }`}
-          >
-            {categoryMapping[category as keyof typeof categoryMapping]}
-          </button>
-        ))}
+      {/* Category Navigation - 고정 위치 */}
+      <div className="fixed top-16 left-0 right-0 z-40 bg-white border-b border-gray-200">
+        <div className="flex justify-center space-x-8 py-4">
+          {categories.map((category) => (
+            <button
+              key={category}
+              onClick={() => handleCategoryChange(category)}
+              className={`text-sm font-medium transition-colors cursor-pointer hover:text-gray-600 ${
+                activeCategory === category ? "text-black" : "text-gray-400"
+              }`}
+            >
+              {categoryMapping[category as keyof typeof categoryMapping]}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Render children with filtered products */}

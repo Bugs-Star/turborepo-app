@@ -73,8 +73,8 @@ export default function CartPage() {
       <div className="min-h-screen bg-white flex flex-col pb-20">
         <PageHeader title="장바구니" />
 
-        {/* Main Content */}
-        <div className="px-6">
+        {/* Main Content - 고정 헤더 아래 여백 추가 */}
+        <div className="pt-16 px-6">
           <CartContent
             cartItems={cartItems}
             total={total}

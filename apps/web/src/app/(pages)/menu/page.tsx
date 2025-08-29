@@ -82,49 +82,55 @@ function MenuContent() {
       <div className="min-h-screen bg-white flex flex-col pb-20">
         <PageHeader title="메뉴" />
 
-        {/* Category Filter */}
-        <CategoryFilter
-          products={sortedAndFilteredProducts}
-          initialCategory={initialCategory}
-          onCategoryChange={handleCategoryChangeWithURL}
-          onFilterChange={(category, previousCategory) =>
-            handleCategoryChange(
-              category,
-              previousCategory,
-              handleCategoryChangeWithURL
-            )
-          }
-        >
-          {(categoryFilteredProducts, activeCategory) => (
-            <>
-              {/* Search Box */}
-              <div className="px-6 pb-4">
-                <SearchBox
-                  onSearch={handleSearch}
-                  onSortChange={handleSort}
-                  searchTerm={searchTerm}
-                  sortOption={sortOption}
-                />
-              </div>
+        {/* Category Filter - 고정 헤더 아래 여백 추가 */}
+        <div className="pt-16">
+          <CategoryFilter
+            products={sortedAndFilteredProducts}
+            initialCategory={initialCategory}
+            onCategoryChange={handleCategoryChangeWithURL}
+            onFilterChange={(category, previousCategory) =>
+              handleCategoryChange(
+                category,
+                previousCategory,
+                handleCategoryChangeWithURL
+              )
+            }
+          >
+            {(categoryFilteredProducts, activeCategory) => (
+              <>
+                {/* 고정된 검색 영역 - 카테고리 아래 */}
+                <div className="fixed top-28 left-0 right-0 z-40 bg-white border-b border-gray-200">
+                  {/* Search Box */}
+                  <div className="px-6 pb-4">
+                    <SearchBox
+                      onSearch={handleSearch}
+                      onSortChange={handleSort}
+                      searchTerm={searchTerm}
+                      sortOption={sortOption}
+                    />
+                  </div>
+                </div>
 
-              <div className="flex-1 px-6 pb-6">
-                <InfiniteScroll
-                  onLoadMore={() => fetchNextPage?.()}
-                  hasMore={hasNextPage}
-                  loading={isFetchingNextPage}
-                  threshold={0.1}
-                  rootMargin="100px"
-                >
-                  <ProductGrid
-                    products={categoryFilteredProducts}
-                    activeCategory={activeCategory}
-                    onProductClick={handleProductClick}
-                  />
-                </InfiniteScroll>
-              </div>
-            </>
-          )}
-        </CategoryFilter>
+                {/* 스크롤 가능한 상품 목록 - 고정 영역 아래 여백 추가 */}
+                <div className="pt-36 flex-1 px-6 pb-6">
+                  <InfiniteScroll
+                    onLoadMore={() => fetchNextPage?.()}
+                    hasMore={hasNextPage}
+                    loading={isFetchingNextPage}
+                    threshold={0.1}
+                    rootMargin="100px"
+                  >
+                    <ProductGrid
+                      products={categoryFilteredProducts}
+                      activeCategory={activeCategory}
+                      onProductClick={handleProductClick}
+                    />
+                  </InfiniteScroll>
+                </div>
+              </>
+            )}
+          </CategoryFilter>
+        </div>
 
         {/* Bottom Navigation */}
         <BottomNavigation />

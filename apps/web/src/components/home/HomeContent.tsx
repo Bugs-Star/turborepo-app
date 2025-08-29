@@ -49,8 +49,8 @@ export default function HomeContent({
       {/* 상단 인사말 */}
       <GreetingSection />
 
-      {/* 콘텐츠 영역 - 통합 여백 적용 */}
-      <div className="px-6">
+      {/* 콘텐츠 영역 - 고정 헤더 아래 여백 추가 */}
+      <div className="pt-16 px-6">
         {/* 상단 프로모션 배너들 */}
         {!promotionsLoading &&
           upPromotions.length > 0 &&

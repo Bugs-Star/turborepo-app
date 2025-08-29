@@ -41,8 +41,8 @@ export default function ProfilePage() {
       >
         <div className="min-h-screen bg-gray-50 flex flex-col pb-20">
           <PageHeader title="내 프로필" />
-          {/* Main Content */}
-          <div className="flex-1 px-6 py-6">
+          {/* Main Content - 여백 추가 */}
+          <div className="pt-20 flex-1 px-6 py-6">
             {/* 프로필 카드 */}
             <div className="mb-6">
               <ProfileCard
