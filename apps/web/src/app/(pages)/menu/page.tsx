@@ -99,7 +99,7 @@ function MenuContent() {
             {(categoryFilteredProducts, activeCategory) => (
               <>
                 {/* 고정된 검색 영역 - 카테고리 아래 */}
-                <div className="fixed top-28 left-0 right-0 z-40 bg-white border-b border-gray-200">
+                <div className="fixed top-28 left-1/2 transform -translate-x-1/2 w-full max-w-md z-40 bg-white border-b border-gray-200">
                   {/* Search Box */}
                   <div className="px-6 pb-4">
                     <SearchBox

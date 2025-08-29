@@ -19,7 +19,7 @@ export default function EventSection({
         {events.map((event) => (
           <div
             key={event._id}
-            className="flex gap-4 bg-white rounded-lg p-4 shadow-sm border cursor-pointer hover:shadow-md transition-shadow"
+            className="flex gap-4 bg-white rounded-lg p-4 shadow-sm border border-gray-200 cursor-pointer hover:shadow-md transition-shadow"
             onClick={() => onEventClick?.(event)}
           >
             <div className="flex-shrink-0">

@@ -59,7 +59,7 @@ export default function CategoryFilter({
   return (
     <>
       {/* Category Navigation - 고정 위치 */}
-      <div className="fixed top-16 left-0 right-0 z-40 bg-white border-b border-gray-200">
+      <div className="fixed top-16 left-1/2 transform -translate-x-1/2 w-full max-w-md z-40 bg-white border-b border-gray-200">
         <div className="flex justify-center space-x-8 py-4">
           {categories.map((category) => (
             <button

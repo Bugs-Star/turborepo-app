@@ -16,7 +16,7 @@ export default function CartActionButton({
   onGoToMenu,
 }: CartActionButtonProps) {
   return (
-    <div className="fixed bottom-20 left-6 right-6 pb-4">
+    <div className="fixed bottom-20 left-1/2 transform -translate-x-1/2 w-full max-w-md px-6 pb-4">
       {hasItems ? (
         <Button
           onClick={onPaymentClick}
