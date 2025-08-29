@@ -10,10 +10,29 @@ import CategoryFilter from "@/components/menu/CategoryFilter";
 import SearchBox from "@/components/menu/SearchBox";
 import { useAnalytics, useMenuActions, useProductFilter } from "@/hooks";
 
+// 카테고리 타입 정의 (CategoryFilter와 동일)
+type CategoryType = "beverage" | "food" | "goods";
+
+// 카테고리 매핑 (CategoryFilter와 동일)
+const CATEGORY_MAPPING: Record<CategoryType, string> = {
+  beverage: "음료",
+  food: "푸드",
+  goods: "상품",
+} as const;
+
+// 타입 검증 함수 (CategoryFilter와 동일)
+const validateCategory = (category: string): CategoryType => {
+  if (Object.keys(CATEGORY_MAPPING).includes(category)) {
+    return category as CategoryType;
+  }
+  return "beverage";
+};
+
 // useSearchParams를 사용하는 컴포넌트를 분리
 function MenuContent() {
   const searchParams = useSearchParams();
-  const initialCategory = searchParams.get("category") || "beverage";
+  const rawCategory = searchParams.get("category") || "beverage";
+  const initialCategory = validateCategory(rawCategory);
 
   const {
     products,

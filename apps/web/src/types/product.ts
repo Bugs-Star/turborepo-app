@@ -4,7 +4,7 @@ export interface BaseProduct {
   productName: string;
   productImg: string;
   price: number;
-  category: string;
+  category: string; // API 호환성을 위해 string 유지
 }
 
 export interface Product extends BaseProduct {
@@ -30,7 +30,7 @@ export interface ProductsResponse {
 }
 
 export interface ProductQueryParams {
-  category?: string;
+  category?: string; // API 호환성을 위해 string 유지
   page?: number;
   limit?: number;
   isRecommended?: boolean;
