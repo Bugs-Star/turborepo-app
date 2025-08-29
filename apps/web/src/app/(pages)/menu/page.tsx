@@ -98,7 +98,7 @@ function MenuContent() {
           {(categoryFilteredProducts, activeCategory) => (
             <>
               {/* Search Box */}
-              <div className="px-4 pb-4">
+              <div className="px-6 pb-4">
                 <SearchBox
                   onSearch={handleSearch}
                   onSortChange={handleSort}
@@ -107,7 +107,7 @@ function MenuContent() {
                 />
               </div>
 
-              <div className="flex-1 px-4 pb-6">
+              <div className="flex-1 px-6 pb-6">
                 <InfiniteScroll
                   onLoadMore={() => fetchNextPage?.()}
                   hasMore={hasNextPage}

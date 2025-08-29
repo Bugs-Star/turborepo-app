@@ -49,21 +49,24 @@ export default function HomeContent({
       {/* 상단 인사말 */}
       <GreetingSection />
 
-      {/* 상단 프로모션 배너들 */}
-      {!promotionsLoading &&
-        upPromotions.length > 0 &&
-        renderPromotions(upPromotions)}
+      {/* 콘텐츠 영역 - 통합 여백 적용 */}
+      <div className="px-6">
+        {/* 상단 프로모션 배너들 */}
+        {!promotionsLoading &&
+          upPromotions.length > 0 &&
+          renderPromotions(upPromotions)}
 
-      {/* 오늘의 추천 메뉴 */}
-      <RecommendedMenu onProductClick={onProductClick} />
+        {/* 오늘의 추천 메뉴 */}
+        <RecommendedMenu onProductClick={onProductClick} />
 
-      {/* 하단 프로모션 배너들 */}
-      {!promotionsLoading &&
-        downPromotions.length > 0 &&
-        renderPromotions(downPromotions)}
+        {/* 하단 프로모션 배너들 */}
+        {!promotionsLoading &&
+          downPromotions.length > 0 &&
+          renderPromotions(downPromotions)}
 
-      {/* 이벤트 */}
-      <EventSection events={events} onEventClick={onEventClick} />
+        {/* 이벤트 */}
+        <EventSection events={events} onEventClick={onEventClick} />
+      </div>
     </div>
   );
 }

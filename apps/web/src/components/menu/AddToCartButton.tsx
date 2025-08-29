@@ -42,7 +42,7 @@ export default function AddToCartButton({
   // 재고가 없는 경우 Sold Out 버튼 표시
   if (isOutOfStock) {
     return (
-      <div className="px-6 pb-6">
+      <div className="pb-6">
         <Button
           variant="red"
           size="lg"
@@ -61,7 +61,7 @@ export default function AddToCartButton({
 
   // 재고가 있는 경우 기존 장바구니 추가 버튼 표시
   return (
-    <div className="px-6 pb-6">
+    <div className="pb-6">
       <Button
         onClick={handleAddToCart}
         disabled={disabled || isLoading}

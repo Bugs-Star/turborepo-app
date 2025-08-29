@@ -21,7 +21,7 @@ export default function OrderHistoryPage() {
           <PageHeader title="주문 내역" />
 
           {/* Main Content */}
-          <div className="flex-1 px-4 py-6">
+          <div className="flex-1 px-6 py-6">
             {orderHistory.length > 0 ? (
               <div className="space-y-4">
                 {orderHistory.map((order) => (

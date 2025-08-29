@@ -20,7 +20,7 @@ export default function PageHeader({
   if (variant === "greeting") {
     return (
       <header
-        className={`flex items-center px-6 py-3 border-b border-gray-200 ${className}`}
+        className={`flex items-center px-4 py-3 border-b border-gray-200 ${className}`}
       >
         {showBackButton && (
           <div className="flex-shrink-0">
