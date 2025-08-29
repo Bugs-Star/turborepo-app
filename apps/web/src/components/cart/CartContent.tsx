@@ -18,7 +18,7 @@ export default function CartContent({
   onRemove,
 }: CartContentProps) {
   return (
-    <div className="flex-1 px-4 py-6">
+    <div className="flex-1 py-6">
       {/* Order Summary */}
       <CartSummary total={total} />
 

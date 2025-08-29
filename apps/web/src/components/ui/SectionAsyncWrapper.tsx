@@ -19,14 +19,14 @@ export default function SectionAsyncWrapper({
 }: SectionAsyncWrapperProps) {
   return (
     <div className="mb-8">
-      <h2 className="text-xl font-bold text-gray-900 px-6 mb-2">{title}</h2>
+      <h2 className="text-xl font-bold text-gray-900 mb-2">{title}</h2>
 
       {loading && (
-        <div className="px-6 text-center text-gray-500">{loadingMessage}</div>
+        <div className="text-center text-gray-500">{loadingMessage}</div>
       )}
 
       {error && (
-        <div className="px-6 text-center text-red-500">
+        <div className="text-center text-red-500">
           <p className="text-sm">{error}</p>
           <p className="text-xs mt-1">{errorMessage}</p>
         </div>

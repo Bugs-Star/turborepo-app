@@ -22,10 +22,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ko">
-      <body className={inter.className}>
+      <body className={`${inter.className} max-w-md mx-auto`}>
         <ErrorBoundary>
           <QueryProvider>
-            {children}
+            <main className="h-screen overflow-y-scroll scrollbar-hide">
+              {children}
+            </main>
             <ToastContainer />
           </QueryProvider>
         </ErrorBoundary>

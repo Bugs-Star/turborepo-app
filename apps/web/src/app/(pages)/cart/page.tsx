@@ -73,23 +73,25 @@ export default function CartPage() {
       <div className="min-h-screen bg-white flex flex-col pb-20">
         <PageHeader title="장바구니" />
 
-        {/* Main Content */}
-        <CartContent
-          cartItems={cartItems}
-          total={total}
-          isActionLoading={isActionLoading}
-          onQuantityChange={handleQuantityChange}
-          onRemove={handleRemoveWithLogging}
-        />
+        {/* Main Content - 고정 헤더 아래 여백 추가 */}
+        <div className="pt-16 px-6">
+          <CartContent
+            cartItems={cartItems}
+            total={total}
+            isActionLoading={isActionLoading}
+            onQuantityChange={handleQuantityChange}
+            onRemove={handleRemoveWithLogging}
+          />
 
-        {/* Action Buttons */}
-        <CartActionButton
-          hasItems={cartItems.length > 0}
-          isProcessing={isProcessing}
-          isActionLoading={isActionLoading}
-          onPaymentClick={handlePaymentClickWithLogging}
-          onGoToMenu={goToMenu}
-        />
+          {/* Action Buttons */}
+          <CartActionButton
+            hasItems={cartItems.length > 0}
+            isProcessing={isProcessing}
+            isActionLoading={isActionLoading}
+            onPaymentClick={handlePaymentClickWithLogging}
+            onGoToMenu={goToMenu}
+          />
+        </div>
 
         {/* Bottom Navigation */}
         <BottomNavigation />

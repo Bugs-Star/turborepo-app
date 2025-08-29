@@ -1,7 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { cartService } from "@/lib/services";
 import { useAuthStore } from "@/stores/authStore";
-import { useState, useEffect } from "react";
 import { AxiosErrorResponse } from "@/types";
 
 export interface CartCountResponse {
@@ -9,12 +8,7 @@ export interface CartCountResponse {
 }
 
 export const useCartCountFetch = () => {
-  const [isClient, setIsClient] = useState(false);
   const { isAuthenticated } = useAuthStore();
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
 
   return useQuery<CartCountResponse>({
     queryKey: ["cartCount"],
@@ -24,8 +18,8 @@ export const useCartCountFetch = () => {
     },
     staleTime: 1000 * 60 * 5, // 5분
     gcTime: 1000 * 60 * 10, // 10분
-    // 클라이언트에서만 인증 상태 체크
-    enabled: isClient && isAuthenticated,
+    // 서버에서는 항상 비활성화, 클라이언트에서만 인증 상태 확인
+    enabled: typeof window !== "undefined" && isAuthenticated,
     // 401 에러는 재시도하지 않음
     retry: (failureCount, error: Error) => {
       if ((error as AxiosErrorResponse)?.response?.status === 401) {

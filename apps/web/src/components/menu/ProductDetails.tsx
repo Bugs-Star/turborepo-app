@@ -21,7 +21,7 @@ export default function ProductDetails({
   };
 
   return (
-    <div className="px-6 py-6">
+    <div className="py-6">
       <h2 className="text-2xl font-bold text-black mb-2">
         {product.productName}
       </h2>

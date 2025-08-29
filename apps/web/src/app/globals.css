@@ -14,9 +14,16 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
+    --background: #d1d5db;
     --foreground: #ededed;
   }
+}
+
+/* body는 기본 스타일만 두고 스크롤은 막기 */
+html,
+body {
+  height: 100%;
+  overflow: hidden; /* body에서 스크롤 발생하지 않게 */
 }
 
 body {

@@ -12,7 +12,7 @@ export default function BottomNavigation() {
   const { trackNavLinkClick } = useAnalytics();
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 py-3 z-50">
+    <div className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-md bg-white border-t border-gray-200 py-3 z-50">
       <div className="flex justify-around items-center">
         <Link
           href="/home"

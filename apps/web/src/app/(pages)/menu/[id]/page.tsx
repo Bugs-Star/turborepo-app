@@ -61,7 +61,7 @@ export default function MenuItemDetailPage() {
           <ProductHeader productName={product.productName} />
 
           {/* Main Content */}
-          <div className="flex-1">
+          <div className="flex-1 px-6">
             {/* Product Image */}
             <ProductImage src={product.productImg} alt={product.productName} />
 

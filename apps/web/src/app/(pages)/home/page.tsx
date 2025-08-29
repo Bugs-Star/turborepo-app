@@ -42,7 +42,7 @@ export default function HomePage() {
       error={null}
       loadingMessage="홈 화면을 불러오는 중..."
     >
-      <div className="min-h-screen bg-gray-50 flex flex-col pb-20">
+      <div className="min-h-screen bg-white flex flex-col pb-20">
         {/* Main Content */}
         <HomeContent
           promotions={promotions}

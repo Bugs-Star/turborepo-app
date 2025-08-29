@@ -14,12 +14,12 @@ export default function EventSection({
 }: EventSectionProps) {
   return (
     <div className="mb-8">
-      <h2 className="text-xl font-bold text-gray-900 px-6 mb-2">새로운 소식</h2>
-      <div className="flex flex-col gap-4 px-6">
+      <h2 className="text-xl font-bold text-gray-900 mb-2">새로운 소식</h2>
+      <div className="flex flex-col gap-4">
         {events.map((event) => (
           <div
             key={event._id}
-            className="flex gap-4 bg-white rounded-lg p-4 shadow-sm border cursor-pointer hover:shadow-md transition-shadow"
+            className="flex gap-4 bg-white rounded-lg p-4 shadow-sm border border-gray-200 cursor-pointer hover:shadow-md transition-shadow"
             onClick={() => onEventClick?.(event)}
           >
             <div className="flex-shrink-0">
