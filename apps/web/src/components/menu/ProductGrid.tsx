@@ -54,8 +54,8 @@ function ProductCard({
         <h3 className="text-sm font-bold text-black mb-1 truncate">
           {product.productName}
         </h3>
-        <p className="text-sm font-semibold text-green-700">
-          {formatProductPrice(product.price)}
+        <p className="text-sm font-semibold text-green-800">
+          {product.price.toLocaleString()}원
         </p>
       </div>
 

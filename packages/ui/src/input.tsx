@@ -52,7 +52,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
     // 에러 상태일 때 빨간 테두리, 포커스 상태일 때 초록 테두리
     const getBorderColor = () => {
       if (error) return "#ef4444"; // red-500
-      if (isFocused) return "#15803d"; // green-700
+      if (isFocused) return "#166534"; // green-800
       return "#e5e7eb"; // gray-200
     };
 

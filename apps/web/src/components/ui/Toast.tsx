@@ -24,7 +24,7 @@ export const Toast = ({ message, type, onClose, id }: ToastProps) => {
   }, [show]);
 
   const typeClasses = {
-    success: "bg-green-500 text-white",
+    success: "bg-green-800 text-white",
     error: "bg-red-500 text-white",
     warning: "bg-yellow-500 text-white",
     info: "bg-blue-500 text-white",

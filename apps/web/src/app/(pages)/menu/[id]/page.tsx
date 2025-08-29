@@ -61,23 +61,25 @@ export default function MenuItemDetailPage() {
           <ProductHeader productName={product.productName} />
 
           {/* Main Content */}
-          <div className="flex-1 px-6">
+          <div className="flex-1">
             {/* Product Image */}
             <ProductImage src={product.productImg} alt={product.productName} />
 
             {/* Product Details */}
-            <ProductDetails
-              product={product}
-              quantity={quantity}
-              onQuantityChange={handleQuantityChange}
-            />
+            <div className="px-6">
+              <ProductDetails
+                product={product}
+                quantity={quantity}
+                onQuantityChange={handleQuantityChange}
+              />
 
-            {/* Add to Cart Button */}
-            <AddToCartButton
-              product={product}
-              quantity={quantity}
-              onCartAdd={handleCartAdd}
-            />
+              {/* Add to Cart Button */}
+              <AddToCartButton
+                product={product}
+                quantity={quantity}
+                onCartAdd={handleCartAdd}
+              />
+            </div>
           </div>
 
           {/* Bottom Navigation */}
