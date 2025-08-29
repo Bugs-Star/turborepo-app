@@ -116,7 +116,7 @@ export default function OrderHistoryItem({ order }: OrderHistoryItemProps) {
                 : "포인트"}
           </p>
         </div>
-        <span className="text-lg font-semibold text-green-600">
+        <span className="text-lg font-semibold text-green-800">
           {order.totalPrice.toLocaleString()}원
         </span>
       </div>

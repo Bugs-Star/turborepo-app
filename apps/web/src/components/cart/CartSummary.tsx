@@ -13,7 +13,7 @@ export default function CartSummary({ total }: CartSummaryProps) {
       </div>
       <div className="flex justify-between items-center">
         <span className="text-gray-700 font-semibold text-lg">총계:</span>
-        <span className="text-green-700 font-semibold text-lg">
+        <span className="text-green-800 font-semibold text-lg">
           {total.toLocaleString()}원
         </span>
       </div>

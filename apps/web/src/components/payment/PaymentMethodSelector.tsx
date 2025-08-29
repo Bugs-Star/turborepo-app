@@ -37,7 +37,7 @@ export default function PaymentMethodSelector({
                 onChange={(e) =>
                   setSelectedMethod(e.target.value as PaymentMethod["value"])
                 }
-                className="accent-green-700"
+                className="accent-green-800"
                 disabled={disabled}
               />
               <div className="flex-1 flex items-center justify-between">

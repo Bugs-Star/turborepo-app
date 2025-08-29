@@ -114,7 +114,7 @@ export default function LoginForm() {
             계정이 없으신가요?{" "}
             <Link
               href="signup"
-              className="text-green-700 hover:underline font-bold"
+              className="text-green-800 hover:underline font-bold"
               onClick={handleSignupLinkClick}
             >
               가입하기

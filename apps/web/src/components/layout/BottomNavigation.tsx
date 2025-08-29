@@ -19,8 +19,8 @@ export default function BottomNavigation() {
           onClick={() => trackNavLinkClick("home", "HOME")}
           className={`flex flex-col items-center transition-colors ${
             pathname === "/home"
-              ? "text-green-700"
-              : "text-gray-700 hover:text-green-700"
+              ? "text-green-800"
+              : "text-gray-700 hover:text-green-800"
           }`}
         >
           <House
@@ -34,8 +34,8 @@ export default function BottomNavigation() {
           onClick={() => trackNavLinkClick("menu", "MENU")}
           className={`flex flex-col items-center transition-colors ${
             pathname === "/menu"
-              ? "text-green-700"
-              : "text-gray-700 hover:text-green-700"
+              ? "text-green-800"
+              : "text-gray-700 hover:text-green-800"
           }`}
         >
           <Menu
@@ -49,8 +49,8 @@ export default function BottomNavigation() {
           onClick={() => trackNavLinkClick("cart", "CART")}
           className={`flex flex-col items-center transition-colors relative ${
             pathname === "/cart"
-              ? "text-green-700"
-              : "text-gray-700 hover:text-green-700"
+              ? "text-green-800"
+              : "text-gray-700 hover:text-green-800"
           }`}
         >
           <div className="relative">
@@ -71,8 +71,8 @@ export default function BottomNavigation() {
           onClick={() => trackNavLinkClick("profile", "MY")}
           className={`flex flex-col items-center transition-colors ${
             pathname === "/profile"
-              ? "text-green-700"
-              : "text-gray-700 hover:text-green-700"
+              ? "text-green-800"
+              : "text-gray-700 hover:text-green-800"
           }`}
         >
           <User
