@@ -38,12 +38,10 @@ export default function AddToCartButton({
   const handleAddToCart = () => {
     if (isOutOfStock) return;
 
-    // 비로그인 상태면 토스트 메시지와 함께 로그인 페이지로 이동
+    // 비로그인 상태면 토스트 메시지와 함께 즉시 로그인 페이지로 이동
     if (!isAuthenticated) {
       showWarning("로그인이 필요한 서비스입니다.");
-      setTimeout(() => {
-        router.push("/login");
-      }, 400);
+      router.push("/login");
       return;
     }
 

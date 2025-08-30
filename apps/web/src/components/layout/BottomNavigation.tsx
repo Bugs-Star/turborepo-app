@@ -28,9 +28,7 @@ export default function BottomNavigation() {
     if (!isAuthenticated) {
       e.preventDefault();
       showWarning("로그인이 필요한 서비스입니다.");
-      setTimeout(() => {
-        router.push("login");
-      }, 400);
+      router.push("/login");
     }
     trackNavLinkClick("cart", "CART");
   };
