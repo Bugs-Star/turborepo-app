@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { Product } from "@/types";
 import { useRecommendedMenuFetch } from "@/hooks/useRecommendedMenuFetch";
-import { SectionAsyncWrapper } from "@/components/ui";
+import { SectionAsyncWrapper, RecommendedMenuSkeleton } from "@/components/ui";
 
 interface RecommendedMenuProps {
   onProductClick?: (product: Product) => void;
@@ -51,6 +51,7 @@ export default function RecommendedMenu({
       title="오늘의 추천 메뉴"
       loadingMessage="추천 메뉴를 불러오는 중..."
       errorMessage="추천 메뉴를 불러올 수 없습니다."
+      skeleton={<RecommendedMenuSkeleton count={5} />}
     >
       {renderProductList()}
     </SectionAsyncWrapper>
