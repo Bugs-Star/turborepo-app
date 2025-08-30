@@ -35,7 +35,7 @@ export const useAnalytics = () => {
         interactionType: "product_card",
         targetId: product._id,
         sourceComponent: sourceComponent,
-        productCode: product.productName,
+        productCode: product.productCode,
         price: product.price,
         category: product.category,
       });
@@ -48,7 +48,7 @@ export const useAnalytics = () => {
       interactionType: "product_card",
       targetId: product._id,
       sourceComponent: "home_recommended_section",
-      productCode: product.productName,
+      productCode: product.productCode,
       price: product.price,
       category: product.category,
     });
