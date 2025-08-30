@@ -116,18 +116,19 @@ function MenuContent() {
         >
           {(categoryFilteredProducts, activeCategory) => (
             <>
-              <div className="fixed top-28 left-1/2 transform -translate-x-1/2 w-full max-w-md z-40 bg-white border-b border-gray-200">
-                <div className="px-6 pb-4">
+              <div className="fixed top-25 left-1/2 transform -translate-x-1/2 w-full max-w-lg z-40 bg-white border-b border-gray-200">
+                <div className="px-6 pt-1 pb-2">
                   <SearchBox
                     onSearch={handleSearch}
                     onSortChange={handleSort}
                     searchTerm={searchTerm}
                     sortOption={sortOption}
+                    className="h-10"
                   />
                 </div>
               </div>
 
-              <div className="pt-36 flex-1 px-6 pb-6">
+              <div className="pt-28 flex-1 px-6 pb-6">
                 <InfiniteScroll
                   onLoadMore={() => fetchNextPage?.()}
                   hasMore={hasNextPage}

@@ -98,16 +98,18 @@ export default function LoginForm() {
           disabled={isFormLoading}
         />
 
-        <Button
-          type="submit"
-          variant="green"
-          size="md"
-          fullWidth
-          className="rounded-full"
-          disabled={isFormLoading}
-        >
-          {isFormLoading ? "로그인 중..." : "로그인"}
-        </Button>
+        <div className="pt-8">
+          <Button
+            type="submit"
+            variant="green"
+            size="md"
+            fullWidth
+            className="rounded-full"
+            disabled={isFormLoading}
+          >
+            {isFormLoading ? "로그인 중..." : "로그인"}
+          </Button>
+        </div>
 
         <div className="text-center">
           <p className="text-gray-600">

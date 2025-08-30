@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { BottomNavigation } from "@/components/layout";
-import { PageHeader } from "@/components/ui";
+import { PageHeader, AuthGuard } from "@/components/ui";
 import { CartContent, CartActionButton } from "@/components/cart";
 import { AsyncWrapper } from "@/components/ui";
 import {
@@ -64,38 +64,40 @@ export default function CartPage() {
   };
 
   return (
-    <AsyncWrapper
-      loading={isLoading || isFetching}
-      error={error?.message || null}
-      loadingMessage="장바구니를 불러오는 중..."
-      errorMessage="장바구니를 불러오는데 실패했습니다."
-    >
-      <div className="min-h-screen bg-white flex flex-col pb-20">
-        <PageHeader title="장바구니" />
+    <AuthGuard backgroundColor="bg-white" title="장바구니" showHeader={true}>
+      <AsyncWrapper
+        loading={isLoading || isFetching}
+        error={error?.message || null}
+        loadingMessage="장바구니를 불러오는 중..."
+        errorMessage="장바구니를 불러오는데 실패했습니다."
+      >
+        <div className="min-h-screen bg-white flex flex-col pb-20">
+          <PageHeader title="장바구니" />
 
-        {/* Main Content - 고정 헤더 아래 여백 추가 */}
-        <div className="pt-16 px-6">
-          <CartContent
-            cartItems={cartItems}
-            total={total}
-            isActionLoading={isActionLoading}
-            onQuantityChange={handleQuantityChange}
-            onRemove={handleRemoveWithLogging}
-          />
+          {/* Main Content - 고정 헤더 아래 여백 추가 */}
+          <div className="pt-16 px-6">
+            <CartContent
+              cartItems={cartItems}
+              total={total}
+              isActionLoading={isActionLoading}
+              onQuantityChange={handleQuantityChange}
+              onRemove={handleRemoveWithLogging}
+            />
 
-          {/* Action Buttons */}
-          <CartActionButton
-            hasItems={cartItems.length > 0}
-            isProcessing={isProcessing}
-            isActionLoading={isActionLoading}
-            onPaymentClick={handlePaymentClickWithLogging}
-            onGoToMenu={goToMenu}
-          />
+            {/* Action Buttons */}
+            <CartActionButton
+              hasItems={cartItems.length > 0}
+              isProcessing={isProcessing}
+              isActionLoading={isActionLoading}
+              onPaymentClick={handlePaymentClickWithLogging}
+              onGoToMenu={goToMenu}
+            />
+          </div>
+
+          {/* Bottom Navigation */}
+          <BottomNavigation />
         </div>
-
-        {/* Bottom Navigation */}
-        <BottomNavigation />
-      </div>
-    </AsyncWrapper>
+      </AsyncWrapper>
+    </AuthGuard>
   );
 }

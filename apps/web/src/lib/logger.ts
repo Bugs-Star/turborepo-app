@@ -98,6 +98,22 @@ const getSessionStorage = (key: string, defaultValue: string): string => {
   }
 };
 
+/**
+ * 사용자 ID 가져오기 (Zustand store에서)
+ */
+const getUserId = (): string => {
+  if (!isBrowser()) return "";
+
+  try {
+    // Zustand store에서 사용자 이메일 가져오기
+    const { useAuthStore } = require("@/stores/authStore");
+    const user = useAuthStore.getState().user;
+    return user?.email || "";
+  } catch {
+    return "";
+  }
+};
+
 // === 로거 인터페이스 ===
 
 interface Logger {
@@ -317,8 +333,8 @@ const createLogger = (): Logger => {
       console.log("🚨 즉시 전송:", {
         count: logs.length,
         logs: logs.map((log) => ({
-          event_name: log.event_name,
-          timestamp: log.event_timestamp,
+          eventName: log.eventName,
+          timestamp: log.eventTimestamp,
           payload: log.payload,
         })),
       });
@@ -389,8 +405,8 @@ const createLogger = (): Logger => {
       console.log("📊 배치 전송:", {
         count: logs.length,
         logs: logs.map((log) => ({
-          event_name: log.event_name,
-          timestamp: log.event_timestamp,
+          eventName: log.eventName,
+          timestamp: log.eventTimestamp,
           payload: log.payload,
         })),
       });
@@ -494,20 +510,20 @@ const createLogger = (): Logger => {
 
     // 스키마로 로그 생성
     const newLogData: NewLogData = {
-      event_name: eventName,
-      event_timestamp: new Date().toISOString(),
-      user_id: getLocalStorage("userId", ""),
-      session_id: sessionId,
-      device_id: deviceId,
+      eventName: eventName,
+      eventTimestamp: new Date().toISOString(),
+      userId: getUserId(),
+      sessionId: sessionId,
+      deviceId: deviceId,
       platform: "Web",
-      app_version: "1.0.0",
+      appVersion: "1.0.0",
       payload: payload,
     };
 
     // 중요 로그 판별 (실패/에러만 즉시 전송)
     const isCritical = (log: NewLogData): boolean => {
       // click_interaction에서 실패/에러 체크
-      if (log.event_name === "click_interaction") {
+      if (log.eventName === "click_interaction") {
         const payload = log.payload as ClickInteractionPayload;
 
         // 실패/에러 관련 상호작용만 즉시 전송

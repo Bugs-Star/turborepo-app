@@ -13,12 +13,14 @@ export default function ProductImage({ src, alt }: ProductImageProps) {
   };
 
   return (
-    <div className="relative w-full h-80 bg-gray-100">
+    <div className="relative w-full bg-gray-100 pt-16">
       <Image
         src={src}
         alt={alt}
-        fill
-        className="object-cover"
+        width={0}
+        height={0}
+        sizes="100vw"
+        className="w-full h-auto object-contain"
         onError={handleImageError}
       />
       {/* 그라데이션 오버레이 요소 */}

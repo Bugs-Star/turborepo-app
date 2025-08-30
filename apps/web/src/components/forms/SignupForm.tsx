@@ -116,17 +116,18 @@ export default function SignupForm() {
           error={errors.confirmPassword}
           disabled={isFormLoading}
         />
-
-        <Button
-          type="submit"
-          variant="green"
-          size="md"
-          fullWidth
-          className="rounded-full"
-          disabled={isFormLoading}
-        >
-          {isFormLoading ? "가입 중..." : "가입하기"}
-        </Button>
+        <div className="pt-8">
+          <Button
+            type="submit"
+            variant="green"
+            size="md"
+            fullWidth
+            className="rounded-full"
+            disabled={isFormLoading}
+          >
+            {isFormLoading ? "가입 중..." : "가입하기"}
+          </Button>
+        </div>
 
         <div className="text-center">
           <p className="text-gray-600">

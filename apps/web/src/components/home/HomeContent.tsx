@@ -6,11 +6,13 @@ import {
 } from "@/components/home";
 import { Product } from "@/types";
 import { Event, Promotion } from "@/lib/services";
+import { PromoBannerSkeleton } from "@/components/ui/Skeleton";
 
 interface HomeContentProps {
   promotions: Promotion[];
   events: Event[];
   promotionsLoading: boolean;
+  eventsLoading: boolean;
   onProductClick: (product: Product) => void;
   onPromoClick: (promotionId: string) => void;
   onEventClick: (event: Event) => void;
@@ -20,6 +22,7 @@ export default function HomeContent({
   promotions,
   events,
   promotionsLoading,
+  eventsLoading,
   onProductClick,
   onPromoClick,
   onEventClick,
@@ -52,20 +55,28 @@ export default function HomeContent({
       {/* 콘텐츠 영역 - 고정 헤더 아래 여백 추가 */}
       <div className="pt-16 px-6">
         {/* 상단 프로모션 배너들 */}
-        {!promotionsLoading &&
-          upPromotions.length > 0 &&
-          renderPromotions(upPromotions)}
+        {promotionsLoading ? (
+          <PromoBannerSkeleton />
+        ) : (
+          upPromotions.length > 0 && renderPromotions(upPromotions)
+        )}
 
         {/* 오늘의 추천 메뉴 */}
         <RecommendedMenu onProductClick={onProductClick} />
 
         {/* 하단 프로모션 배너들 */}
-        {!promotionsLoading &&
-          downPromotions.length > 0 &&
-          renderPromotions(downPromotions)}
+        {promotionsLoading ? (
+          <PromoBannerSkeleton />
+        ) : (
+          downPromotions.length > 0 && renderPromotions(downPromotions)
+        )}
 
         {/* 이벤트 */}
-        <EventSection events={events} onEventClick={onEventClick} />
+        <EventSection
+          events={events}
+          loading={eventsLoading}
+          onEventClick={onEventClick}
+        />
       </div>
     </div>
   );

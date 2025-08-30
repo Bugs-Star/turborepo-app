@@ -5,12 +5,12 @@
  * import { LogData, EventName } from '@repo/types';
  *
  * const logData: LogData = {
- *   event_name: 'product_click',
- *   event_timestamp: new Date().toISOString(),
- *   user_id: 'user_123',
- *   device_id: 'device_456',
- *   session_id: 'sess_789',
- *   payload: { product_id: 'prod_001' }
+ *   eventName: 'product_click',
+ *   eventTimestamp: new Date().toISOString(),
+ *   userId: 'user_123',
+ *   deviceId: 'device_456',
+ *   sessionId: 'sess_789',
+ *   payload: { productId: 'prod_001' }
  * };
  */
 
@@ -21,28 +21,28 @@ export type NewEventName = "view_screen" | "click_interaction";
 
 // 로그 데이터 기본 구조
 export interface NewLogData {
-  event_name: NewEventName;
-  event_timestamp: string;
-  user_id?: string;
-  session_id: string;
-  device_id: string;
+  eventName: NewEventName;
+  eventTimestamp: string;
+  userId?: string;
+  sessionId: string;
+  deviceId: string;
   platform: string;
-  app_version: string;
+  appVersion: string;
   payload: ViewScreenPayload | ClickInteractionPayload;
 }
 
 // 화면 조회 이벤트 Payload
 export interface ViewScreenPayload {
-  screen_name: string;
-  previous_screen_name?: string;
+  screenName: string;
+  previousScreenName?: string;
 }
 
 // 클릭 상호작용 이벤트 Payload
 export interface ClickInteractionPayload {
-  interaction_type: InteractionType;
-  target_id?: string;
-  target_name?: string;
-  source_component?: string;
+  interactionType: InteractionType;
+  targetId?: string;
+  targetName?: string;
+  sourceComponent?: string;
   // 추가 필드들 (필요에 따라 확장)
   [key: string]: any;
 }

@@ -2,6 +2,9 @@ import { Product } from "@/types";
 import { ShoppingCart } from "lucide-react";
 import { Button } from "@repo/ui/button";
 import { useCart } from "@/hooks/useCart";
+import { useAuthStore } from "@/stores/authStore";
+import { useToast } from "@/hooks/useToast";
+import { useRouter } from "next/navigation";
 import { formatProductPrice } from "@/utils/productUtils";
 
 interface AddToCartButtonProps {
@@ -25,12 +28,22 @@ export default function AddToCartButton({
     onSuccess,
     onError,
   });
+  const { isAuthenticated } = useAuthStore();
+  const { showWarning } = useToast();
+  const router = useRouter();
 
   const totalPrice = product.price * quantity;
   const isOutOfStock = product.currentStock <= 0;
 
   const handleAddToCart = () => {
     if (isOutOfStock) return;
+
+    // 비로그인 상태면 토스트 메시지와 함께 즉시 로그인 페이지로 이동
+    if (!isAuthenticated) {
+      showWarning("로그인이 필요한 서비스입니다.");
+      router.push("/login");
+      return;
+    }
 
     // 로거 콜백 호출 (있는 경우)
     onCartAdd?.(product, quantity);

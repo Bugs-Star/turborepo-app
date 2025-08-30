@@ -22,7 +22,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ko">
-      <body className={`${inter.className} max-w-md mx-auto`}>
+      <body className={`${inter.className} max-w-lg mx-auto`}>
         <ErrorBoundary>
           <QueryProvider>
             <main className="h-screen overflow-y-scroll scrollbar-hide">
