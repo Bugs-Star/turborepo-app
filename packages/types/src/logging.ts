@@ -67,8 +67,6 @@ export type InteractionType =
   | "sort_option_select"
   // 장바구니 및 결제
   | "button_add_to_cart"
-  | "button_increase_quantity"
-  | "button_decrease_quantity"
   | "button_remove_item"
   | "button_create_order"
   // 프로모션 및 이벤트

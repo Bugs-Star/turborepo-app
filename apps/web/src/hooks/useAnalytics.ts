@@ -99,32 +99,6 @@ export const useAnalytics = () => {
     });
   }, []);
 
-  const trackIncreaseQuantity = useCallback(
-    (productId: string, currentQuantity: number) => {
-      logger.log("click_interaction", {
-        interactionType: "button_increase_quantity",
-        targetId: productId,
-        sourceComponent: "cart_item",
-        productId: productId,
-        currentQuantity: currentQuantity,
-      });
-    },
-    []
-  );
-
-  const trackDecreaseQuantity = useCallback(
-    (productId: string, currentQuantity: number) => {
-      logger.log("click_interaction", {
-        interactionType: "button_decrease_quantity",
-        targetId: productId,
-        sourceComponent: "cart_item",
-        productId: productId,
-        currentQuantity: currentQuantity,
-      });
-    },
-    []
-  );
-
   const trackRemoveItem = useCallback((item: CartItemUI) => {
     logger.log("click_interaction", {
       interactionType: "button_remove_item",
@@ -338,8 +312,6 @@ export const useAnalytics = () => {
     trackSortOptionSelect,
     trackSearchSubmit,
     trackAddToCart,
-    trackIncreaseQuantity,
-    trackDecreaseQuantity,
     trackRemoveItem,
     trackCreateOrder,
     trackPromotionClick,
