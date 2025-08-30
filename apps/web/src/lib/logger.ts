@@ -140,9 +140,9 @@ interface Logger {
 const createLogger = (): Logger => {
   // 중요 로그 판별을 위한 Set (O(1) 검색 최적화)
   const CRITICAL_INTERACTIONS = new Set<InteractionType>([
-    "login_failure",
-    "signup_failure",
-    "critical_error",
+    "loginFailure",
+    "signupFailure",
+    "criticalError",
   ]);
 
   const state: {
@@ -527,7 +527,7 @@ const createLogger = (): Logger => {
         const payload = log.payload as ClickInteractionPayload;
 
         // 실패/에러 관련 상호작용만 즉시 전송
-        return CRITICAL_INTERACTIONS.has(payload.interaction_type);
+        return CRITICAL_INTERACTIONS.has(payload.interactionType);
       }
 
       return false;

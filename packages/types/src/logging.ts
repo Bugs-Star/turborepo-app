@@ -50,37 +50,37 @@ export interface ClickInteractionPayload {
 // 상호작용 타입 상세 분류
 export type InteractionType =
   // 사용자 인증/세션
-  | "button_login_submit"
-  | "button_signup_submit"
-  | "button_logout"
-  | "button_profile_edit"
-  | "button_order_history"
+  | "buttonLoginSubmit"
+  | "buttonSignupSubmit"
+  | "buttonLogout"
+  | "buttonProfileEdit"
+  | "buttonOrderHistory"
   // 실패/에러 (즉시 전송)
-  | "login_failure"
-  | "signup_failure"
-  | "critical_error"
+  | "loginFailure"
+  | "signupFailure"
+  | "criticalError"
   // 상품 탐색 및 발견
-  | "product_card"
-  | "category_link"
-  | "ad_banner"
-  | "search_submit"
-  | "sort_option_select"
+  | "productCard"
+  | "categoryLink"
+  | "adBanner"
+  | "searchSubmit"
+  | "sortOptionSelect"
   // 장바구니 및 결제
-  | "button_add_to_cart"
-  | "button_remove_item"
-  | "button_create_order"
+  | "buttonAddToCart"
+  | "buttonRemoveItem"
+  | "buttonCreateOrder"
   // 프로모션 및 이벤트
-  | "event_card"
-  | "promotion_card"
-  | "button_event_participate"
-  | "button_coupon_download"
+  | "eventCard"
+  | "promotionCard"
+  | "buttonEventParticipate"
+  | "buttonCouponDownload"
   // 기타 상호작용
-  | "nav_link"
-  | "button_view_more"
-  | "button_popup_close"
-  | "signup_attempt"
-  | "signup_success"
-  | "login_link";
+  | "navLink"
+  | "buttonViewMore"
+  | "buttonPopupClose"
+  | "signupAttempt"
+  | "signupSuccess"
+  | "loginLink";
 
 // API 요청 타입
 export interface EventsRequest {
