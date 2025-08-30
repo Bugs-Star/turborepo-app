@@ -38,6 +38,7 @@ const SearchBox = memo(function SearchBox({
           onChange={handleSearchChange}
           placeholder={placeholder}
           size="md"
+          className="h-10 !h-10"
         />
       </div>
       <SortDropdown onSortChange={onSortChange} selectedOption={sortOption} />

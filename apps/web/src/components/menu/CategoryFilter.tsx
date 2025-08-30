@@ -98,10 +98,9 @@ export default function CategoryFilter({
     setActiveCategory(validatedCategory);
   }, [initialCategory]);
 
-  // 밑줄 위치 업데이트 (더 안전한 타이밍)
+  // 밑줄 위치 업데이트 (즉시 실행)
   useEffect(() => {
-    const timer = setTimeout(updateUnderlinePosition, 100);
-    return () => clearTimeout(timer);
+    updateUnderlinePosition();
   }, [updateUnderlinePosition]);
 
   // 초기 렌더링 후 밑줄 위치 계산 및 준비 완료
@@ -116,7 +115,7 @@ export default function CategoryFilter({
   return (
     <>
       {/* Category Navigation */}
-      <div className="fixed top-18 left-1/2 transform -translate-x-1/2 w-full max-w-md z-45 bg-white">
+      <div className="fixed top-16 left-1/2 transform -translate-x-1/2 w-full max-w-lg z-45 bg-white">
         <div ref={containerRef} className="relative">
           <div className="flex justify-center space-x-4 py-2">
             {categories.map((category) => (

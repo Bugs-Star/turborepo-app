@@ -25,12 +25,14 @@ export default function PromotionDetailContent({
   return (
     <div className="flex-1">
       {/* 상단 이미지 섹션 - 상품 상세 페이지와 동일한 스타일 적용 */}
-      <div className="relative w-full h-80 bg-gray-100">
+      <div className="relative w-full bg-gray-100 pt-16">
         <Image
           src={promotion.promotionImg}
           alt={promotion.title}
-          fill
-          className="object-cover"
+          width={0}
+          height={0}
+          sizes="100vw"
+          className="w-full h-auto object-contain"
           onError={handleImageError}
         />
         {/* 그라데이션 오버레이 요소 */}
