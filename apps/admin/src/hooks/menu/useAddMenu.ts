@@ -1,23 +1,54 @@
-import { useState } from "react";
-import { ProductsService, AddProductPayload } from "@/lib/products";
+"use client";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  ProductsService,
+  AddProductPayload,
+  ProductResponse,
+  GetProductsResponse,
+  GetProductsParams,
+} from "@/lib/products";
 
 export const useAddMenu = () => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const qc = useQueryClient();
 
-  const addMenu = async (payload: AddProductPayload) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const data = await ProductsService.addProduct(payload);
-      setIsLoading(false);
-      return data;
-    } catch (err: any) {
-      setIsLoading(false);
-      setError(err?.response?.data?.message || "상품 추가 실패");
-      throw err;
-    }
-  };
+  return useMutation<ProductResponse, unknown, AddProductPayload>({
+    mutationFn: (payload) => ProductsService.addProduct(payload),
 
-  return { addMenu, isLoading, error };
+    // 생성 직후 캐시 즉시 반영 + 최신화
+    onSuccess: (created) => {
+      // 1) ["products", params] 형태의 모든 캐시에 즉시 끼워넣기
+      const entries = qc.getQueriesData<GetProductsResponse>({
+        queryKey: ["products"],
+      });
+      for (const [key, data] of entries) {
+        if (!data) continue;
+        const [, params] = key as [string, GetProductsParams | undefined];
+
+        // 필터 탭일 경우 조건 맞을 때만 반영
+        if (params?.category && params.category !== created.category) continue;
+        if (
+          typeof params?.isRecommended === "boolean" &&
+          params.isRecommended &&
+          !created.isRecommended
+        )
+          continue;
+
+        const pageSize = data.pagination?.itemsPerPage ?? data.products.length;
+        qc.setQueryData<GetProductsResponse>(key, {
+          ...data,
+          products: [created, ...data.products].slice(0, pageSize),
+          pagination: data.pagination
+            ? { ...data.pagination, totalItems: data.pagination.totalItems + 1 }
+            : data.pagination,
+        });
+      }
+
+      // 2) 서버 정렬/페이지 반영까지 동기화
+      qc.invalidateQueries({
+        predicate: (q) =>
+          Array.isArray(q.queryKey) && q.queryKey[0] === "products",
+        refetchType: "active",
+      });
+    },
+  });
 };
