@@ -8,6 +8,7 @@ export interface BaseProduct {
 }
 
 export interface Product extends BaseProduct {
+  productCode: string;
   productContents: string;
   currentStock: number;
   isRecommended: boolean;

@@ -30,10 +30,10 @@ export default function MenuItemDetailPage() {
     setQuantity(newQuantity);
   };
 
-  // 상품명을 사용한 스크린 뷰 로그 (상품 데이터 로드 후)
+  // 상품 코드를 사용한 스크린 뷰 로그 (상품 데이터 로드 후)
   useEffect(() => {
     if (product && !hasLoggedScreenView.current) {
-      trackScreenView(`/menu/${product.productName}`);
+      trackScreenView(`/menu/${product.productCode}`);
       hasLoggedScreenView.current = true;
     }
   }, [product, trackScreenView]);
