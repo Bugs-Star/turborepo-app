@@ -32,7 +32,7 @@ export const useAnalytics = () => {
   const trackProductClick = useCallback(
     (product: Product, sourceComponent?: string) => {
       logger.log("click_interaction", {
-        interactionType: "product_card",
+        interactionType: "productCard",
         targetId: product._id,
         sourceComponent: sourceComponent,
         productCode: product.productCode,
@@ -45,7 +45,7 @@ export const useAnalytics = () => {
 
   const trackRecommendedProductClick = useCallback((product: Product) => {
     logger.log("click_interaction", {
-      interactionType: "product_card",
+      interactionType: "productCard",
       targetId: product._id,
       sourceComponent: "home_recommended_section",
       productCode: product.productCode,
@@ -57,7 +57,7 @@ export const useAnalytics = () => {
   // === 카테고리 및 필터 이벤트 ===
   const trackCategoryClick = useCallback((category: string) => {
     logger.log("click_interaction", {
-      interactionType: "category_link",
+      interactionType: "categoryLink",
       targetId: category,
       sourceComponent: "category_filter",
       categoryName: category,
@@ -66,7 +66,7 @@ export const useAnalytics = () => {
 
   const trackSortOptionSelect = useCallback((sortOption: string) => {
     logger.log("click_interaction", {
-      interactionType: "sort_option_select",
+      interactionType: "sortOptionSelect",
       targetId: sortOption,
       sourceComponent: "sort_filter",
       sortOption: sortOption,
@@ -77,7 +77,7 @@ export const useAnalytics = () => {
   const trackSearchSubmit = useCallback(
     (searchKeyword: string, resultCount: number) => {
       logger.log("click_interaction", {
-        interactionType: "search_submit",
+        interactionType: "searchSubmit",
         targetId: searchKeyword,
         sourceComponent: "search_bar",
         searchKeyword: searchKeyword,
@@ -90,7 +90,7 @@ export const useAnalytics = () => {
   // === 장바구니 관련 이벤트 ===
   const trackAddToCart = useCallback((product: Product, quantity: number) => {
     logger.log("click_interaction", {
-      interactionType: "button_add_to_cart",
+      interactionType: "buttonAddToCart",
       targetId: product._id,
       sourceComponent: "product_detail",
       productId: product._id,
@@ -101,7 +101,7 @@ export const useAnalytics = () => {
 
   const trackRemoveItem = useCallback((item: CartItemUI) => {
     logger.log("click_interaction", {
-      interactionType: "button_remove_item",
+      interactionType: "buttonRemoveItem",
       targetId: item.id,
       sourceComponent: "cart_item",
       productId: item.id,
@@ -111,7 +111,7 @@ export const useAnalytics = () => {
   const trackCreateOrder = useCallback(
     (totalAmount: number, itemCount: number) => {
       logger.log("click_interaction", {
-        interactionType: "button_create_order",
+        interactionType: "buttonCreateOrder",
         targetId: "order",
         sourceComponent: "cart_page",
         totalAmount: totalAmount,
@@ -124,7 +124,7 @@ export const useAnalytics = () => {
   // === 프로모션/이벤트 관련 이벤트 ===
   const trackPromotionClick = useCallback((promotion: Promotion) => {
     logger.log("click_interaction", {
-      interactionType: "promotion_card",
+      interactionType: "promotionCard",
       targetId: promotion._id,
       sourceComponent: "promotion_section",
       promotionId: promotion._id,
@@ -134,7 +134,7 @@ export const useAnalytics = () => {
 
   const trackEventClick = useCallback((event: Event) => {
     logger.log("click_interaction", {
-      interactionType: "event_card",
+      interactionType: "eventCard",
       targetId: event._id,
       sourceComponent: "event_section",
       eventId: event._id,
@@ -144,7 +144,7 @@ export const useAnalytics = () => {
 
   const trackEventParticipate = useCallback((eventId: string) => {
     logger.log("click_interaction", {
-      interactionType: "button_event_participate",
+      interactionType: "buttonEventParticipate",
       targetId: eventId,
       sourceComponent: "event_detail",
       eventId: eventId,
@@ -154,7 +154,7 @@ export const useAnalytics = () => {
   const trackCouponDownload = useCallback(
     (promotionId: string, couponCode: string) => {
       logger.log("click_interaction", {
-        interactionType: "button_coupon_download",
+        interactionType: "buttonCouponDownload",
         targetId: promotionId,
         sourceComponent: "promotion_detail",
         promotionId: promotionId,
@@ -167,7 +167,7 @@ export const useAnalytics = () => {
   // === 광고 배너 이벤트 ===
   const trackAdBannerClick = useCallback((adId: string, campaignId: string) => {
     logger.log("click_interaction", {
-      interactionType: "ad_banner",
+      interactionType: "adBanner",
       targetId: adId,
       sourceComponent: "ad_section",
       adId: adId,
@@ -179,7 +179,7 @@ export const useAnalytics = () => {
   const trackNavLinkClick = useCallback(
     (linkText: string, targetUrl: string) => {
       logger.log("click_interaction", {
-        interactionType: "nav_link",
+        interactionType: "navLink",
         sourceComponent: "navigation",
         linkText: linkText,
         targetUrl: targetUrl,
@@ -191,7 +191,7 @@ export const useAnalytics = () => {
   // === 기타 상호작용 이벤트 ===
   const trackViewMore = useCallback((pageNumber: number) => {
     logger.log("click_interaction", {
-      interactionType: "button_view_more",
+      interactionType: "buttonViewMore",
       targetId: `page_${pageNumber}`,
       sourceComponent: "product_list",
       pageNumber: pageNumber,
@@ -200,7 +200,7 @@ export const useAnalytics = () => {
 
   const trackPopupClose = useCallback((popupId: string) => {
     logger.log("click_interaction", {
-      interactionType: "button_popup_close",
+      interactionType: "buttonPopupClose",
       targetId: popupId,
       sourceComponent: "popup",
       popupId: popupId,
@@ -210,7 +210,7 @@ export const useAnalytics = () => {
   // === 사용자 인증 이벤트 ===
   const trackLoginSubmit = useCallback(() => {
     logger.log("click_interaction", {
-      interactionType: "button_login_submit",
+      interactionType: "buttonLoginSubmit",
       targetId: "login",
       sourceComponent: "login_form",
     });
@@ -218,7 +218,7 @@ export const useAnalytics = () => {
 
   const trackSignupSubmit = useCallback(() => {
     logger.log("click_interaction", {
-      interactionType: "button_signup_submit",
+      interactionType: "buttonSignupSubmit",
       targetId: "signup",
       sourceComponent: "signup_form",
     });
@@ -226,7 +226,7 @@ export const useAnalytics = () => {
 
   const trackLogout = useCallback(() => {
     logger.log("click_interaction", {
-      interactionType: "button_logout",
+      interactionType: "buttonLogout",
       targetId: "logout",
       sourceComponent: "profile_menu",
     });
@@ -234,7 +234,7 @@ export const useAnalytics = () => {
 
   const trackProfileEditClick = useCallback(() => {
     logger.log("click_interaction", {
-      interactionType: "button_profile_edit",
+      interactionType: "buttonProfileEdit",
       targetId: "profile_edit",
       sourceComponent: "profile_menu",
     });
@@ -242,7 +242,7 @@ export const useAnalytics = () => {
 
   const trackOrderHistoryClick = useCallback(() => {
     logger.log("click_interaction", {
-      interactionType: "button_order_history",
+      interactionType: "buttonOrderHistory",
       targetId: "order_history",
       sourceComponent: "profile_menu",
     });
@@ -252,7 +252,7 @@ export const useAnalytics = () => {
   const trackLoginFailure = useCallback(
     (email: string, errorMessage: string) => {
       logger.log("click_interaction", {
-        interactionType: "login_failure",
+        interactionType: "loginFailure",
         targetId: "login",
         sourceComponent: "login_form",
         email: email,
@@ -265,7 +265,7 @@ export const useAnalytics = () => {
   const trackSignupFailure = useCallback(
     (email: string, name: string, errorMessage: string) => {
       logger.log("click_interaction", {
-        interactionType: "signup_failure",
+        interactionType: "signupFailure",
         targetId: "signup",
         sourceComponent: "signup_form",
         email: email,
@@ -278,7 +278,7 @@ export const useAnalytics = () => {
 
   const trackSignupAttempt = useCallback((email: string, name: string) => {
     logger.log("click_interaction", {
-      interactionType: "signup_attempt",
+      interactionType: "signupAttempt",
       targetId: "signup",
       sourceComponent: "signup_form",
       email: email,
@@ -288,7 +288,7 @@ export const useAnalytics = () => {
 
   const trackSignupSuccess = useCallback((email: string, name: string) => {
     logger.log("click_interaction", {
-      interactionType: "signup_success",
+      interactionType: "signupSuccess",
       targetId: "signup",
       sourceComponent: "signup_form",
       email: email,
@@ -298,7 +298,7 @@ export const useAnalytics = () => {
 
   const trackLoginLinkClick = useCallback(() => {
     logger.log("click_interaction", {
-      interactionType: "login_link",
+      interactionType: "loginLink",
       targetId: "login_link",
       sourceComponent: "signup_form",
     });

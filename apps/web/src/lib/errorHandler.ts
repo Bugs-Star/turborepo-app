@@ -34,7 +34,7 @@ export interface ErrorClassification {
 
 // 에러 컨텍스트 정보
 export interface ErrorContext {
-  error_message: string;
+  errorMessage: string;
   error_code?: number;
   error_type: string;
   context: string;
@@ -192,7 +192,7 @@ const collectErrorContext = (error: any, context: string): ErrorContext => {
   const sanitizedError = sanitizeErrorData(error);
 
   return {
-    error_message: error.message || "Unknown error",
+    errorMessage: error.message || "Unknown error",
     error_code: error.response?.status,
     error_type: error.name || "Error",
     context: context,
