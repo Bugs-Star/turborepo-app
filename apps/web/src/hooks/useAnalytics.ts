@@ -15,15 +15,18 @@ import { Promotion, Event } from "@/lib/services";
 
 export const useAnalytics = () => {
   // === 화면 조회 이벤트 ===
-  const trackScreenView = useCallback(
-    (screenName: string, previousScreen?: string) => {
-      logger.log("view_screen", {
-        screen_name: screenName,
-        previous_screen_name: previousScreen,
-      });
-    },
-    []
-  );
+  const trackScreenView = useCallback((screenName: string) => {
+    // 이전 페이지 가져오기
+    const previousScreen = sessionStorage.getItem("currentScreen") || null;
+
+    // 현재 페이지 저장
+    sessionStorage.setItem("currentScreen", screenName);
+
+    logger.log("view_screen", {
+      screen_name: screenName,
+      previous_screen_name: previousScreen,
+    } as any);
+  }, []);
 
   // === 상품 관련 이벤트 ===
   const trackProductClick = useCallback(
