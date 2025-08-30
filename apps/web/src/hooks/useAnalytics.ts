@@ -32,8 +32,7 @@ export const useAnalytics = () => {
         interaction_type: "product_card",
         target_id: product._id,
         source_component: sourceComponent,
-        productCode: product._id,
-        productName: product.productName,
+        productCode: product.productName,
         price: product.price,
         category: product.category,
       });
@@ -46,8 +45,7 @@ export const useAnalytics = () => {
       interaction_type: "product_card",
       target_id: product._id,
       source_component: "home_recommended_section",
-      productCode: product._id,
-      productName: product.productName,
+      productCode: product.productName,
       price: product.price,
       category: product.category,
     });
@@ -58,8 +56,7 @@ export const useAnalytics = () => {
       interaction_type: "product_card",
       target_id: product._id,
       source_component: "product_detail_view",
-      productCode: product._id,
-      productName: product.productName,
+      productCode: product.productName,
       price: product.price,
       category: product.category,
     });
