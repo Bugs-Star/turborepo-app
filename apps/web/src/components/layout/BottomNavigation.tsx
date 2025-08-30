@@ -1,15 +1,39 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { House, Menu, ShoppingCart, User } from "lucide-react";
 import { useCartCountFetch, useAnalytics } from "@/hooks";
+import { useAuthStore } from "@/stores/authStore";
+import { useToast } from "@/hooks/useToast";
 
 export default function BottomNavigation() {
   const pathname = usePathname();
+  const router = useRouter();
   const { data: cartCountData } = useCartCountFetch();
   const cartCount = cartCountData?.count || 0;
   const { trackNavLinkClick } = useAnalytics();
+  const { isAuthenticated } = useAuthStore();
+  const { showWarning } = useToast();
+
+  const handleProfileClick = (e: React.MouseEvent) => {
+    if (!isAuthenticated) {
+      e.preventDefault();
+      router.push("login");
+    }
+    trackNavLinkClick("profile", "MY");
+  };
+
+  const handleCartClick = (e: React.MouseEvent) => {
+    if (!isAuthenticated) {
+      e.preventDefault();
+      showWarning("로그인이 필요한 서비스입니다.");
+      setTimeout(() => {
+        router.push("login");
+      }, 400);
+    }
+    trackNavLinkClick("cart", "CART");
+  };
 
   return (
     <div className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-md bg-white border-t border-gray-200 py-3 z-50">
@@ -46,7 +70,7 @@ export default function BottomNavigation() {
         </Link>
         <Link
           href="/cart"
-          onClick={() => trackNavLinkClick("cart", "CART")}
+          onClick={handleCartClick}
           className={`flex flex-col items-center transition-colors relative ${
             pathname === "/cart"
               ? "text-green-800"
@@ -68,7 +92,7 @@ export default function BottomNavigation() {
         </Link>
         <Link
           href="/profile"
-          onClick={() => trackNavLinkClick("profile", "MY")}
+          onClick={handleProfileClick}
           className={`flex flex-col items-center transition-colors ${
             pathname === "/profile"
               ? "text-green-800"
