@@ -54,17 +54,6 @@ export const useAnalytics = () => {
     });
   }, []);
 
-  const trackProductView = useCallback((product: Product) => {
-    logger.log("click_interaction", {
-      interactionType: "product_card",
-      targetId: product._id,
-      sourceComponent: "product_detail_view",
-      productCode: product.productName,
-      price: product.price,
-      category: product.category,
-    });
-  }, []);
-
   // === 카테고리 및 필터 이벤트 ===
   const trackCategoryClick = useCallback((category: string) => {
     logger.log("click_interaction", {
@@ -345,7 +334,6 @@ export const useAnalytics = () => {
     trackScreenView,
     trackProductClick,
     trackRecommendedProductClick,
-    trackProductView,
     trackCategoryClick,
     trackSortOptionSelect,
     trackSearchSubmit,

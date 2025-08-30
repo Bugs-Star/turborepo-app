@@ -21,23 +21,14 @@ export default function MenuItemDetailPage() {
 
   // 로거 훅들
   const { trackScreenView } = useAnalytics();
-  const { handleProductView, handleCartAdd } = useProductDetailActions();
+  const { handleCartAdd } = useProductDetailActions();
 
   // 중복 로깅 방지를 위한 ref
   const hasLoggedScreenView = useRef(false);
-  const hasLoggedProductView = useRef(false);
 
   const handleQuantityChange = (newQuantity: number) => {
     setQuantity(newQuantity);
   };
-
-  // 상품 데이터가 로드되면 상품 뷰 로그 (한 번만)
-  useEffect(() => {
-    if (product && !hasLoggedProductView.current) {
-      handleProductView(product);
-      hasLoggedProductView.current = true;
-    }
-  }, [product, handleProductView]);
 
   // 상품명을 사용한 스크린 뷰 로그 (상품 데이터 로드 후)
   useEffect(() => {
