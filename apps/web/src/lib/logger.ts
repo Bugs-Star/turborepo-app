@@ -98,6 +98,22 @@ const getSessionStorage = (key: string, defaultValue: string): string => {
   }
 };
 
+/**
+ * 사용자 ID 가져오기 (Zustand store에서)
+ */
+const getUserId = (): string => {
+  if (!isBrowser()) return "";
+
+  try {
+    // Zustand store에서 사용자 이메일 가져오기
+    const { useAuthStore } = require("@/stores/authStore");
+    const user = useAuthStore.getState().user;
+    return user?.email || "";
+  } catch {
+    return "";
+  }
+};
+
 // === 로거 인터페이스 ===
 
 interface Logger {
@@ -496,7 +512,7 @@ const createLogger = (): Logger => {
     const newLogData: NewLogData = {
       event_name: eventName,
       event_timestamp: new Date().toISOString(),
-      user_id: getLocalStorage("userId", ""),
+      user_id: getUserId(),
       session_id: sessionId,
       device_id: deviceId,
       platform: "Web",
