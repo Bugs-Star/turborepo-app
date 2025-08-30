@@ -122,13 +122,13 @@ export class OfflineLogStorage {
 
       request.onsuccess = () => {
         const logs = request.result.map((item: StoredLog) => ({
-          event_name: item.event_name,
-          event_timestamp: item.event_timestamp,
-          user_id: item.user_id,
-          session_id: item.session_id,
-          device_id: item.device_id,
+          eventName: item.eventName,
+          eventTimestamp: item.eventTimestamp,
+          userId: item.userId,
+          sessionId: item.sessionId,
+          deviceId: item.deviceId,
           platform: item.platform,
-          app_version: item.app_version,
+          appVersion: item.appVersion,
           payload: item.payload,
         }));
         console.log(`📊 전송 대기 로그 ${logs.length}개 조회`);
@@ -289,10 +289,10 @@ export class OfflineLogStorage {
         logs.forEach((targetLog) => {
           const foundLog = allLogs.find(
             (storedLog) =>
-              storedLog.event_name === targetLog.event_name &&
-              storedLog.event_timestamp === targetLog.event_timestamp &&
-              storedLog.session_id === targetLog.session_id &&
-              storedLog.device_id === targetLog.device_id &&
+              storedLog.eventName === targetLog.eventName &&
+              storedLog.eventTimestamp === targetLog.eventTimestamp &&
+              storedLog.sessionId === targetLog.sessionId &&
+              storedLog.deviceId === targetLog.deviceId &&
               storedLog.status === "pending"
           );
 

@@ -295,19 +295,19 @@ export class ErrorHandler {
       if (classification.isCritical) {
         // 즉시 전송 (중요한 에러)
         logger.log("click_interaction", {
-          interaction_type: "critical_error",
-          target_id: "error_handler",
-          target_name: "치명적 오류",
-          source_component: "error_handler",
+          interactionType: "critical_error",
+          targetId: "error_handler",
+          targetName: "치명적 오류",
+          sourceComponent: "error_handler",
           ...errorContext,
           priority: classification.priority,
-          user_friendly_message: classification.userFriendlyMessage,
+          userFriendlyMessage: classification.userFriendlyMessage,
         });
       } else {
         // 배치 전송 (일반적인 에러) - 일반 로그로 처리
         logger.log("view_screen", {
-          screen_name: "error_page",
-          previous_screen_name: errorContext.page,
+          screenName: "error_page",
+          previousScreenName: errorContext.page,
         });
       }
 
@@ -320,13 +320,13 @@ export class ErrorHandler {
       // 최소한의 로깅 시도 (에러 핸들러 자체 에러는 항상 중요)
       try {
         logger.log("click_interaction", {
-          interaction_type: "critical_error",
-          target_id: "error_handler",
-          target_name: "에러 핸들러 실패",
-          source_component: "error_handler",
-          error_message: "Error handler failed",
-          original_error: error.message,
-          handler_error:
+          interactionType: "critical_error",
+          targetId: "error_handler",
+          targetName: "에러 핸들러 실패",
+          sourceComponent: "error_handler",
+          errorMessage: "Error handler failed",
+          originalError: error.message,
+          handlerError:
             handlerError instanceof Error
               ? handlerError.message
               : String(handlerError),
