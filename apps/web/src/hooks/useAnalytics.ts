@@ -214,7 +214,6 @@ export const useAnalytics = () => {
     (linkText: string, targetUrl: string) => {
       logger.log("click_interaction", {
         interaction_type: "nav_link",
-        target_id: targetUrl,
         source_component: "navigation",
         linkText: linkText,
         targetUrl: targetUrl,

@@ -31,14 +31,6 @@ export default function MenuItemDetailPage() {
     setQuantity(newQuantity);
   };
 
-  // 페이지 로드 시 화면 조회 로그 (브라우저에서만 실행, 한 번만)
-  useEffect(() => {
-    if (typeof window !== "undefined" && !hasLoggedScreenView.current) {
-      trackScreenView(`/menu/${productId}`);
-      hasLoggedScreenView.current = true;
-    }
-  }, [trackScreenView, productId]);
-
   // 상품 데이터가 로드되면 상품 뷰 로그 (한 번만)
   useEffect(() => {
     if (product && !hasLoggedProductView.current) {
@@ -46,6 +38,14 @@ export default function MenuItemDetailPage() {
       hasLoggedProductView.current = true;
     }
   }, [product, handleProductView]);
+
+  // 상품명을 사용한 스크린 뷰 로그 (상품 데이터 로드 후)
+  useEffect(() => {
+    if (product && !hasLoggedScreenView.current) {
+      trackScreenView(`/menu/${product.productName}`);
+      hasLoggedScreenView.current = true;
+    }
+  }, [product, trackScreenView]);
 
   return (
     <AsyncWrapper
