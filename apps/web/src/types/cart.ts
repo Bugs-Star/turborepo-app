@@ -9,6 +9,7 @@ export interface CartItem {
     productImg: string;
     price: number;
     category: string;
+    productCode: string;
   };
   subtotal: number;
   isAvailable: boolean;
@@ -35,6 +36,7 @@ export interface CartItemUI {
   price: number;
   quantity: number;
   imageUrl: string;
+  productCode: string;
 }
 
 // 타입 변환 함수
@@ -44,6 +46,7 @@ export const transformCartItemForUI = (item: CartItem): CartItemUI => ({
   price: item.product.price,
   quantity: item.quantity,
   imageUrl: item.product.productImg,
+  productCode: item.product.productCode,
 });
 
 export const transformCartForUI = (cartResponse: CartResponse) => ({

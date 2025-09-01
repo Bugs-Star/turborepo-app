@@ -93,7 +93,7 @@ export const useAnalytics = () => {
       interactionType: "buttonAddToCart",
       targetId: product._id,
       sourceComponent: "product_detail",
-      productId: product._id,
+      productCode: product.productCode,
       quantity: quantity,
       price: product.price,
     });
@@ -104,7 +104,7 @@ export const useAnalytics = () => {
       interactionType: "buttonRemoveItem",
       targetId: item.id,
       sourceComponent: "cart_item",
-      productId: item.id,
+      productCode: item.productCode,
     });
   }, []);
 
@@ -127,7 +127,6 @@ export const useAnalytics = () => {
       interactionType: "promotionCard",
       targetId: promotion._id,
       sourceComponent: "promotion_section",
-      promotionId: promotion._id,
       promotionName: promotion.title,
     });
   }, []);
@@ -137,7 +136,6 @@ export const useAnalytics = () => {
       interactionType: "eventCard",
       targetId: event._id,
       sourceComponent: "event_section",
-      eventId: event._id,
       eventName: event.title,
     });
   }, []);
@@ -147,7 +145,6 @@ export const useAnalytics = () => {
       interactionType: "buttonEventParticipate",
       targetId: eventId,
       sourceComponent: "event_detail",
-      eventId: eventId,
     });
   }, []);
 
@@ -157,7 +154,6 @@ export const useAnalytics = () => {
         interactionType: "buttonCouponDownload",
         targetId: promotionId,
         sourceComponent: "promotion_detail",
-        promotionId: promotionId,
         couponCode: couponCode,
       });
     },
