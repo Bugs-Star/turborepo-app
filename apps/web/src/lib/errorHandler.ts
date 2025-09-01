@@ -295,7 +295,7 @@ export class ErrorHandler {
       if (classification.isCritical) {
         // 즉시 전송 (중요한 에러)
         logger.log("click_interaction", {
-          interactionType: "critical_error",
+          interactionType: "criticalError",
           targetId: "error_handler",
           targetName: "치명적 오류",
           sourceComponent: "error_handler",
@@ -320,7 +320,7 @@ export class ErrorHandler {
       // 최소한의 로깅 시도 (에러 핸들러 자체 에러는 항상 중요)
       try {
         logger.log("click_interaction", {
-          interactionType: "critical_error",
+          interactionType: "criticalError",
           targetId: "error_handler",
           targetName: "에러 핸들러 실패",
           sourceComponent: "error_handler",
