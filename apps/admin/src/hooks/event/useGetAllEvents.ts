@@ -5,7 +5,7 @@ import {
   EventsService,
   GetEventsParams,
   GetEventsResponse,
-} from "@/lib/events";
+} from "@/lib/api/events";
 
 export const useGetAllEvents = (params?: GetEventsParams) => {
   const options: UseQueryOptions<GetEventsResponse, Error> = {

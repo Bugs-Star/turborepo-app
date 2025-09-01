@@ -3,7 +3,7 @@
 
 import { useRouter } from "next/navigation";
 import { QueryClient } from "@tanstack/react-query";
-import { AuthService } from "@/lib/auth";
+import { AuthService } from "@/lib/api/auth";
 
 const useLogout = () => {
   const router = useRouter();

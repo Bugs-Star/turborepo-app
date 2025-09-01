@@ -6,7 +6,7 @@ import {
   ProductResponse,
   GetProductsResponse,
   GetProductsParams,
-} from "@/lib/products";
+} from "@/lib/api/products";
 
 export const useAddMenu = () => {
   const qc = useQueryClient();

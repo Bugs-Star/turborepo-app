@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Coffee, Utensils, Gift } from "lucide-react";
 import BaseForm from "@/components/BaseForm";
-import type { AddProductPayload } from "@/lib/products";
+import type { AddProductPayload } from "@/lib/api/products";
 import { useAddMenu } from "@/hooks/menu/useAddMenu";
 
 type CategoryType = "drink" | "food" | "product";

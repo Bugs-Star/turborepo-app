@@ -3,7 +3,7 @@
 import DraggableList from "@/components/DraggableList";
 import { ArrowUpDown } from "lucide-react";
 import { useEffect, useState } from "react";
-import { EventItem } from "@/lib/events";
+import { EventItem } from "@/lib/api/events";
 import { useGetAllEvents } from "@/hooks/event/useGetAllEvents";
 
 const EventList = () => {

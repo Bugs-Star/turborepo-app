@@ -1,6 +1,6 @@
 "use client";
 
-import { CustomerService, GetAllCustomersResponse } from "@/lib/customer";
+import { CustomerService, GetAllCustomersResponse } from "@/lib/api/customer";
 import { useQuery } from "@tanstack/react-query";
 ``;
 

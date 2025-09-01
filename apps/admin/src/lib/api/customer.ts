@@ -1,4 +1,4 @@
-import axiosInstance from "@/lib/axios";
+import axiosInstance from "@/lib/api/axios";
 
 export interface Customer {
   name: string;

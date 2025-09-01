@@ -1,6 +1,6 @@
 "use client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ProductsService, GetProductsResponse } from "@/lib/products";
+import { ProductsService, GetProductsResponse } from "@/lib/api/products";
 
 export const useDeleteMenu = () => {
   const qc = useQueryClient();

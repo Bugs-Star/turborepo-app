@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { EventsService, AddEventPayload, EventItem } from "@/lib/events";
+import { EventsService, AddEventPayload, EventItem } from "@/lib/api/events";
 
 export const useAddEvent = () => {
   const [isLoading, setIsLoading] = useState(false);
