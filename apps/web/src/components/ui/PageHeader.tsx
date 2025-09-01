@@ -20,7 +20,7 @@ export default function PageHeader({
   variant = "default",
   hideOnScroll = false,
 }: PageHeaderProps) {
-  const { isAtTop }: { isAtTop: boolean } = useScrollPosition();
+  const { isAtTop } = useScrollPosition();
 
   // hideOnScroll이 true일 때만 스크롤 감지 적용
   const shouldHide: boolean = Boolean(hideOnScroll && isAtTop);

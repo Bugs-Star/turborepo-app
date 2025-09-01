@@ -52,6 +52,7 @@ export default function EventSection({
       loading={loading}
       error={null}
       title="새로운 소식"
+      subtitle="놓치기 아까운 혜택과 이야기를 전해드려요!"
       loadingMessage="이벤트를 불러오는 중..."
       errorMessage="이벤트를 불러올 수 없습니다."
       skeleton={<EventSectionSkeleton count={3} />}

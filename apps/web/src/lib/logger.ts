@@ -6,9 +6,9 @@
  * 사용법:
  * import { logger } from '@/lib/logger';
  *
- * logger.log('view_screen', {
- *   screen_name: '/products',
- *   previous_screen_name: '/home'
+ * logger.log('viewScreen', {
+ *   screenName: '/products',
+ *   previousScreenName: '/home'
  * });
  */
 
@@ -16,6 +16,7 @@ import {
   NewLogData,
   NewEventName,
   ViewScreenPayload,
+  ViewScreenDurationPayload,
   ClickInteractionPayload,
   InteractionType,
 } from "@repo/types";
@@ -119,7 +120,10 @@ const getUserId = (): string => {
 interface Logger {
   log: (
     eventName: NewEventName,
-    payload: ViewScreenPayload | ClickInteractionPayload
+    payload:
+      | ViewScreenPayload
+      | ClickInteractionPayload
+      | ViewScreenDurationPayload
   ) => void;
   getQueueSize: () => number;
   forceFlush: () => void;
@@ -475,7 +479,10 @@ const createLogger = (): Logger => {
   // 메인 로그 함수
   const log = (
     eventName: NewEventName,
-    payload: ViewScreenPayload | ClickInteractionPayload
+    payload:
+      | ViewScreenPayload
+      | ClickInteractionPayload
+      | ViewScreenDurationPayload
   ) => {
     if (!isBrowser()) return;
 
@@ -522,8 +529,8 @@ const createLogger = (): Logger => {
 
     // 중요 로그 판별 (실패/에러만 즉시 전송)
     const isCritical = (log: NewLogData): boolean => {
-      // click_interaction에서 실패/에러 체크
-      if (log.eventName === "click_interaction") {
+      // clickInteraction에서 실패/에러 체크
+      if (log.eventName === "clickInteraction") {
         const payload = log.payload as ClickInteractionPayload;
 
         // 실패/에러 관련 상호작용만 즉시 전송
@@ -625,6 +632,7 @@ export type {
   NewLogData,
   NewEventName,
   ViewScreenPayload,
+  ViewScreenDurationPayload,
   ClickInteractionPayload,
   InteractionType,
 } from "@repo/types";
