@@ -2,10 +2,12 @@ import { useState, useEffect } from "react";
 
 interface ScrollPositionReturn {
   isAtTop: boolean;
+  isHeroHidden: boolean;
 }
 
 export function useScrollPosition(): ScrollPositionReturn {
   const [isAtTop, setIsAtTop] = useState<boolean>(true);
+  const [isHeroHidden, setIsHeroHidden] = useState<boolean>(false);
 
   useEffect(() => {
     const handleScroll = (): void => {
@@ -13,7 +15,10 @@ export function useScrollPosition(): ScrollPositionReturn {
       const mainElement: HTMLElement | null = document.querySelector("main");
       const scrollY: number = mainElement?.scrollTop ?? 0;
       const newIsAtTop: boolean = scrollY <= 10;
+      const newIsHeroHidden: boolean = scrollY >= 200;
+
       setIsAtTop(newIsAtTop);
+      setIsHeroHidden(newIsHeroHidden);
     };
 
     // main 요소 찾기
@@ -30,5 +35,5 @@ export function useScrollPosition(): ScrollPositionReturn {
     }
   }, []);
 
-  return { isAtTop };
+  return { isAtTop, isHeroHidden };
 }
