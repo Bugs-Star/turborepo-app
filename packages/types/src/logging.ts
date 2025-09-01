@@ -17,7 +17,10 @@
 // ===== 스키마 (v2) =====
 
 // 이벤트 타입 정의
-export type NewEventName = "view_screen" | "click_interaction";
+export type NewEventName =
+  | "viewScreen"
+  | "clickInteraction"
+  | "viewScreenDuration";
 
 // 로그 데이터 기본 구조
 export interface NewLogData {
@@ -28,13 +31,24 @@ export interface NewLogData {
   deviceId: string;
   platform: string;
   appVersion: string;
-  payload: ViewScreenPayload | ClickInteractionPayload;
+  payload:
+    | ViewScreenPayload
+    | ClickInteractionPayload
+    | ViewScreenDurationPayload;
 }
 
 // 화면 조회 이벤트 Payload
 export interface ViewScreenPayload {
   screenName: string;
   previousScreenName?: string;
+}
+
+// 화면 체류 시간 이벤트 Payload
+export interface ViewScreenDurationPayload {
+  screenName: string;
+  durationSeconds: number;
+  startTime: string;
+  endTime: string;
 }
 
 // 클릭 상호작용 이벤트 Payload
