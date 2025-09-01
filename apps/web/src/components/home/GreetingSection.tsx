@@ -27,6 +27,7 @@ export default function GreetingSection() {
         title="고객님, 향긋한 하루 보내세요!"
         variant="greeting"
         showBackButton={true}
+        hideOnScroll={true}
       />
     );
   }
@@ -39,6 +40,7 @@ export default function GreetingSection() {
         title={`${userName}님, 향긋한 하루 보내세요!`}
         variant="greeting"
         showBackButton={true}
+        hideOnScroll={true}
       />
     );
   }
@@ -49,6 +51,7 @@ export default function GreetingSection() {
       title="고객님, 향긋한 하루 보내세요!"
       variant="greeting"
       showBackButton={true}
+      hideOnScroll={true}
     />
   );
 }

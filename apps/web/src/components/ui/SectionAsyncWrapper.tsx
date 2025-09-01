@@ -20,7 +20,7 @@ export default function SectionAsyncWrapper({
   skeleton,
 }: SectionAsyncWrapperProps) {
   return (
-    <div className="mb-8">
+    <div className="mb-6">
       <h2 className="text-xl font-bold text-gray-900 mb-2">{title}</h2>
 
       {loading &&

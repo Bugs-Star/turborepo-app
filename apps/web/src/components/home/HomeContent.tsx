@@ -1,6 +1,7 @@
 import {
   GreetingSection,
   PromoBanner,
+  FeaturedPromo,
   RecommendedMenu,
   EventSection,
 } from "@/components/home";
@@ -27,11 +28,11 @@ export default function HomeContent({
   onPromoClick,
   onEventClick,
 }: HomeContentProps) {
-  // 위치별로 프로모션 분류
-  const upPromotions = promotions.filter((promo) => promo.position === "up");
-  const downPromotions = promotions.filter(
-    (promo) => promo.position === "down"
-  );
+  // 최근 프로모션 (가장 최근 등록된 것)
+  const latestPromotion = promotions.length > 0 ? promotions[0] : null;
+
+  // 나머지 프로모션들 (최근 것 제외)
+  const otherPromotions = promotions.slice(1);
 
   // 프로모션 렌더링 함수
   const renderPromotions = (promotionList: typeof promotions) => {
@@ -52,23 +53,35 @@ export default function HomeContent({
       {/* 상단 인사말 */}
       <GreetingSection />
 
-      {/* 콘텐츠 영역 - 고정 헤더 아래 여백 추가 */}
-      <div className="pt-16 px-6">
-        {/* 상단 프로모션 배너들 */}
-        {promotionsLoading ? (
-          <PromoBannerSkeleton />
-        ) : (
-          upPromotions.length > 0 && renderPromotions(upPromotions)
-        )}
+      {/* 최근 프로모션 (전체 너비) */}
+      {promotionsLoading ? (
+        <PromoBannerSkeleton />
+      ) : (
+        latestPromotion && (
+          <div className="mb-6">
+            <FeaturedPromo
+              promotion={latestPromotion}
+              onButtonClick={() => onPromoClick(latestPromotion._id)}
+            />
+          </div>
+        )
+      )}
 
+      {/* 콘텐츠 영역 */}
+      <div className="px-6">
         {/* 오늘의 추천 메뉴 */}
         <RecommendedMenu onProductClick={onProductClick} />
 
-        {/* 하단 프로모션 배너들 */}
+        {/* 나머지 프로모션 배너들 */}
         {promotionsLoading ? (
           <PromoBannerSkeleton />
         ) : (
-          downPromotions.length > 0 && renderPromotions(downPromotions)
+          otherPromotions.length > 0 && (
+            <div className="mb-8">
+              <h2 className="text-xl font-bold text-gray-900">프로모션</h2>
+              {renderPromotions(otherPromotions)}
+            </div>
+          )
         )}
 
         {/* 이벤트 */}

@@ -66,3 +66,4 @@ export { useSignupActions } from "./useSignupActions";
 // 유틸리티 훅들
 export { useDebounce } from "./useDebounce";
 export { useProductFilter } from "./useProductFilter";
+export { useScrollPosition } from "./useScrollPosition";
