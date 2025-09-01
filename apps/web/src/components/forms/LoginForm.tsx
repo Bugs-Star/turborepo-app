@@ -98,23 +98,25 @@ export default function LoginForm() {
           disabled={isFormLoading}
         />
 
-        <Button
-          type="submit"
-          variant="green"
-          size="md"
-          fullWidth
-          className="rounded-full"
-          disabled={isFormLoading}
-        >
-          {isFormLoading ? "로그인 중..." : "로그인"}
-        </Button>
+        <div className="pt-8">
+          <Button
+            type="submit"
+            variant="green"
+            size="md"
+            fullWidth
+            className="rounded-full"
+            disabled={isFormLoading}
+          >
+            {isFormLoading ? "로그인 중..." : "로그인"}
+          </Button>
+        </div>
 
         <div className="text-center">
           <p className="text-gray-600">
             계정이 없으신가요?{" "}
             <Link
               href="signup"
-              className="text-green-700 hover:underline font-bold"
+              className="text-green-800 hover:underline font-bold"
               onClick={handleSignupLinkClick}
             >
               가입하기

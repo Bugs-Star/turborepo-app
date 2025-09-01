@@ -3,18 +3,23 @@
 import { useSearchParams } from "next/navigation";
 import { useEffect, useRef, Suspense } from "react";
 import { BottomNavigation } from "@/components/layout";
-import { useInfiniteProductFetch } from "@/hooks";
+import { useHybridProductFetch } from "@/hooks";
 import ProductGrid from "@/components/menu/ProductGrid";
-import { AsyncWrapper, PageHeader, InfiniteScroll } from "@/components/ui";
+import { PageHeader, InfiniteScroll } from "@/components/ui";
+import { ProductGridSkeleton } from "@/components/ui/Skeleton";
 import CategoryFilter from "@/components/menu/CategoryFilter";
 import SearchBox from "@/components/menu/SearchBox";
 import { useAnalytics, useMenuActions, useProductFilter } from "@/hooks";
+import { validateCategory } from "@/utils/categoryUtils";
+import type { ProductCategory } from "@/types/product";
 
 // useSearchParams를 사용하는 컴포넌트를 분리
 function MenuContent() {
   const searchParams = useSearchParams();
-  const initialCategory = searchParams.get("category") || "beverage";
+  const rawCategory = searchParams.get("category") || "beverage";
+  const initialCategory = validateCategory(rawCategory);
 
+  // 하이브리드 훅 사용
   const {
     products,
     loading,
@@ -23,7 +28,7 @@ function MenuContent() {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-  } = useInfiniteProductFetch({
+  } = useHybridProductFetch({
     category: initialCategory,
     pageSize: 10,
   });
@@ -64,25 +69,39 @@ function MenuContent() {
   }, [trackScreenView]);
 
   // 카테고리 변경 핸들러 (URL 업데이트 + 로깅)
-  const handleCategoryChangeWithURL = (category: string) => {
-    // URL 업데이트
+  const handleCategoryChangeWithURL = (category: ProductCategory) => {
     const url = new URL(window.location.href);
     url.searchParams.set("category", category);
     window.history.replaceState({}, "", url.toString());
   };
 
-  return (
-    <AsyncWrapper
-      loading={loading}
-      error={error}
-      loadingMessage="메뉴를 불러오는 중..."
-      errorMessage="잠시 후 다시 시도해주세요."
-      onRetry={refetch}
-    >
+  // 에러 상태 처리
+  if (error) {
+    return (
       <div className="min-h-screen bg-white flex flex-col pb-20">
         <PageHeader title="메뉴" />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-red-600 text-center">
+            <p className="text-sm mb-2">{error}</p>
+            <p className="text-xs mb-4">잠시 후 다시 시도해주세요.</p>
+            <button
+              onClick={() => refetch()}
+              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm"
+            >
+              다시 시도
+            </button>
+          </div>
+        </div>
+        <BottomNavigation />
+      </div>
+    );
+  }
 
-        {/* Category Filter */}
+  return (
+    <div className="min-h-screen bg-white flex flex-col pb-20">
+      <PageHeader title="메뉴" />
+
+      <div className="pt-16">
         <CategoryFilter
           products={sortedAndFilteredProducts}
           initialCategory={initialCategory}
@@ -97,17 +116,19 @@ function MenuContent() {
         >
           {(categoryFilteredProducts, activeCategory) => (
             <>
-              {/* Search Box */}
-              <div className="px-4 pb-4">
-                <SearchBox
-                  onSearch={handleSearch}
-                  onSortChange={handleSort}
-                  searchTerm={searchTerm}
-                  sortOption={sortOption}
-                />
+              <div className="fixed top-25 left-1/2 transform -translate-x-1/2 w-full max-w-lg z-40 bg-white border-b border-gray-200">
+                <div className="px-6 pt-1 pb-2">
+                  <SearchBox
+                    onSearch={handleSearch}
+                    onSortChange={handleSort}
+                    searchTerm={searchTerm}
+                    sortOption={sortOption}
+                    className="h-10"
+                  />
+                </div>
               </div>
 
-              <div className="flex-1 px-4 pb-6">
+              <div className="pt-28 flex-1 px-6 pb-6">
                 <InfiniteScroll
                   onLoadMore={() => fetchNextPage?.()}
                   hasMore={hasNextPage}
@@ -115,21 +136,24 @@ function MenuContent() {
                   threshold={0.1}
                   rootMargin="100px"
                 >
-                  <ProductGrid
-                    products={categoryFilteredProducts}
-                    activeCategory={activeCategory}
-                    onProductClick={handleProductClick}
-                  />
+                  {loading ? (
+                    <ProductGridSkeleton count={8} />
+                  ) : (
+                    <ProductGrid
+                      products={categoryFilteredProducts}
+                      activeCategory={activeCategory}
+                      onProductClick={handleProductClick}
+                    />
+                  )}
                 </InfiniteScroll>
               </div>
             </>
           )}
         </CategoryFilter>
-
-        {/* Bottom Navigation */}
-        <BottomNavigation />
       </div>
-    </AsyncWrapper>
+
+      <BottomNavigation />
+    </div>
   );
 }
 

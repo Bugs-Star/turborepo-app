@@ -20,8 +20,8 @@ export default function OrderHistoryPage() {
         <div className="min-h-screen bg-white flex flex-col pb-20">
           <PageHeader title="주문 내역" />
 
-          {/* Main Content */}
-          <div className="flex-1 px-4 py-6">
+          {/* Main Content - 여백 추가 */}
+          <div className="pt-20 flex-1 px-6 py-6">
             {orderHistory.length > 0 ? (
               <div className="space-y-4">
                 {orderHistory.map((order) => (

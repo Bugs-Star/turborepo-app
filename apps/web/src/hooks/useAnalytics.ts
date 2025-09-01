@@ -15,26 +15,27 @@ import { Promotion, Event } from "@/lib/services";
 
 export const useAnalytics = () => {
   // === 화면 조회 이벤트 ===
-  const trackScreenView = useCallback(
-    (screenName: string, previousScreen?: string) => {
-      logger.log("view_screen", {
-        screen_name: screenName,
-        previous_screen_name: previousScreen,
-      });
-    },
-    []
-  );
+  const trackScreenView = useCallback((screenName: string) => {
+    // 이전 페이지 가져오기
+    const previousScreen = sessionStorage.getItem("currentScreen") || null;
+
+    // 현재 페이지 저장
+    sessionStorage.setItem("currentScreen", screenName);
+
+    logger.log("view_screen", {
+      screenName: screenName,
+      previousScreenName: previousScreen,
+    } as any);
+  }, []);
 
   // === 상품 관련 이벤트 ===
   const trackProductClick = useCallback(
     (product: Product, sourceComponent?: string) => {
       logger.log("click_interaction", {
-        interaction_type: "product_card",
-        target_id: product._id,
-        target_name: product.productName,
-        source_component: sourceComponent,
-        productCode: product._id,
-        productName: product.productName,
+        interactionType: "productCard",
+        targetId: product._id,
+        sourceComponent: sourceComponent,
+        productCode: product.productCode,
         price: product.price,
         category: product.category,
       });
@@ -44,25 +45,10 @@ export const useAnalytics = () => {
 
   const trackRecommendedProductClick = useCallback((product: Product) => {
     logger.log("click_interaction", {
-      interaction_type: "product_card",
-      target_id: product._id,
-      target_name: product.productName,
-      source_component: "home_recommended_section",
-      productCode: product._id,
-      productName: product.productName,
-      price: product.price,
-      category: product.category,
-    });
-  }, []);
-
-  const trackProductView = useCallback((product: Product) => {
-    logger.log("click_interaction", {
-      interaction_type: "product_card",
-      target_id: product._id,
-      target_name: product.productName,
-      source_component: "product_detail_view",
-      productCode: product._id,
-      productName: product.productName,
+      interactionType: "productCard",
+      targetId: product._id,
+      sourceComponent: "home_recommended_section",
+      productCode: product.productCode,
       price: product.price,
       category: product.category,
     });
@@ -71,20 +57,18 @@ export const useAnalytics = () => {
   // === 카테고리 및 필터 이벤트 ===
   const trackCategoryClick = useCallback((category: string) => {
     logger.log("click_interaction", {
-      interaction_type: "category_link",
-      target_id: category,
-      target_name: category,
-      source_component: "category_filter",
+      interactionType: "categoryLink",
+      targetId: category,
+      sourceComponent: "category_filter",
       categoryName: category,
     });
   }, []);
 
   const trackSortOptionSelect = useCallback((sortOption: string) => {
     logger.log("click_interaction", {
-      interaction_type: "sort_option_select",
-      target_id: sortOption,
-      target_name: sortOption,
-      source_component: "sort_filter",
+      interactionType: "sortOptionSelect",
+      targetId: sortOption,
+      sourceComponent: "sort_filter",
       sortOption: sortOption,
     });
   }, []);
@@ -93,10 +77,9 @@ export const useAnalytics = () => {
   const trackSearchSubmit = useCallback(
     (searchKeyword: string, resultCount: number) => {
       logger.log("click_interaction", {
-        interaction_type: "search_submit",
-        target_id: searchKeyword,
-        target_name: searchKeyword,
-        source_component: "search_bar",
+        interactionType: "searchSubmit",
+        targetId: searchKeyword,
+        sourceComponent: "search_bar",
         searchKeyword: searchKeyword,
         resultCount: resultCount,
       });
@@ -107,50 +90,20 @@ export const useAnalytics = () => {
   // === 장바구니 관련 이벤트 ===
   const trackAddToCart = useCallback((product: Product, quantity: number) => {
     logger.log("click_interaction", {
-      interaction_type: "button_add_to_cart",
-      target_id: product._id,
-      target_name: product.productName,
-      source_component: "product_detail",
+      interactionType: "buttonAddToCart",
+      targetId: product._id,
+      sourceComponent: "product_detail",
       productId: product._id,
       quantity: quantity,
       price: product.price,
     });
   }, []);
 
-  const trackIncreaseQuantity = useCallback(
-    (productId: string, currentQuantity: number) => {
-      logger.log("click_interaction", {
-        interaction_type: "button_increase_quantity",
-        target_id: productId,
-        target_name: "수량 증가",
-        source_component: "cart_item",
-        productId: productId,
-        currentQuantity: currentQuantity,
-      });
-    },
-    []
-  );
-
-  const trackDecreaseQuantity = useCallback(
-    (productId: string, currentQuantity: number) => {
-      logger.log("click_interaction", {
-        interaction_type: "button_decrease_quantity",
-        target_id: productId,
-        target_name: "수량 감소",
-        source_component: "cart_item",
-        productId: productId,
-        currentQuantity: currentQuantity,
-      });
-    },
-    []
-  );
-
   const trackRemoveItem = useCallback((item: CartItemUI) => {
     logger.log("click_interaction", {
-      interaction_type: "button_remove_item",
-      target_id: item.id,
-      target_name: item.name,
-      source_component: "cart_item",
+      interactionType: "buttonRemoveItem",
+      targetId: item.id,
+      sourceComponent: "cart_item",
       productId: item.id,
     });
   }, []);
@@ -158,10 +111,9 @@ export const useAnalytics = () => {
   const trackCreateOrder = useCallback(
     (totalAmount: number, itemCount: number) => {
       logger.log("click_interaction", {
-        interaction_type: "button_create_order",
-        target_id: "order",
-        target_name: "주문하기",
-        source_component: "cart_page",
+        interactionType: "buttonCreateOrder",
+        targetId: "order",
+        sourceComponent: "cart_page",
         totalAmount: totalAmount,
         itemCount: itemCount,
       });
@@ -172,10 +124,9 @@ export const useAnalytics = () => {
   // === 프로모션/이벤트 관련 이벤트 ===
   const trackPromotionClick = useCallback((promotion: Promotion) => {
     logger.log("click_interaction", {
-      interaction_type: "promotion_card",
-      target_id: promotion._id,
-      target_name: promotion.title,
-      source_component: "promotion_section",
+      interactionType: "promotionCard",
+      targetId: promotion._id,
+      sourceComponent: "promotion_section",
       promotionId: promotion._id,
       promotionName: promotion.title,
     });
@@ -183,10 +134,9 @@ export const useAnalytics = () => {
 
   const trackEventClick = useCallback((event: Event) => {
     logger.log("click_interaction", {
-      interaction_type: "event_card",
-      target_id: event._id,
-      target_name: event.title,
-      source_component: "event_section",
+      interactionType: "eventCard",
+      targetId: event._id,
+      sourceComponent: "event_section",
       eventId: event._id,
       eventName: event.title,
     });
@@ -194,10 +144,9 @@ export const useAnalytics = () => {
 
   const trackEventParticipate = useCallback((eventId: string) => {
     logger.log("click_interaction", {
-      interaction_type: "button_event_participate",
-      target_id: eventId,
-      target_name: "참여하기",
-      source_component: "event_detail",
+      interactionType: "buttonEventParticipate",
+      targetId: eventId,
+      sourceComponent: "event_detail",
       eventId: eventId,
     });
   }, []);
@@ -205,10 +154,9 @@ export const useAnalytics = () => {
   const trackCouponDownload = useCallback(
     (promotionId: string, couponCode: string) => {
       logger.log("click_interaction", {
-        interaction_type: "button_coupon_download",
-        target_id: promotionId,
-        target_name: "쿠폰 받기",
-        source_component: "promotion_detail",
+        interactionType: "buttonCouponDownload",
+        targetId: promotionId,
+        sourceComponent: "promotion_detail",
         promotionId: promotionId,
         couponCode: couponCode,
       });
@@ -219,10 +167,9 @@ export const useAnalytics = () => {
   // === 광고 배너 이벤트 ===
   const trackAdBannerClick = useCallback((adId: string, campaignId: string) => {
     logger.log("click_interaction", {
-      interaction_type: "ad_banner",
-      target_id: adId,
-      target_name: "광고 배너",
-      source_component: "ad_section",
+      interactionType: "adBanner",
+      targetId: adId,
+      sourceComponent: "ad_section",
       adId: adId,
       campaignId: campaignId,
     });
@@ -232,10 +179,8 @@ export const useAnalytics = () => {
   const trackNavLinkClick = useCallback(
     (linkText: string, targetUrl: string) => {
       logger.log("click_interaction", {
-        interaction_type: "nav_link",
-        target_id: targetUrl,
-        target_name: linkText,
-        source_component: "navigation",
+        interactionType: "navLink",
+        sourceComponent: "navigation",
         linkText: linkText,
         targetUrl: targetUrl,
       });
@@ -246,20 +191,18 @@ export const useAnalytics = () => {
   // === 기타 상호작용 이벤트 ===
   const trackViewMore = useCallback((pageNumber: number) => {
     logger.log("click_interaction", {
-      interaction_type: "button_view_more",
-      target_id: `page_${pageNumber}`,
-      target_name: "더보기",
-      source_component: "product_list",
+      interactionType: "buttonViewMore",
+      targetId: `page_${pageNumber}`,
+      sourceComponent: "product_list",
       pageNumber: pageNumber,
     });
   }, []);
 
   const trackPopupClose = useCallback((popupId: string) => {
     logger.log("click_interaction", {
-      interaction_type: "button_popup_close",
-      target_id: popupId,
-      target_name: "닫기",
-      source_component: "popup",
+      interactionType: "buttonPopupClose",
+      targetId: popupId,
+      sourceComponent: "popup",
       popupId: popupId,
     });
   }, []);
@@ -267,46 +210,41 @@ export const useAnalytics = () => {
   // === 사용자 인증 이벤트 ===
   const trackLoginSubmit = useCallback(() => {
     logger.log("click_interaction", {
-      interaction_type: "button_login_submit",
-      target_id: "login",
-      target_name: "로그인",
-      source_component: "login_form",
+      interactionType: "buttonLoginSubmit",
+      targetId: "login",
+      sourceComponent: "login_form",
     });
   }, []);
 
   const trackSignupSubmit = useCallback(() => {
     logger.log("click_interaction", {
-      interaction_type: "button_signup_submit",
-      target_id: "signup",
-      target_name: "가입하기",
-      source_component: "signup_form",
+      interactionType: "buttonSignupSubmit",
+      targetId: "signup",
+      sourceComponent: "signup_form",
     });
   }, []);
 
   const trackLogout = useCallback(() => {
     logger.log("click_interaction", {
-      interaction_type: "button_logout",
-      target_id: "logout",
-      target_name: "로그아웃",
-      source_component: "profile_menu",
+      interactionType: "buttonLogout",
+      targetId: "logout",
+      sourceComponent: "profile_menu",
     });
   }, []);
 
   const trackProfileEditClick = useCallback(() => {
     logger.log("click_interaction", {
-      interaction_type: "button_profile_edit",
-      target_id: "profile_edit",
-      target_name: "프로필 편집",
-      source_component: "profile_menu",
+      interactionType: "buttonProfileEdit",
+      targetId: "profile_edit",
+      sourceComponent: "profile_menu",
     });
   }, []);
 
   const trackOrderHistoryClick = useCallback(() => {
     logger.log("click_interaction", {
-      interaction_type: "button_order_history",
-      target_id: "order_history",
-      target_name: "주문 내역",
-      source_component: "profile_menu",
+      interactionType: "buttonOrderHistory",
+      targetId: "order_history",
+      sourceComponent: "profile_menu",
     });
   }, []);
 
@@ -314,12 +252,11 @@ export const useAnalytics = () => {
   const trackLoginFailure = useCallback(
     (email: string, errorMessage: string) => {
       logger.log("click_interaction", {
-        interaction_type: "login_failure",
-        target_id: "login",
-        target_name: "로그인 실패",
-        source_component: "login_form",
+        interactionType: "loginFailure",
+        targetId: "login",
+        sourceComponent: "login_form",
         email: email,
-        error_message: errorMessage,
+        errorMessage: errorMessage,
       });
     },
     []
@@ -328,13 +265,12 @@ export const useAnalytics = () => {
   const trackSignupFailure = useCallback(
     (email: string, name: string, errorMessage: string) => {
       logger.log("click_interaction", {
-        interaction_type: "signup_failure",
-        target_id: "signup",
-        target_name: "회원가입 실패",
-        source_component: "signup_form",
+        interactionType: "signupFailure",
+        targetId: "signup",
+        sourceComponent: "signup_form",
         email: email,
         name: name,
-        error_message: errorMessage,
+        errorMessage: errorMessage,
       });
     },
     []
@@ -342,10 +278,9 @@ export const useAnalytics = () => {
 
   const trackSignupAttempt = useCallback((email: string, name: string) => {
     logger.log("click_interaction", {
-      interaction_type: "signup_attempt",
-      target_id: "signup",
-      target_name: "회원가입 시도",
-      source_component: "signup_form",
+      interactionType: "signupAttempt",
+      targetId: "signup",
+      sourceComponent: "signup_form",
       email: email,
       name: name,
     });
@@ -353,10 +288,9 @@ export const useAnalytics = () => {
 
   const trackSignupSuccess = useCallback((email: string, name: string) => {
     logger.log("click_interaction", {
-      interaction_type: "signup_success",
-      target_id: "signup",
-      target_name: "회원가입 성공",
-      source_component: "signup_form",
+      interactionType: "signupSuccess",
+      targetId: "signup",
+      sourceComponent: "signup_form",
       email: email,
       name: name,
     });
@@ -364,10 +298,9 @@ export const useAnalytics = () => {
 
   const trackLoginLinkClick = useCallback(() => {
     logger.log("click_interaction", {
-      interaction_type: "login_link",
-      target_id: "login_link",
-      target_name: "로그인 링크",
-      source_component: "signup_form",
+      interactionType: "loginLink",
+      targetId: "login_link",
+      sourceComponent: "signup_form",
     });
   }, []);
 
@@ -375,13 +308,10 @@ export const useAnalytics = () => {
     trackScreenView,
     trackProductClick,
     trackRecommendedProductClick,
-    trackProductView,
     trackCategoryClick,
     trackSortOptionSelect,
     trackSearchSubmit,
     trackAddToCart,
-    trackIncreaseQuantity,
-    trackDecreaseQuantity,
     trackRemoveItem,
     trackCreateOrder,
     trackPromotionClick,

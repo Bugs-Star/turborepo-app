@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { Product } from "@/types";
+import { Product, ProductCategory } from "@/types";
 import { useAnalytics } from "./useAnalytics";
 
 export const useMenuActions = () => {
@@ -18,9 +18,9 @@ export const useMenuActions = () => {
 
   const handleCategoryChange = useCallback(
     (
-      category: string,
-      previousCategory?: string,
-      onCategoryChange?: (category: string) => void
+      category: ProductCategory,
+      previousCategory?: ProductCategory,
+      onCategoryChange?: (category: ProductCategory) => void
     ) => {
       // 로거 호출
       trackCategoryClick(category);

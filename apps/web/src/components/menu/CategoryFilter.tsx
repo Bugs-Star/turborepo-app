@@ -1,16 +1,25 @@
-import { useState, useMemo, useEffect } from "react";
-import { Product } from "@/lib";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
+import { Product, ProductCategory } from "@/types/product";
+import { CATEGORY_MAPPING, validateCategory } from "@/utils/categoryUtils";
 
 interface CategoryFilterProps {
   products: Product[];
-  initialCategory?: string;
-  onCategoryChange?: (category: string) => void;
-  onFilterChange?: (category: string, previousCategory?: string) => void;
+  initialCategory?: string; // 기존 호환성을 위해 string 유지
+  onCategoryChange?: (category: ProductCategory) => void;
+  onFilterChange?: (
+    category: ProductCategory,
+    previousCategory?: ProductCategory
+  ) => void;
   children: (
     filteredProducts: Product[],
-    activeCategory: string
+    activeCategory: ProductCategory
   ) => React.ReactNode;
 }
+
+// 타입 가드 함수
+const isCategoryType = (value: unknown): value is ProductCategory => {
+  return typeof value === "string" && value in CATEGORY_MAPPING;
+};
 
 export default function CategoryFilter({
   products,
@@ -19,61 +28,125 @@ export default function CategoryFilter({
   onFilterChange,
   children,
 }: CategoryFilterProps) {
-  const [activeCategory, setActiveCategory] = useState(initialCategory);
+  // 타입 검증을 통한 안전한 초기값 설정
+  const validatedInitialCategory = validateCategory(initialCategory);
+  const [activeCategory, setActiveCategory] = useState<ProductCategory>(
+    validatedInitialCategory
+  );
+  const [underlineStyle, setUnderlineStyle] = useState({
+    width: "0px",
+    transform: "translateX(50%)", // 중앙에서 시작
+  });
+  const [isUnderlineReady, setIsUnderlineReady] = useState(false);
 
-  // 카테고리 매핑
-  const categoryMapping = {
-    beverage: "음료",
-    food: "푸드",
-    goods: "상품",
-  };
+  const buttonRefs = useRef<{
+    [key in ProductCategory]: HTMLButtonElement | null;
+  }>({
+    beverage: null,
+    food: null,
+    goods: null,
+  });
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  const categories = Object.keys(categoryMapping);
+  const categories: ProductCategory[] = Object.keys(
+    CATEGORY_MAPPING
+  ) as ProductCategory[];
 
-  // 필터링된 상품들 (무한 스크롤에서는 이미 필터링된 데이터가 전달됨)
+  // 타입 안전한 필터링
   const filteredProducts = useMemo(() => {
     if (!products || !Array.isArray(products)) {
       return [];
     }
-    // 무한 스크롤에서는 이미 카테고리별로 필터링된 데이터가 전달되므로
-    // 추가 필터링이 필요하지 않음
-    return products;
-  }, [products]);
 
-  const handleCategoryChange = (category: string) => {
-    const previousCategory = activeCategory;
-    setActiveCategory(category);
+    // Product.category가 string이므로 타입 안전하게 필터링
+    return products.filter((product) => {
+      return (
+        isCategoryType(product.category) && product.category === activeCategory
+      );
+    });
+  }, [products, activeCategory]);
 
-    // 로거 콜백 호출 (있는 경우)
-    onFilterChange?.(category, previousCategory);
+  const handleCategoryChange = useCallback(
+    (category: ProductCategory) => {
+      const previousCategory = activeCategory;
+      setActiveCategory(category);
+      onFilterChange?.(category, previousCategory);
+      onCategoryChange?.(category);
+    },
+    [activeCategory, onFilterChange, onCategoryChange]
+  );
 
-    // 기존 카테고리 변경 콜백 호출
-    onCategoryChange?.(category);
-  };
+  // 밑줄 위치 계산
+  const updateUnderlinePosition = useCallback(() => {
+    const activeButton = buttonRefs.current[activeCategory];
+    const container = containerRef.current;
 
-  // 초기 카테고리가 변경되면 activeCategory 업데이트
+    if (activeButton && container) {
+      const buttonRect = activeButton.getBoundingClientRect();
+      const containerRect = container.getBoundingClientRect();
+
+      setUnderlineStyle({
+        width: `${buttonRect.width}px`,
+        transform: `translateX(${buttonRect.left - containerRect.left}px)`,
+      });
+    }
+  }, [activeCategory]);
+
+  // 초기 카테고리 업데이트 (타입 검증 포함)
   useEffect(() => {
-    setActiveCategory(initialCategory);
+    const validatedCategory = validateCategory(initialCategory);
+    setActiveCategory(validatedCategory);
   }, [initialCategory]);
+
+  // 밑줄 위치 업데이트 (즉시 실행)
+  useEffect(() => {
+    updateUnderlinePosition();
+  }, [updateUnderlinePosition]);
+
+  // 초기 렌더링 후 밑줄 위치 계산 및 준비 완료
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      updateUnderlinePosition();
+      setIsUnderlineReady(true);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [updateUnderlinePosition]);
 
   return (
     <>
       {/* Category Navigation */}
-      <div className="flex justify-center space-x-8 mb-6 pt-4">
-        {categories.map((category) => (
-          <button
-            key={category}
-            onClick={() => handleCategoryChange(category)}
-            className={`text-sm font-medium transition-colors cursor-pointer hover:text-gray-600 ${
-              activeCategory === category ? "text-black" : "text-gray-400"
+      <div className="fixed top-16 left-1/2 transform -translate-x-1/2 w-full max-w-lg z-45 bg-white">
+        <div ref={containerRef} className="relative">
+          <div className="flex justify-center space-x-4 py-2">
+            {categories.map((category) => (
+              <button
+                key={category}
+                ref={(el) => {
+                  buttonRefs.current[category] = el;
+                }}
+                onClick={() => handleCategoryChange(category)}
+                className={`text-sm font-medium transition-colors cursor-pointer hover:text-green-700 px-2 pb-0 ${
+                  activeCategory === category
+                    ? "text-green-800"
+                    : "text-gray-400"
+                }`}
+              >
+                {CATEGORY_MAPPING[category]}
+              </button>
+            ))}
+          </div>
+
+          {/* 애니메이션 밑줄 */}
+          <div
+            className={`absolute bottom-0 h-0.5 bg-green-800 transition-all duration-300 ease-in-out ${
+              isUnderlineReady ? "opacity-100" : "opacity-0"
             }`}
-          >
-            {categoryMapping[category as keyof typeof categoryMapping]}
-          </button>
-        ))}
+            style={underlineStyle}
+          />
+        </div>
       </div>
 
-      {/* Render children with filtered products */}
+      {/* Render children */}
       {children(filteredProducts, activeCategory)}
     </>
   );
@@ -81,21 +154,21 @@ export default function CategoryFilter({
 
 // 훅으로도 사용할 수 있도록 export
 export const useCategoryFilter = (products: Product[]) => {
-  const [activeCategory, setActiveCategory] = useState("beverage");
+  const [activeCategory, setActiveCategory] =
+    useState<ProductCategory>("beverage");
 
-  const categoryMapping = {
-    beverage: "음료",
-    food: "푸드",
-    goods: "상품",
-  };
-
-  const categories = Object.keys(categoryMapping);
+  const categories: ProductCategory[] = Object.keys(
+    CATEGORY_MAPPING
+  ) as ProductCategory[];
 
   const filteredProducts = useMemo(() => {
     if (!products || !Array.isArray(products)) {
       return [];
     }
-    return products.filter((product) => product.category === activeCategory);
+    return products.filter(
+      (product) =>
+        isCategoryType(product.category) && product.category === activeCategory
+    );
   }, [products, activeCategory]);
 
   return {
@@ -103,6 +176,6 @@ export const useCategoryFilter = (products: Product[]) => {
     setActiveCategory,
     filteredProducts,
     categories,
-    categoryMapping,
+    categoryMapping: CATEGORY_MAPPING,
   };
 };

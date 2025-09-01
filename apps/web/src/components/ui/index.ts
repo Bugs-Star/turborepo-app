@@ -10,3 +10,11 @@ export { default as InfiniteScroll } from "./InfiniteScroll";
 export { HydrationWrapper, ClientOnly } from "./HydrationWrapper";
 export { LoadingIndicator, LoadingSpinner } from "./LoadingIndicator";
 export { Expandable, Hoverable, Focusable, Modal } from "./UIComponents";
+export {
+  Skeleton,
+  ProductCardSkeleton,
+  ProductGridSkeleton,
+  RecommendedMenuSkeleton,
+  PromoBannerSkeleton,
+  EventSectionSkeleton,
+} from "./Skeleton";

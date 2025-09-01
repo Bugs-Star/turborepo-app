@@ -35,11 +35,11 @@ export const Button = ({
   const getVariantStyles = (): React.CSSProperties => {
     const baseVariantStyles = {
       green: {
-        backgroundColor: "#15803d", // green-700
+        backgroundColor: "#166534", // green-800
         color: "white",
       },
       red: {
-        backgroundColor: "#dc2626", // red-600
+        backgroundColor: "#ef4444", // red-500
         color: "white",
       },
       white: {
@@ -51,10 +51,10 @@ export const Button = ({
 
     const hoverVariantStyles = {
       green: {
-        backgroundColor: "#166534", // green-800
+        backgroundColor: "#14532d", // green-900
       },
       red: {
-        backgroundColor: "#b91c1c", // red-700
+        backgroundColor: "#dc2626", // red-600
       },
       white: {
         backgroundColor: "#f3f4f6", // gray-100

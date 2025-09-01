@@ -50,7 +50,7 @@ export default function CartItem({
           <h3 className="text-sm font-medium text-gray-900 mb-1">
             {item.name}
           </h3>
-          <p className="text-sm font-semibold text-green-700 mb-3">
+          <p className="text-sm font-semibold text-green-800 mb-3">
             {item.price.toLocaleString()}원
           </p>
 

@@ -56,7 +56,7 @@ export default function SortDropdown({
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-32 h-12 px-4 border border-gray-300 rounded-lg bg-white text-sm font-medium text-gray-700 focus:outline-none flex items-center justify-between"
+        className="w-32 h-10 px-4 border border-gray-300 rounded-lg bg-white text-sm font-medium text-gray-700 focus:outline-none flex items-center justify-between"
       >
         <span>{selectedOption}</span>
         <svg

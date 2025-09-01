@@ -67,15 +67,6 @@ export default function InfiniteScroll({
           )}
         </div>
       )}
-
-      {/* 모든 상품을 로드했을 때 */}
-      {!hasMore && !loading && (
-        <div className="flex justify-center items-center py-8">
-          <span className="text-sm text-gray-400">
-            모든 상품을 불러왔습니다.
-          </span>
-        </div>
-      )}
     </div>
   );
 }
