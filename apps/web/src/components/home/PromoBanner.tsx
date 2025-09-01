@@ -18,7 +18,7 @@ export default function PromoBanner({
   onButtonClick,
 }: PromoBannerProps) {
   return (
-    <div className="mb-6 mt-6 rounded-lg p-8 relative overflow-hidden">
+    <div className="mb-4 mt-2 rounded-lg p-8 relative overflow-hidden">
       {/* 배경 이미지 레이어 */}
       {imageUrl && (
         <div

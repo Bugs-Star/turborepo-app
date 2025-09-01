@@ -16,27 +16,29 @@ export default function EventSection({
   onEventClick,
 }: EventSectionProps) {
   const renderEventList = () => (
-    <div className="flex flex-col gap-4">
+    <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
       {events.map((event) => (
         <div
           key={event._id}
-          className="flex gap-4 bg-white rounded-lg p-4 shadow-sm border border-gray-200 cursor-pointer hover:shadow-md transition-shadow"
+          className="flex-shrink-0 w-64 cursor-pointer"
           onClick={() => onEventClick?.(event)}
         >
-          <div className="flex-shrink-0">
+          {/* 이미지 카드 */}
+          <div className="w-64 h-40 rounded-lg overflow-hidden mb-3 shadow-sm hover:shadow-md transition-shadow">
             <Image
               src={event.eventImg}
               alt={event.title}
-              width={64}
-              height={64}
-              className="w-16 h-16 rounded-lg object-cover"
+              width={256}
+              height={160}
+              className="w-full h-full object-cover"
             />
           </div>
-          <div className="flex-1 min-w-0">
-            <h3 className="text-sm font-bold text-gray-900 mb-1">
+          {/* 텍스트 영역 */}
+          <div className="px-1">
+            <h3 className="text-sm font-bold text-gray-900 mb-1 line-clamp-1 overflow-hidden text-ellipsis">
               {event.title}
             </h3>
-            <p className="text-xs text-gray-600 leading-relaxed line-clamp-1 overflow-hidden text-ellipsis">
+            <p className="text-xs text-gray-600 leading-relaxed line-clamp-2 overflow-hidden text-ellipsis">
               {event.description}
             </p>
           </div>
