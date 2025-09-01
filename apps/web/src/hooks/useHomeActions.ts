@@ -14,10 +14,10 @@ export const useHomeActions = () => {
     router.push(`menu/${product._id}`);
   };
 
-  const handlePromoClick = (promotionId: string) => {
+  const handlePromoClick = (promotion: Promotion) => {
     // 로거 호출
-    trackPromotionClick({ _id: promotionId, title: "프로모션" } as Promotion);
-    router.push(`promotion/${promotionId}`);
+    trackPromotionClick(promotion);
+    router.push(`promotion/${promotion._id}`);
   };
 
   const handleEventClick = (event: Event) => {

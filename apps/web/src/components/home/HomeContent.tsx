@@ -15,7 +15,7 @@ interface HomeContentProps {
   promotionsLoading: boolean;
   eventsLoading: boolean;
   onProductClick: (product: Product) => void;
-  onPromoClick: (promotionId: string) => void;
+  onPromoClick: (promotion: Promotion) => void;
   onEventClick: (event: Event) => void;
 }
 
@@ -43,7 +43,7 @@ export default function HomeContent({
         subtitle={promotion.description}
         buttonText="자세히 보기"
         imageUrl={promotion.promotionImg}
-        onButtonClick={() => onPromoClick(promotion._id)}
+        onButtonClick={() => onPromoClick(promotion)}
       />
     ));
   };
@@ -61,7 +61,7 @@ export default function HomeContent({
           <div className="mb-6">
             <FeaturedPromo
               promotion={latestPromotion}
-              onButtonClick={() => onPromoClick(latestPromotion._id)}
+              onButtonClick={() => onPromoClick(latestPromotion)}
             />
           </div>
         )
