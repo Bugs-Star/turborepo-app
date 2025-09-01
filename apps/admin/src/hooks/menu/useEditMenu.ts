@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ProductsService, AddProductPayload } from "@/lib/products";
+import { ProductsService, AddProductPayload } from "@/lib/api/products";
 
 export const useEditMenu = (productId: string) => {
   const queryClient = useQueryClient();

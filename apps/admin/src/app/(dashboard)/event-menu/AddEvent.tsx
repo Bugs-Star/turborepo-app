@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Calendar } from "lucide-react";
 import BaseForm from "@/components/BaseForm";
-import type { AddEventPayload } from "@/lib/events";
+import type { AddEventPayload } from "@/lib/api/events";
 import { useAddEvent } from "@/hooks/event/useAddEvent";
 
 const AddEvent = () => {

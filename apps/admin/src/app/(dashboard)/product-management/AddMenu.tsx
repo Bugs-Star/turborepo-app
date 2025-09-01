@@ -2,7 +2,8 @@
 import { useState } from "react";
 import { Coffee, Utensils, Gift } from "lucide-react";
 import BaseForm from "@/components/BaseForm";
-import { AddProductPayload, ProductsService } from "@/lib/products";
+import type { AddProductPayload } from "@/lib/api/products";
+import { useAddMenu } from "@/hooks/menu/useAddMenu";
 
 type CategoryType = "drink" | "food" | "product";
 
@@ -21,25 +22,19 @@ const AddMenu = () => {
   const [optimalStock, setOptimalStock] = useState(0);
   const [description, setDescription] = useState("");
   const [productImg, setProductImg] = useState<File | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async () => {
-    if (!productImg) {
-      alert("이미지를 선택해주세요.");
-      return;
-    }
-    if (!productName) {
-      alert("메뉴 이름을 입력해주세요.");
-      return;
-    }
-    if (!price || price <= 0) {
-      alert("가격을 올바르게 입력해주세요.");
-      return;
-    }
+  const { mutate: addMenu, isPending } = useAddMenu();
+
+  const handleSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
+    e.preventDefault();
+
+    if (!productImg) return alert("이미지를 선택해주세요.");
+    if (!productName.trim()) return alert("메뉴 이름을 입력해주세요.");
+    if (!price || price <= 0) return alert("가격을 올바르게 입력해주세요.");
 
     const payload: AddProductPayload = {
       productCode: productCode || productName,
-      productName,
+      productName: productName.trim(),
       productImg,
       productContents: description,
       category:
@@ -53,34 +48,33 @@ const AddMenu = () => {
       optimalStock,
     };
 
-    try {
-      setIsLoading(true);
-      await ProductsService.addProduct(payload);
-      alert("상품이 추가되었습니다!");
-      // 필요 시 초기화
-      setProductName("");
-      setProductCode("");
-      setPrice(0);
-      setCurrentStock(0);
-      setOptimalStock(0);
-      setDescription("");
-      setProductImg(null);
-    } catch (err: any) {
-      console.error(err);
-      alert(err.response?.data?.message || "상품 추가 실패");
-    } finally {
-      setIsLoading(false);
-    }
+    addMenu(payload, {
+      onSuccess: () => {
+        alert("상품이 추가되었습니다!");
+        // 폼 초기화
+        setCategory("drink");
+        setProductName("");
+        setProductCode("");
+        setPrice(0);
+        setCurrentStock(0);
+        setOptimalStock(0);
+        setDescription("");
+        setProductImg(null);
+      },
+      onError: (err: any) => {
+        alert(err?.response?.data?.message || "상품 추가 실패");
+      },
+    });
   };
 
   return (
     <BaseForm
       title="새 메뉴 항목 추가"
       uploadLabel="메뉴 이미지"
-      buttonLabel={isLoading ? "업로드 중..." : "메뉴 추가"}
+      buttonLabel={isPending ? "업로드 중..." : "메뉴 추가"}
       imageFile={productImg}
       onImageChange={setProductImg}
-      onSubmit={handleSubmit}
+      onSubmit={handleSubmit} // ✅ BaseForm이 <form>이어야 합니다.
       headerExtra={
         <div className="flex gap-3 mb-6">
           {categoryOptions.map(({ key, icon: Icon }) => (

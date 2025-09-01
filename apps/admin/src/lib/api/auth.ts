@@ -1,5 +1,5 @@
 // src/lib/auth.ts
-import axiosInstance from "@/lib/axios";
+import axiosInstance from "@/lib/api/axios";
 
 // --- 로그인 관련 타입 ---
 export interface LoginPayload {

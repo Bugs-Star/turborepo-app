@@ -3,7 +3,7 @@ import {
   ProductsService,
   GetProductsParams,
   GetProductsResponse,
-} from "@/lib/products";
+} from "@/lib/api/products";
 
 export const useGetAllProducts = (params?: GetProductsParams) => {
   const options: UseQueryOptions<GetProductsResponse, Error> = {
