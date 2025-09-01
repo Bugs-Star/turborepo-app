@@ -120,7 +120,10 @@ const getUserId = (): string => {
 interface Logger {
   log: (
     eventName: NewEventName,
-    payload: ViewScreenPayload | ClickInteractionPayload
+    payload:
+      | ViewScreenPayload
+      | ClickInteractionPayload
+      | ViewScreenDurationPayload
   ) => void;
   getQueueSize: () => number;
   forceFlush: () => void;
