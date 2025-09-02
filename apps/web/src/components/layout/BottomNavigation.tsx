@@ -7,6 +7,8 @@ import { useCartCountFetch, useAnalytics } from "@/hooks";
 import { useAuthStore } from "@/stores/authStore";
 import { useToast } from "@/hooks/useToast";
 
+const basePath = "/bugs-star";
+
 export default function BottomNavigation() {
   const pathname = usePathname();
   const router = useRouter();
@@ -19,7 +21,7 @@ export default function BottomNavigation() {
   const handleProfileClick = (e: React.MouseEvent) => {
     if (!isAuthenticated) {
       e.preventDefault();
-      router.push("login");
+      router.push(`${basePath}/login`);
     }
     trackNavLinkClick("profile", "MY");
   };
@@ -28,7 +30,7 @@ export default function BottomNavigation() {
     if (!isAuthenticated) {
       e.preventDefault();
       showWarning("로그인이 필요한 서비스입니다.");
-      router.push("/login");
+      router.push(`${basePath}/login`);
     }
     trackNavLinkClick("cart", "CART");
   };
@@ -37,7 +39,7 @@ export default function BottomNavigation() {
     <div className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-lg bg-white border-t border-gray-200 py-3 z-50">
       <div className="flex justify-around items-center">
         <Link
-          href="/home"
+          href={`${basePath}/home`}
           onClick={() => trackNavLinkClick("home", "HOME")}
           className={`flex flex-col items-center transition-colors ${
             pathname === "/home"
@@ -52,7 +54,7 @@ export default function BottomNavigation() {
           <span className="text-xs">HOME</span>
         </Link>
         <Link
-          href="/menu"
+          href={`${basePath}/menu`}
           onClick={() => trackNavLinkClick("menu", "MENU")}
           className={`flex flex-col items-center transition-colors ${
             pathname === "/menu"
@@ -67,7 +69,7 @@ export default function BottomNavigation() {
           <span className="text-xs">MENU</span>
         </Link>
         <Link
-          href="/cart"
+          href={`${basePath}/cart`}
           onClick={handleCartClick}
           className={`flex flex-col items-center transition-colors relative ${
             pathname === "/cart"
@@ -89,7 +91,7 @@ export default function BottomNavigation() {
           <span className="text-xs">CART</span>
         </Link>
         <Link
-          href="/profile"
+          href={`${basePath}/profile`}
           onClick={handleProfileClick}
           className={`flex flex-col items-center transition-colors ${
             pathname === "/profile"
