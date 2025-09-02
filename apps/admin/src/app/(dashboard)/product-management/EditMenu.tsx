@@ -1,8 +1,9 @@
 "use client";
+
 import BaseForm from "@/components/BaseForm";
-import { useEditMenu } from "@/hooks/menu/useEditMenu";
 import { X, Coffee, Utensils, Gift } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { useEditMenu } from "@/hooks/menu/useEditMenu";
 
 type CategoryType = "drink" | "food" | "product";
 
@@ -15,6 +16,8 @@ const categoryOptions: { key: CategoryType; icon: React.ElementType }[] = [
 interface EditMenuProps {
   productId: string;
   initialData?: {
+    productImgUrl?: string; // ✅ 기존 이미지 URL (추가)
+    productImg?: File; // 선택적 (이미 File 형태로 있을 수도 있음)
     productCode?: string;
     productName?: string;
     productContents?: string;
@@ -30,10 +33,18 @@ interface EditMenuProps {
 
 const EditMenu = ({ productId, initialData, onClose }: EditMenuProps) => {
   const { mutate } = useEditMenu(productId);
+
   const [selectedCategory, setSelectedCategory] = useState<CategoryType>(
     initialData?.category || "drink"
   );
+  // 새로 고른 파일
   const [image, setImage] = useState<File | null>(null);
+
+  // ✅ 미리보기 소스: 새 파일 우선 → 초기 서버 URL
+  const previewSrc = useMemo(() => {
+    if (image) return URL.createObjectURL(image);
+    return initialData?.productImgUrl ?? null;
+  }, [image, initialData?.productImgUrl]);
 
   const categoryMap = {
     drink: "beverage",
@@ -44,30 +55,18 @@ const EditMenu = ({ productId, initialData, onClose }: EditMenuProps) => {
   const handleSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
     e.preventDefault();
 
-    const fd = new FormData(e.currentTarget); // ✅ HTMLFormElement 기반
-    // 이미지 필드명 통일 (서버가 productImg 기대한다면)
-    if (image) fd.set("productImg", image);
-    // UI 카테고리 → API 카테고리로 매핑
+    const fd = new FormData(e.currentTarget);
+    if (image) fd.set("productImg", image); // ✅ 새 이미지가 있으면 전송
     fd.set("category", categoryMap[selectedCategory]);
 
-    // 숫자 필드 정규화
     const numKeys = ["price", "currentStock", "optimalStock"] as const;
     numKeys.forEach((key) => {
       const raw = fd.get(key)?.toString().trim();
-      if (!raw) {
-        fd.delete(key);
-      } else {
-        // 문자열 숫자 유지해도 되지만, JSON 변환 시 Number로
-        fd.set(key, String(Number(raw)));
-      }
+      if (!raw) fd.delete(key);
+      else fd.set(key, String(Number(raw)));
     });
 
-    // 👉 useEditMenu가 FormData를 받도록 구현되어 있다면 이대로 보내세요:
-    // mutate(fd);
-
-    // 👉 useEditMenu가 JSON(Object)을 받도록 구현되어 있다면 객체로 변환해서 보내세요:
     const payload: any = Object.fromEntries(fd.entries());
-    // 숫자형으로 캐스팅
     payload.price =
       payload.price !== undefined ? Number(payload.price) : undefined;
     payload.currentStock =
@@ -109,8 +108,9 @@ const EditMenu = ({ productId, initialData, onClose }: EditMenuProps) => {
           uploadLabel="메뉴 이미지"
           buttonLabel="메뉴 수정"
           imageFile={image}
+          imagePreviewUrl={previewSrc || undefined}
           onImageChange={setImage}
-          onSubmit={handleSubmit} // ✅ 이벤트 사용
+          onSubmit={handleSubmit}
           headerExtra={
             <div className="flex gap-3 mb-4">
               {categoryOptions.map(({ key, icon: Icon }) => (
@@ -127,7 +127,6 @@ const EditMenu = ({ productId, initialData, onClose }: EditMenuProps) => {
                   <Icon size={20} />
                 </button>
               ))}
-              {/* 🔸 hidden input 불필요 — handleSubmit에서 카테고리 주입 */}
             </div>
           }
         >

@@ -1,9 +1,9 @@
 "use client";
 import { UploadCloud } from "lucide-react";
-import { ReactNode, ChangeEvent, useEffect, useState } from "react";
+import { ReactNode, ChangeEvent, useEffect, useMemo, useState } from "react";
 
 interface BaseFormProps {
-  title: string; // Form 제목
+  title: string;
   uploadLabel: string;
   buttonLabel?: string;
   headerExtra?: ReactNode;
@@ -12,7 +12,8 @@ interface BaseFormProps {
   imageFile: File | null;
   onImageChange: (file: File | null) => void;
 
-  // ✨ form 이벤트를 받도록 변경
+  imagePreviewUrl?: string;
+
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void | Promise<void>;
 }
 
@@ -24,19 +25,27 @@ const BaseForm = ({
   children,
   imageFile,
   onImageChange,
+  imagePreviewUrl, // ✅
   onSubmit,
 }: BaseFormProps) => {
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [objectUrl, setObjectUrl] = useState<string | null>(null);
 
-  // 미리보기 로직
+  // ✅ 최종 미리보기 소스: 파일 선택 시 objectURL 우선, 없으면 서버 URL
+  const previewSrc = useMemo(() => {
+    if (objectUrl) return objectUrl;
+    if (imagePreviewUrl) return imagePreviewUrl;
+    return null;
+  }, [objectUrl, imagePreviewUrl]);
+
   useEffect(() => {
-    if (!imageFile) {
-      setPreviewUrl(null);
-      return;
+    // 파일이 바뀌면 새 objectURL 생성
+    if (imageFile) {
+      const url = URL.createObjectURL(imageFile);
+      setObjectUrl(url);
+      return () => URL.revokeObjectURL(url);
     }
-    const url = URL.createObjectURL(imageFile);
-    setPreviewUrl(url);
-    return () => URL.revokeObjectURL(url);
+    // 파일이 없으면 objectURL 해제(서버 URL이 있으면 그걸로 표시됨)
+    setObjectUrl(null);
   }, [imageFile]);
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -59,9 +68,9 @@ const BaseForm = ({
             {uploadLabel}
           </label>
           <label className="flex flex-col relative items-center justify-center border-2 border-dashed border-gray-300 rounded-lg h-64 cursor-pointer hover:bg-gray-50">
-            {previewUrl ? (
+            {previewSrc ? (
               <img
-                src={previewUrl}
+                src={previewSrc}
                 alt="미리보기"
                 className="object-contain w-full h-full"
               />
@@ -75,7 +84,7 @@ const BaseForm = ({
             )}
             <input
               type="file"
-              name="image" // ← FormData로 수집되도록 name 부여
+              name="image"
               accept="image/*"
               className="hidden"
               onChange={handleFileChange}
@@ -88,7 +97,6 @@ const BaseForm = ({
           {headerExtra && <div className="mb-4">{headerExtra}</div>}
           {children}
 
-          {/* 제출 버튼 */}
           <button
             type="submit"
             className="w-full bg-[#005C14] hover:bg-green-900 text-white font-bold py-3 rounded-lg cursor-pointer"

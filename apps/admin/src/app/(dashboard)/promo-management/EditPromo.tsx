@@ -101,9 +101,9 @@ const EditPromo = ({ promotionId, initialData, onClose }: EditPromoProps) => {
           title="프로모션 수정"
           uploadLabel="프로모션 이미지"
           buttonLabel={isPending ? "수정 중..." : "수정 저장"}
-          // BaseForm에서 이미지 미리보기 영역을 지원한다는 전제
           imageFile={imageFile}
           onImageChange={setImageFile}
+          imagePreviewUrl={previewUrl}
           onSubmit={handleSubmit}
         >
           {/* 제목 */}
