@@ -24,7 +24,7 @@ export default function ProductList() {
   const { data } = useGetAllProducts();
   const products: UIProduct[] =
     data?.products.map((p) => ({
-      id: p._id, // ✅ 여기서 productId 정의의 근원
+      id: p._id,
       name: p.productName,
       code: p.productCode,
       image: p.productImg,
@@ -43,12 +43,12 @@ export default function ProductList() {
   const handleEdit = (id: string) => {
     const p = products.find((x) => x.id === id);
     if (!p) return;
-    setEditingId(p.id); // ✅ 이 값이 EditMenu의 productId가 됩니다.
+    setEditingId(p.id);
     setInitialData({
       productName: p.name,
       productCode: p.code,
       productContents: p.productContents,
-      category: apiToUiCategory(p.category), // UI category로 변환
+      category: apiToUiCategory(p.category),
       price: p.price,
       currentStock: p.currentStock,
       optimalStock: p.optimalStock,

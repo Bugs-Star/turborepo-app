@@ -5,7 +5,6 @@ export interface AddPromoPayload {
   title: string;
   description: string;
   promotionImg: File;
-
   startDate: string; // ISO string
   endDate: string; // ISO string
 }

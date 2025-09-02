@@ -5,7 +5,7 @@ import React, { useState } from "react";
 interface Column<T> {
   key: keyof T | "actions" | "delete";
   label: string;
-  render?: (row: T) => React.ReactNode; // render 함수 추가
+  render?: (row: T) => React.ReactNode;
 }
 
 interface SearchableTableProps<T> {
