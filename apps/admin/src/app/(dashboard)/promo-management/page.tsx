@@ -1,14 +1,12 @@
 import AddPromo from "./AddPromo";
 import AdsAnalysis from "./AdsAnalysis";
-import FirstBanner from "./FirstBanner";
-import SecondBanner from "./SecondBanner";
+import PromoBanner from "./PromoBanner";
 
 const AdsManagement = () => {
   return (
     <div>
       <AddPromo />
-      <FirstBanner />
-      <SecondBanner />
+      <PromoBanner />
       <AdsAnalysis />
     </div>
   );

@@ -1,4 +1,3 @@
-// app/(dashboard)/promotions/SecondBanner.tsx
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -8,17 +7,16 @@ import { useGetAllPromo } from "@/hooks/promo/useGetAllPromo";
 interface AdsItem {
   id: string;
   name: string;
-  image: string; // URL or data URL
+  image: string; // URL 또는 data URL
 }
 
-const SecondBanner = () => {
-  // 하단(down) + 활성(true) 프로모션만 가져오기
+const PromoBanner = () => {
+  // 서버 필터 사용: 상단(up) + 활성(true)
   const { data, isLoading, isError, refetch } = useGetAllPromo({
     isActive: true,
-    position: "down",
   });
 
-  // API 응답 -> UI 아이템으로 매핑
+  // 응답을 UI용 아이템으로 매핑
   const fetchedAds: AdsItem[] = useMemo(() => {
     const list = data?.promotions ?? [];
     return list.map((p) => ({
@@ -36,14 +34,14 @@ const SecondBanner = () => {
 
   const handleDelete = (id: string) => {
     setAdsItem((prev) => prev.filter((item) => item.id !== id));
-    // TODO: 서버에도 삭제 반영하려면 여기서 delete API 호출 후 refetch()
+    // TODO: 서버 삭제 연동 시 여기서 delete API 호출 후 refetch()
   };
 
   if (isLoading) {
     return (
       <div className="max-w-5xl mx-auto mt-5 bg-white p-6 rounded-lg">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-lg font-bold">두 번째 배너 광고 등장 순서</h1>
+          <h1 className="text-lg font-bold">배너 광고 등장 순서</h1>
         </div>
         <div className="text-sm text-gray-500">불러오는 중...</div>
       </div>
@@ -54,7 +52,7 @@ const SecondBanner = () => {
     return (
       <div className="max-w-5xl mx-auto mt-5 bg-white p-6 rounded-lg">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-lg font-bold">두 번째 배너 광고 등장 순서</h1>
+          <h1 className="text-lg font-bold">배너 광고 등장 순서</h1>
           <button
             onClick={() => refetch()}
             className="text-sm px-3 py-1 rounded border border-gray-300 hover:bg-gray-50"
@@ -73,16 +71,10 @@ const SecondBanner = () => {
     return (
       <div className="max-w-5xl mx-auto mt-5 bg-white p-6 rounded-lg">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-lg font-bold">두 번째 배너 광고 등장 순서</h1>
-          <button
-            onClick={() => refetch()}
-            className="text-sm px-3 py-1 rounded border border-gray-300 hover:bg-gray-50"
-          >
-            새로고침
-          </button>
+          <h1 className="text-lg font-bold">배너 광고 등장 순서</h1>
         </div>
         <p className="text-sm text-gray-500">
-          표시할 하단 배너 프로모션이 없습니다.
+          표시할 상단 배너 프로모션이 없습니다.
         </p>
       </div>
     );
@@ -90,9 +82,8 @@ const SecondBanner = () => {
 
   return (
     <div className="max-w-5xl mx-auto mt-5 bg-white p-6 rounded-lg">
-      {/* 헤더 */}
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-lg font-bold">두 번째 배너 광고 등장 순서</h1>
+        <h1 className="text-lg font-bold">배너 광고 등장 순서</h1>
       </div>
 
       <DraggableList
@@ -104,4 +95,4 @@ const SecondBanner = () => {
   );
 };
 
-export default SecondBanner;
+export default PromoBanner;

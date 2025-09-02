@@ -26,7 +26,7 @@ export const useAddPromo = () => {
         const [, params] = key as [string, GetPromosParams | undefined];
 
         // 필터 조건이 있을 경우 맞을 때만 반영
-        if (params?.position && params.position !== created.position) continue;
+
         if (
           typeof params?.isActive === "boolean" &&
           params.isActive !== created.isActive

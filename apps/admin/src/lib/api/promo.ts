@@ -5,7 +5,7 @@ export interface AddPromoPayload {
   title: string;
   description: string;
   promotionImg: File;
-  position: "up" | "down";
+
   startDate: string; // ISO string
   endDate: string; // ISO string
 }
@@ -16,7 +16,7 @@ export interface PromoResponse {
   title: string;
   description: string;
   promotionImg: string; // URL 또는 data URL
-  position: "up" | "down";
+
   startDate: string; // ISO
   endDate: string; // ISO
   isActive: boolean;
@@ -27,7 +27,6 @@ export interface PromoResponse {
 // 광고 조회 파라미터
 export interface GetPromosParams {
   isActive?: boolean;
-  position?: "up" | "down";
 }
 
 // 광고 조회 응답 (✅ 페이지네이션 제거)
@@ -54,7 +53,6 @@ export const PromoService = {
     formData.append("title", payload.title);
     formData.append("description", payload.description);
     formData.append("promotionImg", payload.promotionImg);
-    formData.append("position", payload.position);
     formData.append("startDate", payload.startDate);
     formData.append("endDate", payload.endDate);
 
@@ -75,7 +73,6 @@ export const PromoService = {
       formData.append("description", payload.description);
     if (payload.promotionImg)
       formData.append("promotionImg", payload.promotionImg);
-    if (payload.position) formData.append("position", payload.position);
     if (payload.startDate) formData.append("startDate", payload.startDate);
     if (payload.endDate) formData.append("endDate", payload.endDate);
 
