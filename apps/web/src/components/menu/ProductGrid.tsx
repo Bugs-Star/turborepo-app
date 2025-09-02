@@ -2,10 +2,7 @@ import Image from "next/image";
 import { Product } from "@/lib";
 import { useRouter } from "next/navigation";
 import { createImageErrorHandler } from "@/utils";
-import {
-  formatProductPrice,
-  getProductStockStatus,
-} from "@/utils/productUtils";
+import { getProductStockStatus } from "@/utils/productUtils";
 
 // 개별 상품 카드 컴포넌트
 interface ProductCardProps {
@@ -34,37 +31,36 @@ function ProductCard({
   };
 
   return (
-    <div
-      className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden cursor-pointer hover:shadow-md transition-shadow duration-200 relative"
-      onClick={handleCardClick}
-    >
-      {/* Product Image */}
-      <div className="aspect-square bg-gray-100 relative overflow-hidden">
-        <Image
-          src={product.productImg}
-          alt={product.productName}
-          fill
-          className="object-cover"
-          onError={handleImageError}
-        />
+    <div className="cursor-pointer" onClick={handleCardClick}>
+      {/* Product Image Card */}
+      <div className="bg-white rounded-md border border-gray-100 overflow-hidden hover:shadow-md transition-shadow duration-200 relative mb-3">
+        <div className="aspect-square bg-gray-100 relative overflow-hidden">
+          <Image
+            src={product.productImg}
+            alt={product.productName}
+            fill
+            className="object-cover"
+            onError={handleImageError}
+          />
+        </div>
+
+        {/* 재고 상태 표시 */}
+        {isOutOfStock && (
+          <div className="absolute inset-0 bg-white/50 flex items-center justify-center">
+            <div className="text-lg font-bold text-black">SOLD OUT</div>
+          </div>
+        )}
       </div>
 
-      {/* Product Info */}
-      <div className="p-3">
-        <h3 className="text-sm font-bold text-black mb-1 truncate">
+      {/* Product Info - 카드 밖에 배치 */}
+      <div className="px-1">
+        <h3 className="text-sm font-normal text-black mb-1 truncate">
           {product.productName}
         </h3>
-        <p className="text-sm font-semibold text-green-800">
+        <p className="text-sm font-bold text-green-800">
           {product.price.toLocaleString()}원
         </p>
       </div>
-
-      {/* 투명한 오버레이 - 재고가 없을 때만 카드 전체를 덮음 */}
-      {isOutOfStock && (
-        <div className="absolute inset-0 bg-white/50 flex items-center justify-center">
-          <div className="text-lg font-bold text-black">SOLD OUT</div>
-        </div>
-      )}
     </div>
   );
 }
