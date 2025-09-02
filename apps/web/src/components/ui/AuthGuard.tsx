@@ -29,11 +29,11 @@ export const AuthGuard = ({
     try {
       const isValid = await checkAuth();
       if (!isValid) {
-        router.push("login");
+        router.push("/login");
       }
     } catch (error) {
       console.error("인증 확인 중 오류:", error);
-      router.push("login");
+      router.push("/login");
     }
   }, [isClient, checkAuth, router]);
 

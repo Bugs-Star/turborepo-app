@@ -7,8 +7,6 @@ import { useCartCountFetch, useAnalytics } from "@/hooks";
 import { useAuthStore } from "@/stores/authStore";
 import { useToast } from "@/hooks/useToast";
 
-const basePath = "/bugs-star";
-
 export default function BottomNavigation() {
   const pathname = usePathname();
   const router = useRouter();
@@ -18,10 +16,24 @@ export default function BottomNavigation() {
   const { isAuthenticated } = useAuthStore();
   const { showWarning } = useToast();
 
+  // basePath를 제거한 실제 경로 계산
+  const getActualPath = (path: string) => {
+    // 프로덕션에서는 /bugs-star 접두사 제거, 개발에서는 그대로
+    if (
+      process.env.NODE_ENV === "production" &&
+      path.startsWith("/bugs-star")
+    ) {
+      return path.replace("/bugs-star", "");
+    }
+    return path;
+  };
+
+  const actualPathname = getActualPath(pathname);
+
   const handleProfileClick = (e: React.MouseEvent) => {
     if (!isAuthenticated) {
       e.preventDefault();
-      router.push(`${basePath}/login`);
+      router.push("/login");
     }
     trackNavLinkClick("profile", "MY");
   };
@@ -30,7 +42,7 @@ export default function BottomNavigation() {
     if (!isAuthenticated) {
       e.preventDefault();
       showWarning("로그인이 필요한 서비스입니다.");
-      router.push(`${basePath}/login`);
+      router.push("/login");
     }
     trackNavLinkClick("cart", "CART");
   };
@@ -39,40 +51,40 @@ export default function BottomNavigation() {
     <div className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-lg bg-white border-t border-gray-200 py-3 z-50">
       <div className="flex justify-around items-center">
         <Link
-          href={`${basePath}/home`}
+          href="/home"
           onClick={() => trackNavLinkClick("home", "HOME")}
           className={`flex flex-col items-center transition-colors ${
-            pathname === "/home"
+            actualPathname === "/home"
               ? "text-green-800"
               : "text-gray-700 hover:text-green-800"
           }`}
         >
           <House
             className="w-6 h-6 mb-1"
-            fill={pathname === "/home" ? "currentColor" : "none"}
+            fill={actualPathname === "/home" ? "currentColor" : "none"}
           />
           <span className="text-xs">HOME</span>
         </Link>
         <Link
-          href={`${basePath}/menu`}
+          href="/menu"
           onClick={() => trackNavLinkClick("menu", "MENU")}
           className={`flex flex-col items-center transition-colors ${
-            pathname === "/menu"
+            actualPathname === "/menu"
               ? "text-green-800"
               : "text-gray-700 hover:text-green-800"
           }`}
         >
           <Menu
             className="w-6 h-6 mb-1"
-            fill={pathname === "/menu" ? "currentColor" : "none"}
+            fill={actualPathname === "/menu" ? "currentColor" : "none"}
           />
           <span className="text-xs">MENU</span>
         </Link>
         <Link
-          href={`${basePath}/cart`}
+          href="/cart"
           onClick={handleCartClick}
           className={`flex flex-col items-center transition-colors relative ${
-            pathname === "/cart"
+            actualPathname === "/cart"
               ? "text-green-800"
               : "text-gray-700 hover:text-green-800"
           }`}
@@ -80,7 +92,7 @@ export default function BottomNavigation() {
           <div className="relative">
             <ShoppingCart
               className="w-6 h-6 mb-1"
-              fill={pathname === "/cart" ? "currentColor" : "none"}
+              fill={actualPathname === "/cart" ? "currentColor" : "none"}
             />
             {cartCount > 0 && (
               <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
@@ -91,17 +103,17 @@ export default function BottomNavigation() {
           <span className="text-xs">CART</span>
         </Link>
         <Link
-          href={`${basePath}/profile`}
+          href="/profile"
           onClick={handleProfileClick}
           className={`flex flex-col items-center transition-colors ${
-            pathname === "/profile"
+            actualPathname === "/profile"
               ? "text-green-800"
               : "text-gray-700 hover:text-green-800"
           }`}
         >
           <User
             className="w-6 h-6 mb-1"
-            fill={pathname === "/profile" ? "currentColor" : "none"}
+            fill={actualPathname === "/profile" ? "currentColor" : "none"}
           />
           <span className="text-xs">MY</span>
         </Link>
