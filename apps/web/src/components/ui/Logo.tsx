@@ -4,12 +4,14 @@ interface LogoProps {
   title?: string;
   subtitle?: string;
   size?: "sm" | "md" | "lg";
+  priority?: boolean;
 }
 
 export default function Logo({
   title = "Bugs Star",
   subtitle,
   size = "md",
+  priority = false,
 }: LogoProps) {
   const sizeClasses = {
     sm: {
@@ -42,6 +44,7 @@ export default function Logo({
           {...imageProps}
           className={`${image} object-contain`}
           unoptimized
+          priority={priority}
         />
       </div>
       {title && <h1 className="text-3xl font-bold text-green-800">{title}</h1>}

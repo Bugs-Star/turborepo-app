@@ -28,7 +28,7 @@ export default function LoginPage() {
         <div className="flex-1 flex flex-col items-center justify-center px-6 py-8">
           {/* Logo */}
           <div className="mb-8">
-            <Logo size="lg" />
+            <Logo size="lg" priority={true} />
           </div>
 
           {/* Login Form */}
