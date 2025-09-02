@@ -22,20 +22,22 @@ export default function SignupPage() {
   }, [trackScreenView]);
 
   return (
-    <div className="min-h-screen bg-white flex flex-col pb-20">
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col items-center justify-center px-6 py-8">
-        {/* Logo */}
-        <div className="mb-8">
-          <Logo size="lg" />
+    <>
+      <div className="min-h-screen bg-white flex flex-col pb-20">
+        {/* Main Content */}
+        <div className="flex-1 flex flex-col items-center justify-center px-6 py-8">
+          {/* Logo */}
+          <div className="mb-8">
+            <Logo size="lg" priority={true} />
+          </div>
+
+          {/* Signup Form */}
+          <SignupForm />
         </div>
 
-        {/* Signup Form */}
-        <SignupForm />
+        {/* Bottom Navigation */}
+        <BottomNavigation />
       </div>
-
-      {/* Bottom Navigation */}
-      <BottomNavigation />
-    </div>
+    </>
   );
 }
