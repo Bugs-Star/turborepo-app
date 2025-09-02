@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useAuthStore } from "@/stores/authStore";
 import { useHydration, useScrollPosition } from "@/hooks";
+import homeImage from "../../../public/images/homeImage.png";
 
 export default function HeroBanner() {
   const { user, isAuthenticated } = useAuthStore();
@@ -52,9 +53,10 @@ export default function HeroBanner() {
     >
       {/* 배경 이미지 - homeImage.png 사용 */}
       <Image
-        src="/images/homeImage.png"
+        src={homeImage.src}
         alt="카페 배경 이미지"
         fill
+        sizes="100%"
         className="object-cover"
         priority
       />
