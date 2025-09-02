@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { House, Menu, ShoppingCart, User } from "lucide-react";
+import { House, Coffee, ShoppingCart, User } from "lucide-react";
 import { useCartCountFetch, useAnalytics } from "@/hooks";
 import { useAuthStore } from "@/stores/authStore";
 import { useToast } from "@/hooks/useToast";
@@ -61,7 +61,9 @@ export default function BottomNavigation() {
         >
           <House
             className="w-6 h-6 mb-1"
-            fill={actualPathname === "/home" ? "currentColor" : "none"}
+            fill={
+              actualPathname === "/home" ? "rgba(22, 101, 52, 0.2)" : "none"
+            }
           />
           <span className="text-xs">HOME</span>
         </Link>
@@ -74,9 +76,11 @@ export default function BottomNavigation() {
               : "text-gray-700 hover:text-green-800"
           }`}
         >
-          <Menu
+          <Coffee
             className="w-6 h-6 mb-1"
-            fill={actualPathname === "/menu" ? "currentColor" : "none"}
+            fill={
+              actualPathname === "/menu" ? "rgba(22, 101, 52, 0.2)" : "none"
+            }
           />
           <span className="text-xs">MENU</span>
         </Link>
@@ -92,7 +96,9 @@ export default function BottomNavigation() {
           <div className="relative">
             <ShoppingCart
               className="w-6 h-6 mb-1"
-              fill={actualPathname === "/cart" ? "currentColor" : "none"}
+              fill={
+                actualPathname === "/cart" ? "rgba(22, 101, 52, 0.2)" : "none"
+              }
             />
             {cartCount > 0 && (
               <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
@@ -113,7 +119,9 @@ export default function BottomNavigation() {
         >
           <User
             className="w-6 h-6 mb-1"
-            fill={actualPathname === "/profile" ? "currentColor" : "none"}
+            fill={
+              actualPathname === "/profile" ? "rgba(22, 101, 52, 0.2)" : "none"
+            }
           />
           <span className="text-xs">MY</span>
         </Link>

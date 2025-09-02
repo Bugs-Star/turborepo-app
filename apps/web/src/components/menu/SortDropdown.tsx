@@ -56,7 +56,7 @@ export default function SortDropdown({
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-32 h-10 px-4 border border-gray-300 rounded-lg bg-white text-sm font-medium text-gray-700 focus:outline-none flex items-center justify-between"
+        className="w-30 h-8 rounded-lg bg-white text-sm font-medium text-gray-500 focus:outline-none flex items-center justify-end gap-2"
       >
         <span>{selectedOption}</span>
         <svg
@@ -77,12 +77,12 @@ export default function SortDropdown({
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-1 w-40 bg-white border border-gray-300 rounded-lg shadow-lg z-10">
+        <div className="absolute right-0 top-full w-30 bg-white border border-gray-300 rounded-lg shadow-lg z-50">
           {sortOptions.map((option) => (
             <button
               key={option.value}
               onClick={() => handleOptionSelect(option)}
-              className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 first:rounded-t-lg last:rounded-b-lg"
+              className="block w-full text-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 first:rounded-t-lg last:rounded-b-lg transition-colors duration-150"
             >
               {option.label}
             </button>

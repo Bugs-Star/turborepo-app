@@ -11,7 +11,7 @@ export const useHomeActions = () => {
   const handleProductClick = (product: Product) => {
     // 로거 호출
     trackRecommendedProductClick(product);
-    router.push(`menu/${product._id}`);
+    router.push(`menu/${product._id}?from=home`);
   };
 
   const handlePromoClick = (promotion: Promotion) => {

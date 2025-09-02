@@ -9,6 +9,7 @@ import { PageHeader, InfiniteScroll } from "@/components/ui";
 import { ProductGridSkeleton } from "@/components/ui/Skeleton";
 import CategoryFilter from "@/components/menu/CategoryFilter";
 import SearchBox from "@/components/menu/SearchBox";
+import SortDropdown from "@/components/menu/SortDropdown";
 import { useAnalytics, useMenuActions, useProductFilter } from "@/hooks";
 import { validateCategory } from "@/utils/categoryUtils";
 import type { ProductCategory } from "@/types/product";
@@ -116,19 +117,25 @@ function MenuContent() {
         >
           {(categoryFilteredProducts, activeCategory) => (
             <>
-              <div className="fixed top-25 left-1/2 transform -translate-x-1/2 w-full max-w-lg z-40 bg-white border-b border-gray-200">
+              <div className="fixed top-25 left-1/2 transform -translate-x-1/2 w-full max-w-lg z-40 bg-white border-b border-gray-100">
                 <div className="px-6 pt-1 pb-2">
                   <SearchBox
                     onSearch={handleSearch}
-                    onSortChange={handleSort}
                     searchTerm={searchTerm}
-                    sortOption={sortOption}
                     className="h-10"
                   />
                 </div>
               </div>
 
-              <div className="pt-28 flex-1 px-6 pb-6">
+              <div className="pt-24 flex-1 px-6 pb-6">
+                {/* 정렬 옵션 - 구분선 아래에 배치, 오른쪽 정렬 */}
+                <div className="mb-4 flex justify-end">
+                  <SortDropdown
+                    onSortChange={handleSort}
+                    selectedOption={sortOption}
+                  />
+                </div>
+
                 <InfiniteScroll
                   onLoadMore={() => fetchNextPage?.()}
                   hasMore={hasNextPage}
