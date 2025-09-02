@@ -1,8 +1,11 @@
+import mongoose from 'mongoose';
 import Promotion from '../models/Promotion.js';
 import { compressMulterFile } from '../utils/imageUtils.js';
 
 // 프로모션 등록
 export const createPromotion = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
   try {
     console.log('프로모션 등록 요청:', {
       body: req.body,
@@ -23,10 +26,11 @@ export const createPromotion = async (req, res) => {
     const description = getFieldValue('description');
     const startDate = getFieldValue('startDate');
     const endDate = getFieldValue('endDate');
-    const position = getFieldValue('position');
 
     // 필수 필드 검증
     if (!title || !description || !startDate || !endDate) {
+      await session.abortTransaction();
+      session.endSession();
       return res.status(400).json({ 
         message: '필수 필드가 누락되었습니다. (title, description, startDate, endDate)',
         receivedData: {
@@ -43,12 +47,16 @@ export const createPromotion = async (req, res) => {
     const end = new Date(endDate);
     
     if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+      await session.abortTransaction();
+      session.endSession();
       return res.status(400).json({ 
         message: '유효하지 않은 날짜 형식입니다. (ISO 8601 형식: YYYY-MM-DDTHH:mm:ss.sssZ)' 
       });
     }
     
     if (start >= end) {
+      await session.abortTransaction();
+      session.endSession();
       return res.status(400).json({ 
         message: '종료 날짜는 시작 날짜보다 늦어야 합니다.',
         receivedDates: {
@@ -57,10 +65,6 @@ export const createPromotion = async (req, res) => {
         }
       });
     }
-
-    // position 값 검증
-    const validPositions = ['up', 'down'];
-    const validatedPosition = position && validPositions.includes(position) ? position : 'up';
 
     // 현재 로그인한 관리자 ID
     const adminId = req.admin._id;
@@ -90,6 +94,8 @@ export const createPromotion = async (req, res) => {
         
       } catch (compressionError) {
         console.error('프로모션 이미지 압축 실패:', compressionError);
+        await session.abortTransaction();
+        session.endSession();
         return res.status(400).json({ message: '이미지 압축에 실패했습니다.' });
       }
     } else {
@@ -97,8 +103,13 @@ export const createPromotion = async (req, res) => {
     }
 
     if (!processedImageUrl) {
+      await session.abortTransaction();
+      session.endSession();
       return res.status(400).json({ message: '프로모션 이미지가 필요합니다.' });
     }
+
+    // 기존 프로모션들의 순서를 1씩 증가시킴
+    await Promotion.updateMany({}, { $inc: { promotionOrder: 1 } }, { session });
 
     // 데이터 타입 변환
     const promotionData = {
@@ -109,11 +120,14 @@ export const createPromotion = async (req, res) => {
       startDate: start,
       endDate: end,
       isActive: true,
-      position: validatedPosition
+      promotionOrder: 1 // 새로운 프로모션은 최상단(1번)으로
     };
 
     const promotion = new Promotion(promotionData);
-    await promotion.save();
+    await promotion.save({ session });
+
+    await session.commitTransaction();
+    session.endSession();
 
     console.log('프로모션 등록 성공:', promotion._id);
 
@@ -121,6 +135,8 @@ export const createPromotion = async (req, res) => {
       message: '프로모션이 성공적으로 등록되었습니다.'
     });
   } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
     console.error('프로모션 등록 오류:', error);
     res.status(500).json({ 
       message: '서버 오류가 발생했습니다.',
@@ -132,7 +148,7 @@ export const createPromotion = async (req, res) => {
 // 프로모션 목록 조회 (공통 - 관리자/일반 사용자)
 export const getPromotions = async (req, res) => {
   try {
-    const { isActive, position } = req.query;
+    const { isActive } = req.query;
 
     // 쿼리 조건 구성
     const query = {};
@@ -141,22 +157,9 @@ export const getPromotions = async (req, res) => {
       query.isActive = isActive === 'true';
     }
 
-    if (position) {
-      // position 값 검증
-      const validPositions = ['up', 'down'];
-      if (!validPositions.includes(position)) {
-        return res.status(400).json({ 
-          message: '유효하지 않은 position 값입니다. (up, down 중 하나를 선택해주세요)',
-          receivedPosition: position,
-          validPositions: validPositions
-        });
-      }
-      query.position = position;
-    }
-
     const promotions = await Promotion.find(query)
       .select('-adminId') // 생성자 정보는 제외 (공통)
-      .sort({ position: -1, createdAt: -1 });
+      .sort({ promotionOrder: 1, createdAt: -1 });
 
     res.json({ promotions });
   } catch (error) {
@@ -208,7 +211,7 @@ export const updatePromotion = async (req, res) => {
     const updateData = {};
 
     // 업데이트할 필드들 추출
-    const fields = ['title', 'description', 'startDate', 'endDate', 'isActive', 'position'];
+    const fields = ['title', 'description', 'startDate', 'endDate', 'isActive', 'promotionOrder'];
 
     fields.forEach(field => {
       const value = getFieldValue(field);
@@ -241,18 +244,6 @@ export const updatePromotion = async (req, res) => {
             startDate: updateData.startDate || promotion.startDate,
             endDate: updateData.endDate || promotion.endDate
           }
-        });
-      }
-    }
-
-    // position 값 검증
-    if (updateData.position) {
-      const validPositions = ['up', 'down'];
-      if (!validPositions.includes(updateData.position)) {
-        return res.status(400).json({ 
-          message: '유효하지 않은 position 값입니다. (up, down 중 하나를 선택해주세요)',
-          receivedPosition: updateData.position,
-          validPositions: validPositions
         });
       }
     }
@@ -293,6 +284,9 @@ export const updatePromotion = async (req, res) => {
     }
     if (updateData.isActive !== undefined) {
       updateData.isActive = updateData.isActive === 'true' || updateData.isActive === true;
+    }
+    if (updateData.promotionOrder !== undefined) {
+      updateData.promotionOrder = Number(updateData.promotionOrder);
     }
 
     // 업데이트할 데이터가 없으면 에러
@@ -349,6 +343,78 @@ export const deletePromotion = async (req, res) => {
     });
   } catch (error) {
     console.error('프로모션 삭제 오류:', error);
+    res.status(500).json({
+      message: '서버 오류가 발생했습니다.',
+      error: error.message // 개발 중에만 사용
+    });
+  }
+};
+
+// 프로모션 순서 변경
+export const reorderPromotions = async (req, res) => {
+  try {
+    const { promotionIds } = req.body;
+
+    console.log('프로모션 순서 변경 요청:', { promotionIds });
+
+    // 1. 유효성 검증
+    if (!Array.isArray(promotionIds) || promotionIds.length === 0) {
+      return res.status(400).json({ 
+        message: '유효하지 않은 프로모션 ID 배열입니다.',
+        receivedData: { promotionIds }
+      });
+    }
+
+    // 2. 모든 프로모션 ID가 유효한지 확인
+    const validPromotions = await Promotion.find({ _id: { $in: promotionIds } });
+    if (validPromotions.length !== promotionIds.length) {
+      return res.status(400).json({ 
+        message: '존재하지 않는 프로모션이 포함되어 있습니다.',
+        receivedCount: promotionIds.length,
+        validCount: validPromotions.length
+      });
+    }
+
+    // 3. 트랜잭션 시작
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    try {
+      // 4. 모든 프로모션의 promotionOrder를 새로운 순서로 업데이트
+      for (let i = 0; i < promotionIds.length; i++) {
+        await Promotion.findByIdAndUpdate(
+          promotionIds[i],
+          { promotionOrder: i + 1 },
+          { session }
+        );
+      }
+
+      // 5. 트랜잭션 커밋
+      await session.commitTransaction();
+
+      console.log('프로모션 순서 변경 성공:', {
+        updatedCount: promotionIds.length,
+        newOrder: promotionIds
+      });
+
+      res.json({
+        message: '프로모션 순서가 성공적으로 변경되었습니다.',
+        updatedCount: promotionIds.length,
+        newOrder: promotionIds
+      });
+
+    } catch (error) {
+      // 6. 에러 시 트랜잭션 롤백
+      await session.abortTransaction();
+      console.error('프로모션 순서 변경 트랜잭션 실패:', error);
+      throw error;
+    } finally {
+      // 7. 세션 종료
+      session.endSession();
+    }
+
+  } catch (error) {
+    console.error('프로모션 순서 변경 오류:', error);
     res.status(500).json({
       message: '서버 오류가 발생했습니다.',
       error: error.message // 개발 중에만 사용

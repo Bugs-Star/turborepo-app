@@ -32,10 +32,10 @@ const promotionSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   },
-  position: {
-    type: String,
-    enum: ['up', 'down'],
-    default: 'up'
+  promotionOrder: {
+    type: Number,
+    min: 0,
+    default: 0
   }
 }, {
   timestamps: true
@@ -43,7 +43,7 @@ const promotionSchema = new mongoose.Schema({
 
 // 인덱스 설정
 promotionSchema.index({ isActive: 1, startDate: 1, endDate: 1 });
-promotionSchema.index({ position: -1, createdAt: -1 });
+promotionSchema.index({ promotionOrder: 1, createdAt: -1 });
 
 // 인스턴스 메서드
 promotionSchema.methods.isCurrentlyActive = function() {

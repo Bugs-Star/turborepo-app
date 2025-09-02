@@ -3,7 +3,8 @@ import { adminLogin, adminRefresh, adminLogout, getUsers } from '../controllers/
 import { 
   createProduct, 
   updateProduct, 
-  deleteProduct
+  deleteProduct,
+  reorderRecommendedProducts
 } from '../controllers/productController.js';
 import { 
   createEvent, 
@@ -14,7 +15,8 @@ import {
 import { 
   createPromotion, 
   updatePromotion, 
-  deletePromotion
+  deletePromotion,
+  reorderPromotions
 } from '../controllers/promotionController.js';
 import { 
   getAllOrders, 
@@ -37,6 +39,7 @@ router.get('/users', adminAuth, getUsers);                    // 일반 유저 �
 router.post('/products', adminAuth, uploadFields, createProduct);      // 상품 등록
 router.put('/products/:id', adminAuth, uploadFields, updateProduct);   // 상품 수정
 router.delete('/products/:id', adminAuth, deleteProduct); // 상품 삭제
+router.post('/products/reorder-recommended', adminAuth, reorderRecommendedProducts); // 추천 상품 순서 변경
 
 // 이벤트 관리 라우트
 router.post('/events', adminAuth, uploadFields, createEvent);      // 이벤트 등록
@@ -48,6 +51,7 @@ router.post('/events/reorder', adminAuth, reorderEvents); // 이벤트 순서 �
 router.post('/promotions', adminAuth, uploadFields, createPromotion);      // 프로모션 등록
 router.put('/promotions/:id', adminAuth, uploadFields, updatePromotion);   // 프로모션 수정
 router.delete('/promotions/:id', adminAuth, deletePromotion); // 프로모션 삭제
+router.post('/promotions/reorder', adminAuth, reorderPromotions); // 프로모션 순서 변경
 
 // 주문 관리 라우트
 router.get('/order', adminAuth, getAllOrders);                    // 모든 주문 목록 조회

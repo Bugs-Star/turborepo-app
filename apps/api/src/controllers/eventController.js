@@ -28,7 +28,6 @@ export const createEvent = async (req, res) => {
     const startDate = getFieldValue('startDate');
     const endDate = getFieldValue('endDate');
     const isActive = getFieldValue('isActive');
-    const eventOrder = getFieldValue('eventOrder');
 
     // 필수 필드 검증
     if (!title || !description || !startDate || !endDate) {
@@ -99,6 +98,10 @@ export const createEvent = async (req, res) => {
       return res.status(400).json({ message: '이벤트 이미지가 필요합니다.' });
     }
 
+    // 새로운 eventOrder 값 설정 (가장 큰 값 + 1)
+    const maxOrderEvent = await Event.findOne({}).sort({ eventOrder: -1 });
+    const newOrder = maxOrderEvent ? maxOrderEvent.eventOrder + 1 : 1;
+
     // 데이터 타입 변환
     const eventData = {
       adminId: adminId,
@@ -108,7 +111,7 @@ export const createEvent = async (req, res) => {
       startDate: start,
       endDate: end,
       isActive: isActive === 'true' || isActive === true || isActive === undefined,
-      eventOrder: Number(eventOrder) || 0
+      eventOrder: newOrder
     };
 
     const event = new Event(eventData);
