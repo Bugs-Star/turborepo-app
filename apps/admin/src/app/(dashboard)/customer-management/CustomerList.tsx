@@ -12,7 +12,7 @@ const CustomerList = () => {
     name: user.name,
     email: user.email,
     joined: new Date(user.createdAt).toLocaleDateString("ko-KR"),
-    recent: "-", // 최근 활동 API 없으니 placeholder
+    recent: "-",
   }));
 
   return (
@@ -25,7 +25,7 @@ const CustomerList = () => {
         { key: "joined", label: "가입일" },
         { key: "recent", label: "최근 활동" },
         {
-          key: "name",
+          key: "actions",
           label: "작업",
           render: (row) => (
             <button className="bg-[#005C14] text-white px-3 py-1 rounded cursor-pointer">

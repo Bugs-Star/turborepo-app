@@ -4,6 +4,7 @@ import BaseForm from "@/components/BaseForm";
 import { X, Coffee, Utensils, Gift } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useEditMenu } from "@/hooks/menu/useEditMenu";
+import { notify } from "@/lib/notify";
 
 type CategoryType = "drink" | "food" | "product";
 
@@ -40,7 +41,6 @@ const EditMenu = ({ productId, initialData, onClose }: EditMenuProps) => {
   // 새로 고른 파일
   const [image, setImage] = useState<File | null>(null);
 
-  // ✅ 미리보기 소스: 새 파일 우선 → 초기 서버 URL
   const previewSrc = useMemo(() => {
     if (image) return URL.createObjectURL(image);
     return initialData?.productImgUrl ?? null;
@@ -56,7 +56,7 @@ const EditMenu = ({ productId, initialData, onClose }: EditMenuProps) => {
     e.preventDefault();
 
     const fd = new FormData(e.currentTarget);
-    if (image) fd.set("productImg", image); // ✅ 새 이미지가 있으면 전송
+    if (image) fd.set("productImg", image);
     fd.set("category", categoryMap[selectedCategory]);
 
     const numKeys = ["price", "currentStock", "optimalStock"] as const;
@@ -80,7 +80,7 @@ const EditMenu = ({ productId, initialData, onClose }: EditMenuProps) => {
 
     mutate(payload, {
       onSuccess: () => {
-        alert("메뉴가 수정되었습니다!");
+        notify.success("메뉴가 수정되었습니다.");
         onClose();
       },
     });

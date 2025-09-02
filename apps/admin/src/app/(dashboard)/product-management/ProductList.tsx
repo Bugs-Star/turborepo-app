@@ -45,6 +45,7 @@ export default function ProductList() {
     if (!p) return;
     setEditingId(p.id);
     setInitialData({
+      productImgUrl: p.image,
       productName: p.name,
       productCode: p.code,
       productContents: p.productContents,

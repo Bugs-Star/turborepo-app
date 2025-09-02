@@ -20,15 +20,13 @@ export const notify = {
       typeof anyToast.promise === "function" &&
       anyToast.promise.length >= 3
     ) {
-      // 3 인자 시그니처 지원
       return anyToast.promise(p, msgs, opts);
     }
-    // 2 인자 시그니처만 지원
+
     return anyToast.promise(p, msgs);
   },
 };
 
-// (선택) 기존 window.alert를 토스트로 대체
 export function installAlertShim() {
   if (typeof window !== "undefined") {
     (window as any).alert = (m?: string) => (toast as any)(m ?? "");
