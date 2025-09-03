@@ -127,13 +127,20 @@ export const useAnalytics = () => {
   }, []);
 
   const trackCreateOrder = useCallback(
-    (totalAmount: number, itemCount: number) => {
+    (totalAmount: number, itemCount: number, cartItems: CartItemUI[]) => {
       logger.log("clickInteraction", {
         interactionType: "buttonCreateOrder",
         targetId: "order",
         sourceComponent: "cart_page",
         totalAmount: totalAmount,
         itemCount: itemCount,
+        // 🆕 상품 정보 (수량 × 가격으로 계산)
+        products: cartItems.map((item) => ({
+          productCode: item.productCode,
+          quantity: item.quantity,
+          price: item.price * item.quantity, // 🆕 수량 × 가격
+          unitPrice: item.price, // 🆕 개별 가격도 추가
+        })),
       });
     },
     []

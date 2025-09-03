@@ -19,7 +19,7 @@ export default function RecommendedMenu({
       {products?.products?.map((product: Product) => (
         <div
           key={product._id}
-          className="flex-shrink-0 w-32 bg-white rounded-lg shadow-sm border border-gray-200 cursor-pointer hover:shadow-md transition-shadow"
+          className="flex-shrink-0 w-[130px] bg-white rounded-lg shadow-sm border border-gray-200 cursor-pointer hover:shadow-md transition-shadow"
           onClick={() => onProductClick?.(product)}
         >
           <div className="w-32 h-32 rounded-t-lg overflow-hidden">

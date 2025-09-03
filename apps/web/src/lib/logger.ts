@@ -408,11 +408,36 @@ const createLogger = (): Logger => {
     if (process.env.NODE_ENV === "development") {
       console.log("📊 배치 전송:", {
         count: logs.length,
-        logs: logs.map((log) => ({
-          eventName: log.eventName,
-          timestamp: log.eventTimestamp,
-          payload: log.payload,
-        })),
+        logs: logs.map((log) => {
+          // 기본 로그 정보
+          const logInfo = {
+            eventName: log.eventName,
+            timestamp: log.eventTimestamp,
+            payload: log.payload,
+          };
+
+          // products 배열이 있는 경우 더 자세히 표시 (타입 가드 사용)
+          if (
+            log.payload &&
+            "interactionType" in log.payload &&
+            "products" in log.payload &&
+            log.payload.products
+          ) {
+            console.log("🛒 상품 정보 상세:", {
+              eventName: log.eventName,
+              products: log.payload.products.map(
+                (product: any, index: number) => ({
+                  index: index + 1,
+                  productCode: product.productCode,
+                  quantity: product.quantity,
+                  price: product.price,
+                })
+              ),
+            });
+          }
+
+          return logInfo;
+        }),
       });
     }
 
