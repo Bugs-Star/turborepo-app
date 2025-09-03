@@ -1,0 +1,17 @@
+{
+  "name": "@repo/types",
+  "version": "1.0.0",
+  "description": "Shared types for the cafe app",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "files": [
+    "src/**/*"
+  ]
+}

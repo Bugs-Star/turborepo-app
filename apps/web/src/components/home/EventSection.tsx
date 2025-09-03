@@ -1,0 +1,63 @@
+"use client";
+
+import Image from "next/image";
+import { Event } from "@/lib/services";
+import { SectionAsyncWrapper, EventSectionSkeleton } from "@/components/ui";
+
+interface EventSectionProps {
+  events: Event[];
+  loading?: boolean;
+  onEventClick?: (event: Event) => void;
+}
+
+export default function EventSection({
+  events,
+  loading = false,
+  onEventClick,
+}: EventSectionProps) {
+  const renderEventList = () => (
+    <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+      {events.map((event) => (
+        <div
+          key={event._id}
+          className="flex-shrink-0 w-64 cursor-pointer"
+          onClick={() => onEventClick?.(event)}
+        >
+          {/* 이미지 카드 */}
+          <div className="w-64 h-40 rounded-lg overflow-hidden mb-3 shadow-sm hover:shadow-md transition-shadow">
+            <Image
+              src={event.eventImg}
+              alt={event.title}
+              width={256}
+              height={160}
+              className="w-full h-full object-cover"
+            />
+          </div>
+          {/* 텍스트 영역 */}
+          <div className="px-1">
+            <h3 className="text-sm font-bold text-gray-900 mb-1 line-clamp-1 overflow-hidden text-ellipsis">
+              {event.title}
+            </h3>
+            <p className="text-xs text-gray-600 leading-relaxed line-clamp-2 overflow-hidden text-ellipsis">
+              {event.description}
+            </p>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+
+  return (
+    <SectionAsyncWrapper
+      loading={loading}
+      error={null}
+      title="새로운 소식"
+      subtitle="놓치기 아까운 혜택과 이야기를 전해드려요!"
+      loadingMessage="이벤트를 불러오는 중..."
+      errorMessage="이벤트를 불러올 수 없습니다."
+      skeleton={<EventSectionSkeleton count={3} />}
+    >
+      {renderEventList()}
+    </SectionAsyncWrapper>
+  );
+}
