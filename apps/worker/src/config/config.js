@@ -6,7 +6,8 @@ dotenv.config(); // .env 파일 읽어서 process.env에 반영
 
 // REDIS_STREAM_KEY: Redis 스트림의 이름입니다.
 // Redis 스트림은 메시지 큐 같은 역할을 하며, 이 이름으로 이벤트들이 쌓입니다.
-export const REDIS_STREAM_KEY = "event_stream";
+// export const REDIS_STREAM_KEY = "event_stream";
+export const REDIS_STREAM_KEY = "batch_logs_stream";
 
 // REDIS_CONSUMER_GROUP: Redis 스트림을 소비하는 소비자 그룹 이름입니다.
 // 소비자 그룹은 여러 워커가 협력하여 스트림 메시지를 분산 처리할 수 있게 해줍니다.
@@ -26,14 +27,14 @@ export const REDIS_CONSUMER_NAME = `worker_${Math.random()
 // basicAuth: 기본 인증 정보(아이디: default, 비밀번호는 빈 문자열).
 // debug: 디버그 모드 여부 (false면 로그 출력 최소화).
 export const CLICKHOUSE_CONFIG = {
-  url: "http://default:1234@localhost:8123", // HTTP URL 형식
-  debug: true,
-  // url: process.env.CLICKHOUSE_HOST,
-  // basicAuth: {
-  //   username: process.env.CLICKHOUSE_USERNAME,
-  //   password: process.env.CLICKHOUSE_PASSWORD,
-  // },
-  // debug: false,
+  // url: "http://default:1234@localhost:8123", // HTTP URL 형식
+  // debug: true,
+  url: process.env.CLICKHOUSE_HOST,
+  basicAuth: {
+    username: process.env.CLICKHOUSE_USERNAME,
+    password: process.env.CLICKHOUSE_PASSWORD,
+  },
+  debug: false,
 };
 
 // 개념 정리
