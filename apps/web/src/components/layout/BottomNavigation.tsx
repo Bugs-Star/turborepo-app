@@ -16,20 +16,6 @@ export default function BottomNavigation() {
   const { isAuthenticated } = useAuthStore();
   const { showWarning } = useToast();
 
-  // basePath를 제거한 실제 경로 계산
-  const getActualPath = (path: string) => {
-    // 프로덕션에서는 /bugs-star 접두사 제거, 개발에서는 그대로
-    if (
-      process.env.NODE_ENV === "production" &&
-      path.startsWith("/bugs-star")
-    ) {
-      return path.replace("/bugs-star", "");
-    }
-    return path;
-  };
-
-  const actualPathname = getActualPath(pathname);
-
   const handleProfileClick = (e: React.MouseEvent) => {
     if (!isAuthenticated) {
       e.preventDefault();
@@ -54,16 +40,14 @@ export default function BottomNavigation() {
           href="/home"
           onClick={() => trackNavLinkClick("home", "HOME")}
           className={`flex flex-col items-center transition-colors ${
-            actualPathname === "/home"
+            pathname === "/home"
               ? "text-green-800"
               : "text-gray-700 hover:text-green-800"
           }`}
         >
           <House
             className="w-6 h-6 mb-1"
-            fill={
-              actualPathname === "/home" ? "rgba(22, 101, 52, 0.2)" : "none"
-            }
+            fill={pathname === "/home" ? "rgba(22, 101, 52, 0.2)" : "none"}
           />
           <span className="text-xs">HOME</span>
         </Link>
@@ -71,16 +55,14 @@ export default function BottomNavigation() {
           href="/menu"
           onClick={() => trackNavLinkClick("menu", "MENU")}
           className={`flex flex-col items-center transition-colors ${
-            actualPathname === "/menu"
+            pathname === "/menu"
               ? "text-green-800"
               : "text-gray-700 hover:text-green-800"
           }`}
         >
           <Coffee
             className="w-6 h-6 mb-1"
-            fill={
-              actualPathname === "/menu" ? "rgba(22, 101, 52, 0.2)" : "none"
-            }
+            fill={pathname === "/menu" ? "rgba(22, 101, 52, 0.2)" : "none"}
           />
           <span className="text-xs">MENU</span>
         </Link>
@@ -88,7 +70,7 @@ export default function BottomNavigation() {
           href="/cart"
           onClick={handleCartClick}
           className={`flex flex-col items-center transition-colors relative ${
-            actualPathname === "/cart"
+            pathname === "/cart"
               ? "text-green-800"
               : "text-gray-700 hover:text-green-800"
           }`}
@@ -96,9 +78,7 @@ export default function BottomNavigation() {
           <div className="relative">
             <ShoppingCart
               className="w-6 h-6 mb-1"
-              fill={
-                actualPathname === "/cart" ? "rgba(22, 101, 52, 0.2)" : "none"
-              }
+              fill={pathname === "/cart" ? "rgba(22, 101, 52, 0.2)" : "none"}
             />
             {cartCount > 0 && (
               <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
@@ -112,16 +92,14 @@ export default function BottomNavigation() {
           href="/profile"
           onClick={handleProfileClick}
           className={`flex flex-col items-center transition-colors ${
-            actualPathname === "/profile"
+            pathname === "/profile"
               ? "text-green-800"
               : "text-gray-700 hover:text-green-800"
           }`}
         >
           <User
             className="w-6 h-6 mb-1"
-            fill={
-              actualPathname === "/profile" ? "rgba(22, 101, 52, 0.2)" : "none"
-            }
+            fill={pathname === "/profile" ? "rgba(22, 101, 52, 0.2)" : "none"}
           />
           <span className="text-xs">MY</span>
         </Link>

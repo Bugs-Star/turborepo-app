@@ -19,8 +19,8 @@ export const useCartAnalyticsActions = () => {
   );
 
   const handleOrderInitiate = useCallback(
-    (totalAmount: number, itemCount: number) => {
-      trackCreateOrder(totalAmount, itemCount);
+    (totalAmount: number, itemCount: number, cartItems: CartItemUI[]) => {
+      trackCreateOrder(totalAmount, itemCount, cartItems);
     },
     [trackCreateOrder]
   );
