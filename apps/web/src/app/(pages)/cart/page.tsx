@@ -59,7 +59,7 @@ export default function CartPage() {
 
   // 주문 시작 로깅 핸들러
   const handlePaymentClickWithLogging = () => {
-    handleOrderInitiate(total, summary?.totalItems || 0);
+    handleOrderInitiate(total, summary?.totalItems || 0, cartItems);
     handlePaymentClick();
   };
 

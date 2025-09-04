@@ -1,4 +1,5 @@
 import Image from "next/image";
+import logoImage from "../../../public/images/logo.png";
 
 interface LogoProps {
   title?: string;
@@ -39,7 +40,7 @@ export default function Logo({
         className={`${container} rounded-full flex items-center justify-center mx-auto mb-2 overflow-hidden`}
       >
         <Image
-          src="/images/logo.png"
+          src={logoImage}
           alt="Bugs Star Logo"
           {...imageProps}
           className={`${image} object-contain`}

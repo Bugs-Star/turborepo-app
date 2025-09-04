@@ -1,9 +1,11 @@
+// app/.../RecommendMenu.tsx
 "use client";
 
-import { useEffect, useState } from "react";
-import { ArrowUpDown } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { ArrowUpDown, Loader2 } from "lucide-react";
 import DraggableList from "@/components/DraggableList";
 import { useGetAllRecommendedMenu } from "@/hooks/event/useGetAllRecommendedMenu";
+import { useReorderRecommended } from "@/hooks/event/useReorderRecommended";
 
 interface EventItem {
   id: string;
@@ -12,26 +14,79 @@ interface EventItem {
 }
 
 const RecommendMenu = () => {
-  // ✅ 추천 메뉴만 불러오기
   const { data, isLoading, isError } = useGetAllRecommendedMenu(1, 50);
-  const [menus, setMenus] = useState<EventItem[]>([]);
 
-  // API 결과 → DraggableList 아이템으로 매핑
-  useEffect(() => {
-    if (!data?.products) return;
-    const mapped: EventItem[] = data.products.map((p) => ({
-      id: p._id,
-      name: p.productName,
-      image: p.productImg, // 서버가 주는 url/base64
-    }));
-    setMenus(mapped);
+  // 서버 데이터 → 초기 표시 순서 보장 (recommendedOrder ASC, tie: _id)
+  const initialMenus = useMemo<EventItem[]>(() => {
+    if (!data?.products) return [];
+    return [...data.products]
+      .sort((a, b) => {
+        const ao =
+          typeof a.recommendedOrder === "number"
+            ? a.recommendedOrder
+            : Number.MAX_SAFE_INTEGER;
+        const bo =
+          typeof b.recommendedOrder === "number"
+            ? b.recommendedOrder
+            : Number.MAX_SAFE_INTEGER;
+        if (ao !== bo) return ao - bo;
+        return a._id.localeCompare(b._id);
+      })
+      .map((p) => ({
+        id: p._id,
+        name: p.productName,
+        image: p.productImg,
+      }));
   }, [data]);
 
+  const [menus, setMenus] = useState<EventItem[]>(initialMenus);
+  useEffect(() => setMenus(initialMenus), [initialMenus]);
+
+  const { mutate: commitOrder, isPending } = useReorderRecommended();
+
   const handleDelete = (id: string) => {
-    // 지금은 UI상 삭제만; 실제 삭제 API 연결 원하면 말해줘!
     setMenus((prev) => prev.filter((item) => item.id !== id));
   };
 
+  // 드래그 직후: updatedList(전체 id 순서)로 완전 재구성
+  const handleReorderLocal = (updatedList: { id: string }[]) => {
+    setMenus((prev) => {
+      const map = new Map(prev.map((it) => [it.id, it]));
+      const next = updatedList.map((u) => map.get(u.id)!).filter(Boolean);
+      // 방어: 일부만 들어온 경우 이전 상태 유지
+      return next.length === prev.length ? next : prev;
+    });
+  };
+
+  // 드래그 완료: 전체 인덱스로 서버 저장 (+ 실패 시 롤백)
+  const handleReorderCommit = ({
+    oldItems,
+    newItems,
+  }: {
+    oldItems: { id: string }[];
+    newItems: { id: string }[];
+    moves: { id: string; from: number; to: number }[];
+  }) => {
+    if (!newItems.length) return;
+
+    // ✅ 서버 스펙: 전체 순서의 ID 배열 필요
+    const ids = newItems.map((it) => it.id);
+
+    commitOrder(ids, {
+      onSuccess: () => {
+        setMenus((prev) =>
+          prev.map((it, idx) => ({ ...it, _order: idx }) as any)
+        );
+      },
+      onError: () => {
+        const pos = new Map(oldItems.map((it, i) => [it.id, i]));
+        setMenus((prev) =>
+          [...prev].sort((a, b) => (pos.get(a.id) ?? 0) - (pos.get(b.id) ?? 0))
+        );
+        alert("추천 순서 저장에 실패했어요. 다시 시도해주세요.");
+      },
+    });
+  };
   if (isLoading) {
     return (
       <div className="max-w-5xl mx-auto mt-5 bg-white p-6 rounded-lg">
@@ -53,16 +108,28 @@ const RecommendMenu = () => {
       {/* 헤더 */}
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-lg font-bold">추천 메뉴 재정렬</h1>
-        <div className="flex items-center gap-2 text-gray-700">
-          <ArrowUpDown className="w-4 h-4" /> 재정렬
+
+        <div className="flex items-center gap-2 text-gray-700 min-h-5">
+          {isPending ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span className="text-xs text-gray-500">저장중..</span>
+            </>
+          ) : (
+            <>
+              <ArrowUpDown className="w-4 h-4" />
+              재정렬
+            </>
+          )}
         </div>
       </div>
 
-      {/* Draggable list */}
+      {/* 드래그 리스트 */}
       <DraggableList
         items={menus}
-        onReorder={setMenus} // 드래그 후 UI상 순서만 우선 반영
-        onDelete={handleDelete} // UI 삭제
+        onReorder={handleReorderLocal}
+        onReorderCommit={handleReorderCommit}
+        onDelete={handleDelete}
       />
     </div>
   );

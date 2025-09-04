@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { Promotion } from "@/lib/services";
 import { Button } from "@repo/ui";
 import { SectionAsyncWrapper, PromoBannerSkeleton } from "@/components/ui";
@@ -11,7 +11,7 @@ interface PromotionSectionProps {
   onPromoClick?: (promotion: Promotion) => void;
 }
 
-export default function PromotionSection({
+export default React.memo(function PromotionSection({
   promotions,
   loading = false,
   onPromoClick,
@@ -20,23 +20,33 @@ export default function PromotionSection({
   const ITEMS_PER_PAGE = 3;
 
   // 최근 순으로 정렬된 프로모션 (최신이 먼저 오도록)
-  const sortedPromotions = [...promotions].sort((a, b) => {
-    return (
-      new Date(b.createdAt || 0).getTime() -
-      new Date(a.createdAt || 0).getTime()
-    );
-  });
+  const sortedPromotions = React.useMemo(
+    () =>
+      [...promotions].sort((a, b) => {
+        return (
+          new Date(b.createdAt || 0).getTime() -
+          new Date(a.createdAt || 0).getTime()
+        );
+      }),
+    [promotions]
+  );
 
   // 현재 표시할 프로모션들
-  const displayedPromotions = sortedPromotions.slice(0, displayCount);
+  const displayedPromotions = React.useMemo(
+    () => sortedPromotions.slice(0, displayCount),
+    [sortedPromotions, displayCount]
+  );
 
   // 더보기 버튼 표시 여부
-  const hasMorePromotions = displayCount < sortedPromotions.length;
+  const hasMorePromotions = React.useMemo(
+    () => displayCount < sortedPromotions.length,
+    [displayCount, sortedPromotions.length]
+  );
 
   // 더보기 버튼 클릭 핸들러
-  const handleLoadMore = () => {
+  const handleLoadMore = useCallback(() => {
     setDisplayCount((prev) => prev + ITEMS_PER_PAGE);
-  };
+  }, [ITEMS_PER_PAGE]);
 
   return (
     <SectionAsyncWrapper
@@ -112,4 +122,4 @@ export default function PromotionSection({
       </div>
     </SectionAsyncWrapper>
   );
-}
+});

@@ -28,7 +28,7 @@ export default function PageHeader({
   if (variant === "greeting") {
     return (
       <header
-        className={`fixed top-0 left-1/2 transform -translate-x-1/2 w-full max-w-lg z-50 flex items-center px-4 py-3 border-b border-gray-200 bg-white transition-transform duration-300 ${
+        className={`fixed top-0 left-1/2 transform -translate-x-1/2 w-full max-w-lg z-50 flex items-center px-4 py-2 border-b border-gray-200 bg-white transition-transform duration-300 ${
           shouldHide ? "-translate-y-full" : "translate-y-0"
         } ${className}`}
       >
@@ -47,7 +47,7 @@ export default function PageHeader({
 
   return (
     <header
-      className={`fixed top-0 left-1/2 transform -translate-x-1/2 w-full max-w-lg z-50 flex items-center px-4 py-3 bg-white border-b border-gray-100 transition-transform duration-300 ${
+      className={`fixed top-0 left-1/2 transform -translate-x-1/2 w-full max-w-lg z-50 flex items-center px-4 py-2 bg-white border-b border-gray-100 transition-transform duration-300 ${
         shouldHide ? "-translate-y-full" : "translate-y-0"
       } ${className}`}
     >

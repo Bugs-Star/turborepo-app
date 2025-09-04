@@ -7,16 +7,24 @@ interface BaseItem {
   id: string;
   name: string;
   image: string;
-  // 선택적으로 날짜 필드를 포함할 수 있음
+  description?: string; // ✅ 옵션으로 허용
   startDate?: string;
   endDate?: string;
   startAt?: string;
   finishAt?: string;
 }
 
+type MoveDiff = { id: string; from: number; to: number };
+
 interface DraggableListProps<T extends BaseItem> {
   items: T[];
   onReorder: (newItems: T[]) => void;
+  /** ✅ 드래그 종료 후 서버 반영 등 커밋용 (옵션) */
+  onReorderCommit?: (args: {
+    oldItems: T[];
+    newItems: T[];
+    moves: MoveDiff[];
+  }) => void;
   onEdit?: (id: string) => void;
   onDelete?: (id: string) => void;
   renderExtra?: (item: T) => React.ReactNode;
@@ -36,16 +44,36 @@ const formatDate = (iso?: string) => {
 const DraggableList = <T extends BaseItem>({
   items,
   onReorder,
+  onReorderCommit,
   onEdit,
   onDelete,
   renderExtra,
 }: DraggableListProps<T>) => {
   const handleDragEnd = (result: any) => {
     if (!result.destination) return;
+
+    const oldItems = items;
     const reordered = Array.from(items);
     const [removed] = reordered.splice(result.source.index, 1);
     reordered.splice(result.destination.index, 0, removed);
+
+    // 로컬 즉시 반영
     onReorder(reordered);
+
+    // ✅ 커밋 콜백: 변경된 항목만 diff로 전달
+    if (onReorderCommit) {
+      const oldIndex = new Map(oldItems.map((it, i) => [it.id, i]));
+      const moves: MoveDiff[] = reordered
+        .map((it, newIdx) => ({
+          id: it.id,
+          from: oldIndex.get(it.id)!,
+          to: newIdx,
+        }))
+        .filter((m) => m.from !== m.to);
+
+      if (moves.length)
+        onReorderCommit({ oldItems, newItems: reordered, moves });
+    }
   };
 
   return (
@@ -53,12 +81,11 @@ const DraggableList = <T extends BaseItem>({
       <Droppable droppableId="list">
         {(provided) => (
           <div
-            {...provided.droppableProps}
             ref={provided.innerRef}
+            {...provided.droppableProps}
             className="space-y-3"
           >
             {items.map((item, index) => {
-              // start/end 필드 호환 처리
               const start = (item.startDate ?? item.startAt) || "";
               const end = (item.endDate ?? item.finishAt) || "";
               const hasRange = Boolean(start && end);
@@ -67,11 +94,10 @@ const DraggableList = <T extends BaseItem>({
                 <Draggable key={item.id} draggableId={item.id} index={index}>
                   {(provided) => (
                     <div
-                      className="flex items-center justify-between border border-gray-200 rounded-lg p-3 bg-white shadow-sm"
                       ref={provided.innerRef}
                       {...provided.draggableProps}
+                      className="flex items-center justify-between border border-gray-200 rounded-lg p-3 bg-white shadow-sm"
                     >
-                      {/* Drag handle */}
                       <div
                         {...provided.dragHandleProps}
                         className="cursor-grab text-gray-400 pr-2"
@@ -79,7 +105,6 @@ const DraggableList = <T extends BaseItem>({
                         ⋮⋮
                       </div>
 
-                      {/* Item info */}
                       <div className="flex items-center gap-3 flex-1">
                         <img
                           src={item.image}
@@ -96,7 +121,6 @@ const DraggableList = <T extends BaseItem>({
                         </div>
                       </div>
 
-                      {/* 기간 표시 */}
                       {hasRange && (
                         <div className="flex items-center text-gray-500 ml-4 mr-4 text-xs">
                           <Calendar className="w-4 h-4 mr-1" />
@@ -106,14 +130,12 @@ const DraggableList = <T extends BaseItem>({
                         </div>
                       )}
 
-                      {/* Actions */}
                       <div className="flex items-center gap-2">
                         {onEdit && (
                           <button
                             type="button"
                             onClick={() => onEdit(item.id)}
                             className="bg-orange-400 text-sm text-white px-3 py-1 rounded-xl cursor-pointer"
-                            aria-label="수정"
                           >
                             수정
                           </button>
@@ -123,7 +145,6 @@ const DraggableList = <T extends BaseItem>({
                             type="button"
                             onClick={() => onDelete(item.id)}
                             className="bg-[#D74753] text-sm text-white px-3 py-1 rounded-xl cursor-pointer"
-                            aria-label="삭제"
                           >
                             삭제
                           </button>

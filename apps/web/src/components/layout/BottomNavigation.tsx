@@ -16,20 +16,6 @@ export default function BottomNavigation() {
   const { isAuthenticated } = useAuthStore();
   const { showWarning } = useToast();
 
-  // basePath를 제거한 실제 경로 계산
-  const getActualPath = (path: string) => {
-    // 프로덕션에서는 /bugs-star 접두사 제거, 개발에서는 그대로
-    if (
-      process.env.NODE_ENV === "production" &&
-      path.startsWith("/bugs-star")
-    ) {
-      return path.replace("/bugs-star", "");
-    }
-    return path;
-  };
-
-  const actualPathname = getActualPath(pathname);
-
   const handleProfileClick = (e: React.MouseEvent) => {
     if (!isAuthenticated) {
       e.preventDefault();
@@ -48,82 +34,74 @@ export default function BottomNavigation() {
   };
 
   return (
-    <div className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-lg bg-white border-t border-gray-200 py-3 z-50">
+    <div className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-lg bg-white border-t border-gray-200 pt-3 pb-2 z-50">
       <div className="flex justify-around items-center">
         <Link
           href="/home"
           onClick={() => trackNavLinkClick("home", "HOME")}
           className={`flex flex-col items-center transition-colors ${
-            actualPathname === "/home"
+            pathname === "/home"
               ? "text-green-800"
               : "text-gray-700 hover:text-green-800"
           }`}
         >
           <House
-            className="w-6 h-6 mb-1"
-            fill={
-              actualPathname === "/home" ? "rgba(22, 101, 52, 0.2)" : "none"
-            }
+            className="w-5 h-5 mb-1"
+            fill={pathname === "/home" ? "rgba(22, 101, 52, 0.2)" : "none"}
           />
-          <span className="text-xs">HOME</span>
+          <span className="text-[10px]">HOME</span>
         </Link>
         <Link
           href="/menu"
           onClick={() => trackNavLinkClick("menu", "MENU")}
           className={`flex flex-col items-center transition-colors ${
-            actualPathname === "/menu"
+            pathname === "/menu"
               ? "text-green-800"
               : "text-gray-700 hover:text-green-800"
           }`}
         >
           <Coffee
-            className="w-6 h-6 mb-1"
-            fill={
-              actualPathname === "/menu" ? "rgba(22, 101, 52, 0.2)" : "none"
-            }
+            className="w-5 h-5 mb-1"
+            fill={pathname === "/menu" ? "rgba(22, 101, 52, 0.2)" : "none"}
           />
-          <span className="text-xs">MENU</span>
+          <span className="text-[10px]">MENU</span>
         </Link>
         <Link
           href="/cart"
           onClick={handleCartClick}
           className={`flex flex-col items-center transition-colors relative ${
-            actualPathname === "/cart"
+            pathname === "/cart"
               ? "text-green-800"
               : "text-gray-700 hover:text-green-800"
           }`}
         >
           <div className="relative">
             <ShoppingCart
-              className="w-6 h-6 mb-1"
-              fill={
-                actualPathname === "/cart" ? "rgba(22, 101, 52, 0.2)" : "none"
-              }
+              className="w-5 h-5 mb-1"
+              fill={pathname === "/cart" ? "rgba(22, 101, 52, 0.2)" : "none"}
             />
             {cartCount > 0 && (
-              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center">
                 {cartCount > 99 ? "99+" : cartCount}
               </span>
             )}
           </div>
-          <span className="text-xs">CART</span>
+          <span className="text-[10px]">CART</span>
         </Link>
         <Link
           href="/profile"
           onClick={handleProfileClick}
           className={`flex flex-col items-center transition-colors ${
-            actualPathname === "/profile"
+            pathname === "/profile"
               ? "text-green-800"
               : "text-gray-700 hover:text-green-800"
           }`}
         >
           <User
-            className="w-6 h-6 mb-1"
-            fill={
-              actualPathname === "/profile" ? "rgba(22, 101, 52, 0.2)" : "none"
-            }
+            className="w-5 h-5 mb-1"
+            fill={pathname === "/profile" ? "rgba(22, 101, 52, 0.2)" : "none"}
           />
-          <span className="text-xs">MY</span>
+          <span className="text-[10px]">MY</span>
         </Link>
       </div>
     </div>

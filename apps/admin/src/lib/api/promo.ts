@@ -21,6 +21,7 @@ export interface PromoResponse {
   isActive: boolean;
   createdAt: string; // ISO
   updatedAt: string; // ISO
+  promotionOrder?: number;
 }
 
 // 광고 조회 파라미터
@@ -36,6 +37,12 @@ export interface GetPromosResponse {
 export interface DeletePromoResponse {
   message?: string;
   success?: boolean;
+}
+
+export interface ReorderPromosResponse {
+  message: string;
+  updatedCount: number;
+  newOrder: string[]; // 서버가 돌려주는 최종 ID 순서
 }
 
 export const PromoService = {
@@ -87,5 +94,17 @@ export const PromoService = {
   deletePromo: async (promoId: string): Promise<DeletePromoResponse> => {
     const res = await axiosInstance.delete(`/admin/promotions/${promoId}`);
     return res.data;
+  },
+
+  // ✅ 배치 재정렬: JSON POST
+  reorderPromotions: async (
+    promotionIds: string[]
+  ): Promise<ReorderPromosResponse> => {
+    const { data } = await axiosInstance.post<ReorderPromosResponse>(
+      "/admin/promotions/reorder",
+      { promotionIds }, // 서버 스펙에 맞춰 키 이름 정확히!
+      { headers: { "Content-Type": "application/json" } }
+    );
+    return data;
   },
 };

@@ -1,3 +1,4 @@
+import React, { useCallback } from "react";
 import {
   GreetingSection,
   PromotionSection,
@@ -18,7 +19,7 @@ interface HomeContentProps {
   onEventClick: (event: Event) => void;
 }
 
-export default function HomeContent({
+export default React.memo(function HomeContent({
   promotions,
   events,
   promotionsLoading,
@@ -27,6 +28,27 @@ export default function HomeContent({
   onPromoClick,
   onEventClick,
 }: HomeContentProps) {
+  const handleProductClick = useCallback(
+    (product: Product) => {
+      onProductClick(product);
+    },
+    [onProductClick]
+  );
+
+  const handlePromoClick = useCallback(
+    (promotion: Promotion) => {
+      onPromoClick(promotion);
+    },
+    [onPromoClick]
+  );
+
+  const handleEventClick = useCallback(
+    (event: Event) => {
+      onEventClick(event);
+    },
+    [onEventClick]
+  );
+
   return (
     <div className="flex-1">
       {/* 상단 인사말 */}
@@ -40,22 +62,22 @@ export default function HomeContent({
       {/* 콘텐츠 영역 */}
       <div className="px-6">
         {/* 오늘의 추천 메뉴 */}
-        <RecommendedMenu onProductClick={onProductClick} />
+        <RecommendedMenu onProductClick={handleProductClick} />
 
         {/* 프로모션 섹션 */}
         <PromotionSection
           promotions={promotions}
           loading={promotionsLoading}
-          onPromoClick={onPromoClick}
+          onPromoClick={handlePromoClick}
         />
 
         {/* 이벤트 */}
         <EventSection
           events={events}
           loading={eventsLoading}
-          onEventClick={onEventClick}
+          onEventClick={handleEventClick}
         />
       </div>
     </div>
   );
-}
+});

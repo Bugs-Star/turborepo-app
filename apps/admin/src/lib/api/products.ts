@@ -12,6 +12,7 @@ export interface AddProductPayload {
   optimalStock: number;
   isRecommended?: boolean;
   recommendedOrder?: number;
+  productOrder?: number;
 }
 
 // 상품 응답 데이터
@@ -30,6 +31,7 @@ export interface ProductResponse {
   isLowStock: boolean;
   createdAt: string;
   updatedAt: string;
+  productOrder?: number;
 }
 
 // 상품 조회 파라미터
@@ -54,6 +56,13 @@ export interface GetProductsResponse {
 export interface DeleteProductResponse {
   message?: string;
   success?: boolean;
+}
+
+// ✅ 추천메뉴 배치 재정렬 응답
+export interface ReorderRecommendedResponse {
+  message: string;
+  updatedCount: number;
+  newOrder: string[];
 }
 
 export const ProductsService = {
@@ -91,7 +100,7 @@ export const ProductsService = {
     return response.data;
   },
 
-  // 상품 수정
+  // 상품 수정 (파일 포함 시 사용)
   editProduct: async (
     productId: string,
     payload: Partial<AddProductPayload>
@@ -121,16 +130,53 @@ export const ProductsService = {
     if (payload.recommendedOrder !== undefined) {
       formData.append("recommendedOrder", payload.recommendedOrder.toString());
     }
+    if (payload.productOrder !== undefined) {
+      formData.append("productOrder", payload.productOrder.toString());
+    }
 
     const response = await axiosInstance.put(
       `/admin/products/${productId}`,
       formData
     );
-
     return response.data;
   },
 
-  // 상품 삭제 (DELETE /admin/products/{productId})
+  // ✅ 파일 없이 숫자/불리언만 바꿀 때 JSON PUT (FormData 400 방지용)
+  updateProductJson: async (
+    productId: string,
+    payload: Partial<AddProductPayload>
+  ): Promise<ProductResponse> => {
+    const body: any = {};
+    if (payload.productCode !== undefined)
+      body.productCode = payload.productCode;
+    if (payload.productName !== undefined)
+      body.productName = payload.productName;
+    if (payload.productContents !== undefined)
+      body.productContents = payload.productContents;
+    if (payload.category !== undefined) body.category = payload.category;
+    if (payload.price !== undefined) body.price = payload.price;
+    if (payload.optimalStock !== undefined)
+      body.optimalStock = payload.optimalStock;
+    if (payload.currentStock !== undefined)
+      body.currentStock = payload.currentStock;
+    if (payload.isRecommended !== undefined)
+      body.isRecommended = payload.isRecommended;
+    if (payload.recommendedOrder !== undefined)
+      body.recommendedOrder = payload.recommendedOrder;
+    if (payload.productOrder !== undefined)
+      body.productOrder = payload.productOrder;
+
+    const { data } = await axiosInstance.put(
+      `/admin/products/${productId}`,
+      body,
+      {
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+    return data;
+  },
+
+  // 상품 삭제
   deleteProduct: async (productId: string): Promise<DeleteProductResponse> => {
     const res = await axiosInstance.delete(`/admin/products/${productId}`);
     return res.data;
@@ -140,5 +186,17 @@ export const ProductsService = {
   getAll: async (params?: GetProductsParams): Promise<GetProductsResponse> => {
     const response = await axiosInstance.get("/products", { params });
     return response.data;
+  },
+
+  // 추천메뉴 배치 재정렬(
+  reorderRecommended: async (
+    productIds: string[]
+  ): Promise<ReorderRecommendedResponse> => {
+    const { data } = await axiosInstance.post<ReorderRecommendedResponse>(
+      "/admin/products/reorder-recommended",
+      { productIds: productIds },
+      { headers: { "Content-Type": "application/json" } }
+    );
+    return data;
   },
 };
