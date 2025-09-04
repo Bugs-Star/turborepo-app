@@ -211,6 +211,7 @@ export interface Promotion {
   endDate: string;
   isActive: boolean;
   position: "up" | "down";
+  promotionOrder: number; // 프로모션 표시 순서 (작은 숫자가 위쪽에 표시)
   createdAt: string;
   updatedAt: string;
 }
