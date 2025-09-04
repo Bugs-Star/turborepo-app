@@ -1,3 +1,4 @@
+// hooks/event/useReorderEvents.ts
 "use client";
 
 import { EventsService, GetEventsResponse, EventItem } from "@/lib/api/events";
@@ -11,16 +12,26 @@ export const useReorderEvents = () => {
     getId: (e) => e._id,
     setOrder: (e, order) => ({ ...e, eventOrder: order }),
 
+    // eventOrder ASC, tie는 _id 고정
     sort: (a, b) => {
-      const ao = a.eventOrder ?? Number.MAX_SAFE_INTEGER; // order 없으면 맨 뒤
-      const bo = b.eventOrder ?? Number.MAX_SAFE_INTEGER;
-      return ao - bo;
+      const ao =
+        typeof a.eventOrder === "number"
+          ? a.eventOrder
+          : Number.MAX_SAFE_INTEGER;
+      const bo =
+        typeof b.eventOrder === "number"
+          ? b.eventOrder
+          : Number.MAX_SAFE_INTEGER;
+      if (ao !== bo) return ao - bo;
+      return a._id.localeCompare(b._id);
     },
 
-    // 서버 저장(배치)
-    persist: (updates: ReorderUpdate[]) =>
-      EventsService.updateEventOrdersBatch(
-        updates.map((u) => ({ id: u.id, eventOrder: u.order }))
-      ),
+    /** ✅ 변경: updates → id 배열로 변환하여 배치 엔드포인트 호출 */
+    persist: async (updates: ReorderUpdate[]) => {
+      const ids = [...updates]
+        .sort((a, b) => a.order - b.order)
+        .map((u) => u.id);
+      await EventsService.reorderEvents(ids);
+    },
   });
 };

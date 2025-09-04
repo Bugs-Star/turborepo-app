@@ -43,7 +43,12 @@ export interface AddEventPayload {
   eventOrder: number;
 }
 
-/** ----- Service ----- */
+export interface ReorderEventsResponse {
+  message: string;
+  updatedCount: number;
+  newOrder: string[];
+}
+
 export const EventsService = {
   // 이벤트 추가 (POST /admin/events)
   addEvent: async (payload: AddEventPayload): Promise<EventItem> => {
@@ -101,15 +106,14 @@ export const EventsService = {
     return data as EventItem;
   },
 
-  // ✅ 순서 일괄 업데이트 (배치 엔드포인트 없으면 개별 PUT 병렬)
-  updateEventOrdersBatch: async (
-    updates: { id: string; eventOrder: number }[]
-  ) => {
-    await Promise.all(
-      updates.map((u) =>
-        EventsService.editEvent(u.id, { eventOrder: u.eventOrder })
-      )
+  // 배치 재정렬
+  reorderEvents: async (eventIds: string[]): Promise<ReorderEventsResponse> => {
+    const { data } = await axiosInstance.post<ReorderEventsResponse>(
+      "/admin/events/reorder",
+      { eventIds }, // 문서 스펙 그대로 사용
+      { headers: { "Content-Type": "application/json" } }
     );
+    return data;
   },
 
   // 모든 이벤트 조회 (GET /events)
