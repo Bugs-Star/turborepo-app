@@ -1,47 +1,33 @@
 "use client";
 
-import Image from "next/image";
+import React, { useCallback } from "react";
 import { Product } from "@/types";
 import { useRecommendedMenuFetch } from "@/hooks/useRecommendedMenuFetch";
 import { SectionAsyncWrapper, RecommendedMenuSkeleton } from "@/components/ui";
+import { ProductCard } from "./ProductCard";
 
 interface RecommendedMenuProps {
   onProductClick?: (product: Product) => void;
 }
 
-export default function RecommendedMenu({
+export default React.memo(function RecommendedMenu({
   onProductClick,
 }: RecommendedMenuProps) {
   const { data: products, isLoading, error } = useRecommendedMenuFetch();
 
-  const renderProductList = () => (
-    <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
-      {products?.products?.map((product: Product) => (
-        <div
-          key={product._id}
-          className="flex-shrink-0 w-[130px] bg-white rounded-lg shadow-sm border border-gray-200 cursor-pointer hover:shadow-md transition-shadow"
-          onClick={() => onProductClick?.(product)}
-        >
-          <div className="w-32 h-32 rounded-t-lg overflow-hidden">
-            <Image
-              src={product.productImg}
-              alt={product.productName}
-              width={128}
-              height={128}
-              className="w-full h-full object-cover"
-            />
-          </div>
-          <div className="p-3">
-            <h3 className="text-sm font-medium text-gray-900 mb-1 truncate">
-              {product.productName}
-            </h3>
-            <p className="text-sm font-bold text-green-800">
-              {product.price.toLocaleString()}원
-            </p>
-          </div>
-        </div>
-      ))}
-    </div>
+  const renderProductList = useCallback(
+    () => (
+      <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+        {products?.products?.map((product: Product) => (
+          <ProductCard
+            key={product._id}
+            product={product}
+            onClick={onProductClick}
+          />
+        ))}
+      </div>
+    ),
+    [products, onProductClick]
   );
 
   return (
@@ -56,4 +42,4 @@ export default function RecommendedMenu({
       {renderProductList()}
     </SectionAsyncWrapper>
   );
-}
+});
