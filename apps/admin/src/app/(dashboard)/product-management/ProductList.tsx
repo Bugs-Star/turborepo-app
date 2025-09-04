@@ -51,8 +51,7 @@ export default function ProductList() {
     return list.map((p) => {
       const ratio =
         p.optimalStock > 0 ? Math.min(1, p.currentStock / p.optimalStock) : 0;
-      const statusText =
-        ratio >= 0.7 ? "충분" : ratio >= 0.3 ? "부족" : "매우 부족";
+      const statusText = ratio > 0.7 ? "충분" : ratio > 0.4 ? "보통" : "부족";
       return {
         id: p._id,
         image: p.productImg,
@@ -199,9 +198,9 @@ export default function ProductList() {
                 style={{
                   width: `${pct}%`,
                   background:
-                    ratio >= 0.7
+                    ratio > 0.7
                       ? "#22c55e"
-                      : ratio >= 0.3
+                      : ratio > 0.4
                         ? "#f59e0b"
                         : "#ef4444",
                 }}
@@ -221,9 +220,9 @@ export default function ProductList() {
         const max = Math.max(1, r.optimalStock ?? 0);
         const ratio = Math.min(1, (r.currentStock ?? 0) / max);
         const cls =
-          ratio >= 0.7
+          ratio > 0.7
             ? "bg-green-100 text-green-700"
-            : ratio >= 0.3
+            : ratio > 0.4
               ? "bg-amber-100 text-amber-700"
               : "bg-red-100 text-red-700";
         return (
