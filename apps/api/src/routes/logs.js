@@ -26,12 +26,7 @@ router.post("/batch", async (req, res) => {
     // [batch]디버그 로그
     console.log("[batch 로그]");
     logs.forEach((log, index) => {
-      console.log(`[${index + 1}]`, log);
-
-      // 🆕 products 배열만 추가로 표시
-      if (log.payload && log.payload.products) {
-        console.log(`[${index + 1}] 상품 정보:`, log.payload.products);
-      }
+      console.log(`[${index + 1}]`, JSON.stringify(log, null, 2));
     });
 
     // Redis Stream에 직접 추가
