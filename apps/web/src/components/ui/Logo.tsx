@@ -1,15 +1,18 @@
 import Image from "next/image";
+import logoImage from "../../../public/images/logo.png";
 
 interface LogoProps {
   title?: string;
   subtitle?: string;
   size?: "sm" | "md" | "lg";
+  priority?: boolean;
 }
 
 export default function Logo({
   title = "Bugs Star",
   subtitle,
   size = "md",
+  priority = false,
 }: LogoProps) {
   const sizeClasses = {
     sm: {
@@ -37,11 +40,12 @@ export default function Logo({
         className={`${container} rounded-full flex items-center justify-center mx-auto mb-2 overflow-hidden`}
       >
         <Image
-          src="/images/logo.png"
+          src={logoImage}
           alt="Bugs Star Logo"
           {...imageProps}
           className={`${image} object-contain`}
           unoptimized
+          priority={priority}
         />
       </div>
       {title && <h1 className="text-3xl font-bold text-green-800">{title}</h1>}

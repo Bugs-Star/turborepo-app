@@ -1,14 +1,10 @@
 import { memo } from "react";
 import { Input } from "@repo/ui";
-import SortDropdown from "./SortDropdown";
-import type { SortOption } from "@/types/product";
 
 interface SearchBoxProps {
   onSearch?: (searchTerm: string) => void;
-  onSortChange?: (sortOption: SortOption) => void;
   placeholder?: string;
   searchTerm?: string;
-  sortOption?: SortOption;
   className?: string;
 }
 
@@ -18,10 +14,8 @@ interface SearchBoxProps {
  */
 const SearchBox = memo(function SearchBox({
   onSearch,
-  onSortChange,
   placeholder = "상품을 검색해보세요",
   searchTerm = "",
-  sortOption,
   className = "",
 }: SearchBoxProps) {
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -30,18 +24,15 @@ const SearchBox = memo(function SearchBox({
   };
 
   return (
-    <div className={`flex gap-3 ${className}`}>
-      <div className="flex-1">
-        <Input
-          type="text"
-          value={searchTerm}
-          onChange={handleSearchChange}
-          placeholder={placeholder}
-          size="md"
-          className="h-10 !h-10"
-        />
-      </div>
-      <SortDropdown onSortChange={onSortChange} selectedOption={sortOption} />
+    <div className={`w-full ${className}`}>
+      <Input
+        type="text"
+        value={searchTerm}
+        onChange={handleSearchChange}
+        placeholder={placeholder}
+        size="md"
+        className="h-10 !h-10"
+      />
     </div>
   );
 });

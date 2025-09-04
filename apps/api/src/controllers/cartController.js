@@ -30,6 +30,7 @@ const transformCartItems = async (cartItems) => {
       quantity: item.quantity,
       product: {
         _id: product._id,
+        productCode: product.productCode,
         productName: product.productName,
         productImg: product.productImg,
         price: product.price,

@@ -3,6 +3,7 @@
 import { aggregateSummaryStats } from "./aggregators/summaryStats.js";
 import { aggregateBestSellers } from "./aggregators/bestSellers.js";
 import { aggregateGoldenPath } from "./aggregators/goldenPath.js";
+import { aggregatePurchaseGoldenPath } from "./aggregators/purchaseGoldenPathStats.js";
 // 새로 만든 RAG 집계 함수를 import
 import { aggregateRagUnifiedSummary } from "./aggregators/ragUnifiedSummary.js";
 
@@ -90,6 +91,9 @@ async function runAllAggregations() {
 
     await aggregateGoldenPath("weekly");
     await aggregateGoldenPath("monthly");
+
+    await aggregatePurchaseGoldenPath("monthly");
+    await aggregatePurchaseGoldenPath("monthly");
 
     console.log(
       "[Worker] Individual aggregations completed. Starting RAG unified aggregation..."

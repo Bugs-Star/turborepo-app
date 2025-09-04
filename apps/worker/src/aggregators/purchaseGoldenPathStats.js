@@ -1,21 +1,29 @@
-// src/aggregators/goldenPathStats.js
+// src/aggregators/purchaseGoldenPathStats.js (수정된 버전)
 import clickhouse from "../clickhouse/clickhouseClient.js";
 
-export async function aggregateGoldenPath(periodType = "weekly") {
+/**
+ * '구매로 이어진' 골든패스 집계
+ * @param {'weekly'|'monthly'} periodType
+ */
+export async function aggregatePurchaseGoldenPath(periodType = "weekly") {
   const dateFunc =
     periodType === "monthly" ? "toStartOfMonth" : "toStartOfWeek";
   const intervalDays = periodType === "monthly" ? 90 : 30;
 
-  // ... (deleteQuery 부분은 동일)
+  // 이 쿼리는 'purchase_golden_path_stats'라는 별도의 테이블을 사용합니다.
+  // 미리 생성해두어야 합니다.
+  const targetTable = 'purchase_golden_path_stats';
+
   const deleteQuery = `
-    ALTER TABLE golden_path_stats
+    ALTER TABLE ${targetTable}
     DELETE WHERE period_type = '${periodType}'
       AND period_start >= today() - INTERVAL ${intervalDays} DAY
   `;
   await clickhouse.exec({ query: deleteQuery });
 
-  // 2️⃣ CTE를 사용하여 재구성된 집계 쿼리
   const insertQuery = `
+    -- ★★★ 수정: INSERT INTO 구문을 WITH 절 앞으로 이동
+    INSERT INTO ${targetTable}
     WITH
         -- 1단계: 각 세션의 화면 이동 경로를 배열로 생성
         session_paths AS (
@@ -33,6 +41,9 @@ export async function aggregateGoldenPath(periodType = "weekly") {
                 FROM events
                 WHERE event_type = 'viewScreen'
                   AND event_time >= today() - INTERVAL ${intervalDays} DAY
+                  AND session_id IN (
+                      SELECT DISTINCT session_id FROM orders WHERE status = 'paid'
+                  )
                 ORDER BY session_id, event_time ASC
             )
             GROUP BY session_id, store_id
@@ -47,7 +58,7 @@ export async function aggregateGoldenPath(periodType = "weekly") {
             FROM session_paths
             GROUP BY period_start, store_id, path
         ),
-        -- 3단계: 기간별/매장별 전체 세션 수 집계
+        -- 3단계: 기간별/매장별 '구매' 세션 수 집계
         period_totals AS (
             SELECT
                 ${dateFunc}(event_time) AS period_start,
@@ -55,10 +66,12 @@ export async function aggregateGoldenPath(periodType = "weekly") {
                 count(DISTINCT session_id) AS total_sessions
             FROM events
             WHERE event_time >= today() - INTERVAL ${intervalDays} DAY
+              AND session_id IN (
+                  SELECT DISTINCT session_id FROM orders WHERE status = 'paid'
+              )
             GROUP BY period_start, store_id
         )
-    -- 4단계: 위에서 계산된 결과들을 JOIN하여 최종 데이터 삽입
-    INSERT INTO golden_path_stats
+    -- 4단계: 위에서 계산된 결과들을 JOIN하여 최종 데이터 선택
     SELECT
         '${periodType}' AS period_type,
         pc.period_start,
@@ -72,52 +85,5 @@ export async function aggregateGoldenPath(periodType = "weekly") {
     LIMIT 100 BY pc.period_start, pc.store_id
   `;
   await clickhouse.exec({ query: insertQuery });
-  console.log(`[Worker] ${periodType} golden path stats aggregated`);
+  console.log(`[Worker] ${periodType} PURCHASE golden path stats aggregated`);
 }
-
-
-// // src/aggregators/goldenPathStats.js
-// import clickhouse from "../clickhouse/clickhouseClient.js";
-
-// /**
-//  * 매장별 골든패스 집계 (weekly / monthly)
-//  * @param {'weekly'|'monthly'} periodType
-//  */
-// export async function aggregateGoldenPath(periodType = "weekly") {
-//   const dateFunc =
-//     periodType === "monthly" ? "toStartOfMonth" : "toStartOfWeek";
-//   const intervalDays = periodType === "monthly" ? 90 : 30;
-
-//   // 1️⃣ 기존 데이터 삭제
-//   const deleteQuery = `
-//     ALTER TABLE golden_path_stats
-//     DELETE WHERE period_type = '${periodType}'
-//       AND period_start >= today() - INTERVAL ${intervalDays} DAY
-//   `;
-//   await clickhouse.exec({ query: deleteQuery });
-
-//   // 2️⃣ 집계 삽입
-//   const insertQuery = `
-//     INSERT INTO golden_path_stats
-//     SELECT
-//         '${periodType}' AS period_type,
-//         period_start,
-//         store_id,
-//         groupArray(path) AS path,
-//         COUNT(DISTINCT user_id) AS user_count,
-//         COUNT(*) AS total_sessions
-//     FROM (
-//         SELECT
-//             store_id,
-//             ${dateFunc}(event_time) AS period_start,
-//             JSONExtractString(toString(metadata), 'page') AS path,
-//             user_id,
-//             session_id
-//         FROM events
-//         WHERE event_time >= today() - INTERVAL ${intervalDays} DAY
-//     )
-//     GROUP BY store_id, period_start
-//   `;
-//   await clickhouse.exec({ query: insertQuery });
-//   console.log(`[Worker] ${periodType} golden path stats aggregated`);
-// }

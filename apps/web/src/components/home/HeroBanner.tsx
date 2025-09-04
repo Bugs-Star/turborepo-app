@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useAuthStore } from "@/stores/authStore";
 import { useHydration, useScrollPosition } from "@/hooks";
 import homeImage from "../../../public/images/homeImage.png";
@@ -51,14 +50,12 @@ export default function HeroBanner() {
         isHeroHidden ? "opacity-0" : "opacity-100"
       }`}
     >
-      {/* 배경 이미지 - homeImage.png 사용 */}
-      <Image
-        src={homeImage.src}
-        alt="카페 배경 이미지"
-        fill
-        sizes="100%"
-        className="object-cover"
-        priority
+      {/* 배경 이미지 - CSS로 처리하여 최적화 문제 해결 */}
+      <div
+        className="absolute inset-0 bg-cover bg-center"
+        style={{
+          backgroundImage: `url(${homeImage.src})`,
+        }}
       />
 
       {/* 그라데이션 오버레이 */}
