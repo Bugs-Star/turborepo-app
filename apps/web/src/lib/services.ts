@@ -181,8 +181,13 @@ export const cartService = {
 // 주문 관련 API
 export const orderService = {
   // 주문 내역 조회
-  getOrderHistory: async () => {
-    return await api.get("/order");
+  getOrderHistory: async (params?: { page?: number; limit?: number }) => {
+    const queryParams = new URLSearchParams();
+    if (params?.page) queryParams.append("page", params.page.toString());
+    if (params?.limit) queryParams.append("limit", params.limit.toString());
+
+    const url = `/order${queryParams.toString() ? `?${queryParams.toString()}` : ""}`;
+    return await api.get(url);
   },
 
   // 주문 생성

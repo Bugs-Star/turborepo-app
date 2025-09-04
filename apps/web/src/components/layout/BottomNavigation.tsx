@@ -34,7 +34,7 @@ export default function BottomNavigation() {
   };
 
   return (
-    <div className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-lg bg-white border-t border-gray-200 py-3 z-50">
+    <div className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-lg bg-white border-t border-gray-200 pt-3 pb-2 z-50">
       <div className="flex justify-around items-center">
         <Link
           href="/home"
@@ -46,10 +46,10 @@ export default function BottomNavigation() {
           }`}
         >
           <House
-            className="w-6 h-6 mb-1"
+            className="w-5 h-5 mb-1"
             fill={pathname === "/home" ? "rgba(22, 101, 52, 0.2)" : "none"}
           />
-          <span className="text-xs">HOME</span>
+          <span className="text-[10px]">HOME</span>
         </Link>
         <Link
           href="/menu"
@@ -61,10 +61,10 @@ export default function BottomNavigation() {
           }`}
         >
           <Coffee
-            className="w-6 h-6 mb-1"
+            className="w-5 h-5 mb-1"
             fill={pathname === "/menu" ? "rgba(22, 101, 52, 0.2)" : "none"}
           />
-          <span className="text-xs">MENU</span>
+          <span className="text-[10px]">MENU</span>
         </Link>
         <Link
           href="/cart"
@@ -77,16 +77,16 @@ export default function BottomNavigation() {
         >
           <div className="relative">
             <ShoppingCart
-              className="w-6 h-6 mb-1"
+              className="w-5 h-5 mb-1"
               fill={pathname === "/cart" ? "rgba(22, 101, 52, 0.2)" : "none"}
             />
             {cartCount > 0 && (
-              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center">
                 {cartCount > 99 ? "99+" : cartCount}
               </span>
             )}
           </div>
-          <span className="text-xs">CART</span>
+          <span className="text-[10px]">CART</span>
         </Link>
         <Link
           href="/profile"
@@ -98,10 +98,10 @@ export default function BottomNavigation() {
           }`}
         >
           <User
-            className="w-6 h-6 mb-1"
+            className="w-5 h-5 mb-1"
             fill={pathname === "/profile" ? "rgba(22, 101, 52, 0.2)" : "none"}
           />
-          <span className="text-xs">MY</span>
+          <span className="text-[10px]">MY</span>
         </Link>
       </div>
     </div>
