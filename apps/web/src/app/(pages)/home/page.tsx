@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useMemo } from "react";
 import { BottomNavigation } from "@/components/layout";
 import { HomeContent } from "@/components/home";
 import {
@@ -9,6 +9,8 @@ import {
   useHomeActions,
   useAnalytics,
 } from "@/hooks";
+import { Product } from "@/types";
+import { Event, Promotion } from "@/lib/services";
 
 export default function HomePage() {
   // 프로모션 데이터 가져오기
@@ -18,7 +20,7 @@ export default function HomePage() {
   // 이벤트 데이터 가져오기
   const { data: events = [], isLoading: eventsLoading } = useEventFetch({
     isActive: true,
-    limit: 5,
+    limit: 3, // 프로모션과 동일하게 3개로 변경
   });
 
   const { handleProductClick, handlePromoClick, handleEventClick } =
@@ -38,18 +40,32 @@ export default function HomePage() {
     }
   }, [trackScreenView]);
 
+  // 메모이제이션된 props 객체 - 직접 핸들러 전달
+  const homeContentProps = useMemo(
+    () => ({
+      promotions,
+      events,
+      promotionsLoading,
+      eventsLoading,
+      onProductClick: handleProductClick,
+      onPromoClick: handlePromoClick,
+      onEventClick: handleEventClick,
+    }),
+    [
+      promotions,
+      events,
+      promotionsLoading,
+      eventsLoading,
+      handleProductClick,
+      handlePromoClick,
+      handleEventClick,
+    ]
+  );
+
   return (
     <div className="min-h-screen bg-white flex flex-col pb-20">
       {/* Main Content */}
-      <HomeContent
-        promotions={promotions}
-        events={events}
-        promotionsLoading={promotionsLoading}
-        eventsLoading={eventsLoading}
-        onProductClick={handleProductClick}
-        onPromoClick={handlePromoClick}
-        onEventClick={handleEventClick}
-      />
+      <HomeContent {...homeContentProps} />
 
       {/* Bottom Navigation */}
       <BottomNavigation />

@@ -115,7 +115,7 @@ export default function CategoryFilter({
   return (
     <>
       {/* Category Navigation */}
-      <div className="fixed top-16 left-1/2 transform -translate-x-1/2 w-full max-w-lg z-45 bg-white">
+      <div className="fixed top-14 left-1/2 transform -translate-x-1/2 w-full max-w-lg z-45 bg-white">
         <div ref={containerRef} className="relative">
           <div className="flex justify-center space-x-4 py-2">
             {categories.map((category) => (

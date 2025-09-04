@@ -117,7 +117,7 @@ function MenuContent() {
         >
           {(categoryFilteredProducts, activeCategory) => (
             <>
-              <div className="fixed top-25 left-1/2 transform -translate-x-1/2 w-full max-w-lg z-40 bg-white border-b border-gray-100">
+              <div className="fixed top-23 left-1/2 transform -translate-x-1/2 w-full max-w-lg z-40 bg-white border-b border-gray-100">
                 <div className="px-6 pt-1 pb-2">
                   <SearchBox
                     onSearch={handleSearch}
@@ -127,7 +127,7 @@ function MenuContent() {
                 </div>
               </div>
 
-              <div className="pt-24 flex-1 px-6 pb-6">
+              <div className="pt-22 flex-1 px-6 pb-6">
                 {/* 정렬 옵션 - 구분선 아래에 배치, 오른쪽 정렬 */}
                 <div className="mb-4 flex justify-end">
                   <SortDropdown

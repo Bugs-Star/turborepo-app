@@ -39,14 +39,16 @@ export function Skeleton({
 // 상품 카드 스켈레톤
 export function ProductCardSkeleton() {
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
-      {/* 이미지 스켈레톤 */}
-      <div className="aspect-square bg-gray-100 relative overflow-hidden">
-        <Skeleton className="w-full h-full" />
+    <div className="cursor-pointer">
+      {/* Product Image Card - 실제 ProductCard와 동일한 스타일 */}
+      <div className="bg-white rounded-md border border-gray-100 overflow-hidden hover:shadow-md transition-shadow duration-200 relative mb-3">
+        <div className="aspect-square bg-gray-100 relative overflow-hidden">
+          <Skeleton className="w-full h-full" />
+        </div>
       </div>
 
-      {/* 정보 스켈레톤 */}
-      <div className="p-3">
+      {/* Product Info - 카드 밖에 배치, 실제 ProductCard와 동일한 스타일 */}
+      <div className="px-1">
         {/* 제목 스켈레톤 */}
         <Skeleton className="h-4 mb-1 w-3/4" />
         {/* 가격 스켈레톤 */}
