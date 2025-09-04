@@ -19,10 +19,15 @@ export default React.memo(function PromotionSection({
   const [displayCount, setDisplayCount] = useState(3);
   const ITEMS_PER_PAGE = 3;
 
-  // 최근 순으로 정렬된 프로모션 (최신이 먼저 오도록)
+  // promotionOrder 순서대로 정렬된 프로모션 (관리자가 설정한 순서 우선)
   const sortedPromotions = React.useMemo(
     () =>
       [...promotions].sort((a, b) => {
+        // 1순위: promotionOrder (작은 숫자가 위쪽에 표시)
+        if (a.promotionOrder !== b.promotionOrder) {
+          return a.promotionOrder - b.promotionOrder;
+        }
+        // 2순위: createdAt (최신 등록순)
         return (
           new Date(b.createdAt || 0).getTime() -
           new Date(a.createdAt || 0).getTime()
