@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import DraggableList from "@/components/DraggableList";
 import { useGetAllPromo } from "@/hooks/promo/useGetAllPromo";
 import EditPromo from "./EditPromo";
-import { useDeletePromo } from "@/hooks/promo/useDeletePromo"; // ✅ 추가
+import { useDeletePromo } from "@/hooks/promo/useDeletePromo";
 
 interface AdsItem {
   id: string;
@@ -16,7 +16,7 @@ const PromoBanner = () => {
   const { data, isLoading, isError, refetch } = useGetAllPromo({
     isActive: true,
   });
-  const { mutate: deletePromo } = useDeletePromo(); // ✅ 훅 사용
+  const { mutate: deletePromo } = useDeletePromo();
 
   const fetched = data?.promotions ?? [];
 

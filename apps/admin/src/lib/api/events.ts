@@ -67,6 +67,51 @@ export const EventsService = {
     return response.data;
   },
 
+  // ✅ 개별 수정 (PUT /admin/events/{eventId})
+  editEvent: async (
+    eventId: string,
+    payload: Partial<
+      Pick<
+        EventItem,
+        | "title"
+        | "description"
+        | "eventImg"
+        | "startDate"
+        | "endDate"
+        | "isActive"
+        | "eventOrder"
+      >
+    >
+  ): Promise<EventItem> => {
+    const fd = new FormData();
+    if (payload.title !== undefined) fd.append("title", payload.title);
+    if (payload.description !== undefined)
+      fd.append("description", payload.description);
+    if (payload.eventImg !== undefined)
+      fd.append("eventImg", payload.eventImg as any); // 필요 시 File 로만 사용
+    if (payload.startDate !== undefined)
+      fd.append("startDate", payload.startDate);
+    if (payload.endDate !== undefined) fd.append("endDate", payload.endDate);
+    if (payload.isActive !== undefined)
+      fd.append("isActive", String(payload.isActive));
+    if (payload.eventOrder !== undefined)
+      fd.append("eventOrder", String(payload.eventOrder));
+
+    const { data } = await axiosInstance.put(`/admin/events/${eventId}`, fd);
+    return data as EventItem;
+  },
+
+  // ✅ 순서 일괄 업데이트 (배치 엔드포인트 없으면 개별 PUT 병렬)
+  updateEventOrdersBatch: async (
+    updates: { id: string; eventOrder: number }[]
+  ) => {
+    await Promise.all(
+      updates.map((u) =>
+        EventsService.editEvent(u.id, { eventOrder: u.eventOrder })
+      )
+    );
+  },
+
   // 모든 이벤트 조회 (GET /events)
   getAll: async (params?: GetEventsParams): Promise<GetEventsResponse> => {
     const response = await axiosInstance.get("/events", { params });
