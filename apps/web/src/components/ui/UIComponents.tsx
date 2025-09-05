@@ -125,7 +125,7 @@ export const Focusable = ({
 // 모달 컴포넌트
 interface ModalProps {
   children: ReactNode;
-  key: string;
+  modalKey: string;
   isOpen: boolean;
   onClose: () => void;
   className?: string;
@@ -135,14 +135,14 @@ interface ModalProps {
 
 export const Modal = ({
   children,
-  key,
+  modalKey,
   isOpen,
   onClose,
   className = "",
   overlayClassName = "",
   contentClassName = "",
 }: ModalProps) => {
-  const { isVisible, show, hide } = useVisible(key);
+  const { isVisible, show, hide } = useVisible(modalKey);
 
   // isOpen이 변경될 때 visible 상태 동기화
   React.useEffect(() => {
@@ -156,9 +156,9 @@ export const Modal = ({
   if (!isVisible) return null;
 
   return (
-    <div className={`fixed inset-0 z-50 ${className}`}>
+    <div className={`fixed inset-0 z-[60] ${className}`}>
       <div
-        className={`absolute inset-0 bg-black bg-opacity-50 ${overlayClassName}`}
+        className={`absolute inset-0 bg-black/50 ${overlayClassName}`}
         onClick={onClose}
       />
       <div className={`relative z-10 ${contentClassName}`}>{children}</div>

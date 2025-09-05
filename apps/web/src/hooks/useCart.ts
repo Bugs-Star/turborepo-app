@@ -1,7 +1,7 @@
 import { cartService } from "@/lib/services";
 import { useToast, useDelayedLoading } from "@/hooks";
 import { useQueryClient } from "@tanstack/react-query";
-import { CartResponse } from "@/types";
+import { CartResponse, Product } from "@/types";
 import {
   updateCartResponse,
   removeItemFromCart,
@@ -15,6 +15,7 @@ import {
 interface UseCartOptions {
   onSuccess?: () => void;
   onError?: (error: string) => void;
+  onCartAddSuccess?: () => void; // 장바구니 추가 성공 시 모달 표시를 위한 콜백
 }
 
 export const useCart = (options: UseCartOptions = {}) => {
@@ -34,7 +35,7 @@ export const useCart = (options: UseCartOptions = {}) => {
   const addToCart = async (
     productId: string,
     quantity: number,
-    productInfo?: any
+    productInfo?: Product
   ) => {
     if (isLoading) return;
 
@@ -50,15 +51,23 @@ export const useCart = (options: UseCartOptions = {}) => {
         productId: productId,
         quantity: quantity,
         subtotal: productInfo ? productInfo.price * quantity : 0, // 실제 가격 사용
-        product: productInfo || {
-          _id: productId,
-          productName: "로딩 중...",
-          price: 0,
-          category: "",
-          description: "",
-          image: "",
-          isAvailable: true,
-        },
+        product: productInfo
+          ? {
+              _id: productInfo._id,
+              productName: productInfo.productName,
+              productImg: productInfo.productImg,
+              price: productInfo.price,
+              category: productInfo.category,
+              productCode: productInfo.productCode,
+            }
+          : {
+              _id: productId,
+              productName: "로딩 중...",
+              productImg: "",
+              price: 0,
+              category: "",
+              productCode: "",
+            },
         isAvailable: true,
         stockStatus: "available", // stockStatus 필드 추가
       };
@@ -69,9 +78,10 @@ export const useCart = (options: UseCartOptions = {}) => {
 
     try {
       await cartService.addToCart(productId, quantity);
-      showToast("장바구니에 추가되었습니다.", "success");
       // 성공 시 캐시 무효화하여 최신 데이터 가져오기
       invalidateAllCartCaches(queryClient);
+      // 모달 표시를 위한 콜백 호출 (토스트 대신)
+      options.onCartAddSuccess?.();
       options.onSuccess?.();
     } catch (err) {
       // 에러 발생 시 모든 캐시 롤백
