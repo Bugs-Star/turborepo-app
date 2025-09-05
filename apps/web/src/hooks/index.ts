@@ -31,6 +31,7 @@ export { useProductDetailActions } from "./useProductDetailActions";
 export { useNavigation } from "./useNavigation";
 export { useHydration } from "./useHydration";
 export { useLoading, useAsyncLoading, useDelayedLoading } from "./useLoading";
+export { useProductNavigation } from "./useProductNavigation";
 export { useProfileImage } from "./useProfileImage";
 export { useProductDetailsFetch } from "./useProductDetailsFetch";
 export { useErrorHandler } from "./useErrorHandler";

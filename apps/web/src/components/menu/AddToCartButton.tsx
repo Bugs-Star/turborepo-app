@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Product } from "@/types";
 import { ShoppingCart } from "lucide-react";
 import { Button } from "@repo/ui/button";
@@ -6,6 +7,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { useToast } from "@/hooks/useToast";
 import { useRouter } from "next/navigation";
 import { formatProductPrice } from "@/utils/productUtils";
+import CartSuccessModal from "@/components/cart/CartSuccessModal";
 
 interface AddToCartButtonProps {
   product: Product;
@@ -24,9 +26,12 @@ export default function AddToCartButton({
   onError,
   onCartAdd,
 }: AddToCartButtonProps) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   const { addToCart, isLoading } = useCart({
     onSuccess,
     onError,
+    onCartAddSuccess: () => setIsModalOpen(true), // 모달 표시
   });
   const { isAuthenticated } = useAuthStore();
   const { showWarning } = useToast();
@@ -74,23 +79,32 @@ export default function AddToCartButton({
 
   // 재고가 있는 경우 기존 장바구니 추가 버튼 표시
   return (
-    <div className="pb-6">
-      <Button
-        onClick={handleAddToCart}
-        disabled={disabled || isLoading}
-        variant="green"
-        size="lg"
-        fullWidth
-        style={{
-          justifyContent: "space-between",
-        }}
-      >
-        <div className="flex items-center">
-          <ShoppingCart className="w-5 h-5 mr-2" />
-          <span>{isLoading ? "추가 중..." : "장바구니에 추가"}</span>
-        </div>
-        <span>{formatProductPrice(totalPrice)}</span>
-      </Button>
-    </div>
+    <>
+      <div className="pb-6">
+        <Button
+          onClick={handleAddToCart}
+          disabled={disabled || isLoading}
+          variant="green"
+          size="lg"
+          fullWidth
+          style={{
+            justifyContent: "space-between",
+          }}
+        >
+          <div className="flex items-center">
+            <ShoppingCart className="w-5 h-5 mr-2" />
+            <span>{isLoading ? "추가 중..." : "장바구니에 추가"}</span>
+          </div>
+          <span>{formatProductPrice(totalPrice)}</span>
+        </Button>
+      </div>
+
+      {/* 장바구니 추가 성공 모달 */}
+      <CartSuccessModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        // onContinueShopping과 onGoToCart를 제거하여 기본 동작 사용
+      />
+    </>
   );
 }
