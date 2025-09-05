@@ -4,6 +4,7 @@ import { Calendar } from "lucide-react";
 import BaseForm from "@/components/BaseForm";
 import type { AddEventPayload } from "@/lib/api/events";
 import { useAddEvent } from "@/hooks/event/useAddEvent";
+import { notify } from "@/lib/notify";
 
 const AddEvent = () => {
   const [title, setTitle] = useState("");
@@ -16,13 +17,12 @@ const AddEvent = () => {
   const [isActive] = useState(true);
   const [eventOrder] = useState(0);
 
-  const { addEvent, isLoading, error } = useAddEvent();
-
   const toISOStartOfDay = (yyyyMmDd: string) =>
     yyyyMmDd ? `${yyyyMmDd}T00:00:00.000Z` : "";
 
-  const handleSubmit = async () => {
-    // 기본 유효성 검사
+  const { mutate: addEvent, isPending } = useAddEvent();
+
+  const handleSubmit = () => {
     if (!title.trim()) return alert("이벤트 제목을 입력하세요.");
     if (!startDate || !endDate) return alert("이벤트 기간을 선택하세요.");
     if (new Date(endDate) < new Date(startDate))
@@ -39,20 +39,21 @@ const AddEvent = () => {
       eventOrder,
     };
 
-    try {
-      await addEvent(payload);
-      alert("이벤트가 등록되었습니다!");
-      // 폼 초기화
-      setTitle("");
-      setDescription("");
-      setStartDate("");
-      setEndDate("");
-      setImageFile(null);
-    } catch {
-      // useAddEvents에서 error 세팅됨
-      if (error) alert(error);
-      else alert("이벤트 등록 중 오류가 발생했습니다.");
-    }
+    addEvent(payload, {
+      onSuccess: () => {
+        notify.success("이벤트가 등록되었습니다.");
+        setTitle("");
+        setDescription("");
+        setStartDate("");
+        setEndDate("");
+        setImageFile(null);
+      },
+      onError: (err: any) => {
+        notify.error(
+          err?.response?.data?.message || "이벤트 등록 중 오류 발생"
+        );
+      },
+    });
   };
 
   return (
@@ -62,7 +63,7 @@ const AddEvent = () => {
       imageFile={imageFile}
       onImageChange={setImageFile}
       onSubmit={handleSubmit}
-      buttonLabel={isLoading ? "등록 중..." : "이벤트 등록"}
+      buttonLabel={isPending ? "등록 중..." : "이벤트 등록"}
     >
       {/* 이벤트 제목 */}
       <div>
@@ -119,9 +120,6 @@ const AddEvent = () => {
           />
         </div>
       </div>
-
-      {/* 에러 메시지 */}
-      {error && <p className="text-sm text-red-600 mt-3">에러: {error}</p>}
     </BaseForm>
   );
 };

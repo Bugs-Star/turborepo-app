@@ -90,7 +90,7 @@ const RecommendMenu = () => {
   if (isLoading) {
     return (
       <div className="max-w-5xl mx-auto mt-5 bg-white p-6 rounded-lg">
-        <div className="text-center text-gray-600">불러오는 중…</div>
+        <div className="text-center text-gray-600">로딩중…</div>
       </div>
     );
   }

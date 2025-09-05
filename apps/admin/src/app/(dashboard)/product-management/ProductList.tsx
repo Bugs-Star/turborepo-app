@@ -1,4 +1,3 @@
-// app/.../ProductList.tsx
 "use client";
 
 import { useMemo, useState } from "react";
@@ -18,8 +17,7 @@ type Row = {
   category: Category;
   currentStock: number;
   optimalStock: number;
-  statusText: string; // 검색에 걸리도록 텍스트로도 보유
-  // 편의상 원본도 함께 (수정 모달 초기값 세팅용)
+  statusText: string;
   productContents?: string;
 };
 
@@ -30,7 +28,7 @@ const categoryLabel = (c: Category) =>
 const apiToUiCategory = (c: Category) =>
   c === "beverage" ? "drink" : c === "goods" ? "product" : "food";
 
-export default function ProductList() {
+const ProductList = () => {
   const { data, isLoading, isError, refetch } = useGetAllProducts();
 
   // 삭제 훅
@@ -299,4 +297,6 @@ export default function ProductList() {
       )}
     </>
   );
-}
+};
+
+export default ProductList;
