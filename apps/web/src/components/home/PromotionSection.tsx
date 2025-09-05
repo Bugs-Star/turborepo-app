@@ -67,12 +67,12 @@ export default React.memo(function PromotionSection({
         {displayedPromotions.map((promotion) => (
           <div
             key={promotion._id}
-            className="mb-4 mt-2 rounded-lg p-8 relative overflow-hidden"
+            className="mb-4 mt-2 rounded-lg p-8 relative overflow-hidden group"
           >
             {/* 배경 이미지 레이어 */}
             {promotion.promotionImg && (
               <div
-                className="absolute inset-0 bg-cover bg-center opacity-50"
+                className="absolute inset-0 bg-cover bg-center opacity-50 group-hover:opacity-25 transition-opacity duration-300"
                 style={{
                   backgroundImage: `url(${promotion.promotionImg})`,
                 }}
@@ -82,10 +82,10 @@ export default React.memo(function PromotionSection({
             {/* 콘텐츠 */}
             <div className="relative z-10">
               <div className="flex-1 pr-4">
-                <h2 className="text-xl font-bold text-black mb-2">
+                <h2 className="text-xl font-bold text-black mb-2 cursor-default">
                   {promotion.title}
                 </h2>
-                <p className="text-sm text-black mb-4 leading-relaxed line-clamp-1 overflow-hidden text-ellipsis">
+                <p className="text-sm text-black mb-4 leading-relaxed line-clamp-1 overflow-hidden text-ellipsis cursor-default">
                   {promotion.description}
                 </p>
                 <Button

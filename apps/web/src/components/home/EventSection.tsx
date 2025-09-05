@@ -5,6 +5,8 @@ import Image from "next/image";
 import { Event } from "@/lib/services";
 import { SectionAsyncWrapper, EventSectionSkeleton } from "@/components/ui";
 
+const ITEMS_PER_PAGE = 3;
+
 interface EventSectionProps {
   events: Event[];
   loading?: boolean;
@@ -17,7 +19,6 @@ export default React.memo(function EventSection({
   onEventClick,
 }: EventSectionProps) {
   const [displayCount, setDisplayCount] = useState(3);
-  const ITEMS_PER_PAGE = 3;
 
   // 현재 표시할 이벤트들
   const displayedEvents = React.useMemo(
@@ -34,7 +35,7 @@ export default React.memo(function EventSection({
   // 더보기 버튼 클릭 핸들러
   const handleLoadMore = useCallback(() => {
     setDisplayCount((prev) => prev + ITEMS_PER_PAGE);
-  }, [ITEMS_PER_PAGE]);
+  }, []);
 
   const renderEventList = useCallback(
     () => (
@@ -69,9 +70,21 @@ export default React.memo(function EventSection({
             </div>
           </div>
         ))}
+
+        {/* 더보기 버튼 - 스크롤 영역 안에 배치 */}
+        {hasMoreEvents && (
+          <div className="flex-shrink-0 flex items-start justify-center pt-16">
+            <button
+              onClick={handleLoadMore}
+              className="text-sm text-gray-600 hover:text-green-800 hover:font-medium cursor-pointer transition-colors"
+            >
+              더 보기
+            </button>
+          </div>
+        )}
       </div>
     ),
-    [displayedEvents, onEventClick]
+    [displayedEvents, onEventClick, hasMoreEvents, handleLoadMore]
   );
 
   return (
@@ -84,34 +97,7 @@ export default React.memo(function EventSection({
       errorMessage="이벤트를 불러올 수 없습니다."
       skeleton={<EventSectionSkeleton count={3} />}
     >
-      <div className="space-y-4">
-        {renderEventList()}
-
-        {/* 더보기 버튼 */}
-        {hasMoreEvents && (
-          <div className="flex justify-center pt-1">
-            <button
-              onClick={handleLoadMore}
-              className="flex items-center gap-2 text-sm text-gray-600 hover:text-green-800 hover:font-medium cursor-pointer transition-colors"
-            >
-              더 보기
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 9l-7 7-7-7"
-                />
-              </svg>
-            </button>
-          </div>
-        )}
-      </div>
+      <div className="space-y-4">{renderEventList()}</div>
     </SectionAsyncWrapper>
   );
 });

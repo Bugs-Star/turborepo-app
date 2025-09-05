@@ -20,7 +20,7 @@ export default function HomePage() {
   // 이벤트 데이터 가져오기
   const { data: events = [], isLoading: eventsLoading } = useEventFetch({
     isActive: true,
-    limit: 3, // 프로모션과 동일하게 3개로 변경
+    // limit 제거 - 모든 활성 이벤트를 가져와서 클라이언트에서 3개씩 표시
   });
 
   const { handleProductClick, handlePromoClick, handleEventClick } =

@@ -16,30 +16,24 @@ export const ProductCard = React.memo(
     }, [product, onClick]);
 
     return (
-      <div
-        className="flex-shrink-0 w-[130px] bg-white rounded-lg shadow-sm border border-gray-200 cursor-pointer hover:shadow-md transition-shadow"
-        onClick={handleClick}
-      >
-        <div className="w-32 h-32 rounded-t-lg overflow-hidden">
+      <div className="flex-shrink-0 w-28 cursor-pointer" onClick={handleClick}>
+        {/* 동그라미 이미지 */}
+        <div className="w-28 h-28 rounded-full overflow-hidden mb-2">
           <Image
             src={product.productImg}
             alt={product.productName}
-            width={128}
-            height={128}
+            width={112}
+            height={112}
             className="w-full h-full object-cover"
-            sizes="(max-width: 768px) 130px, 130px"
+            sizes="(max-width: 768px) 112px, 112px"
             priority={false}
             loading="lazy"
           />
         </div>
-        <div className="p-3">
-          <h3 className="text-sm font-medium text-gray-900 mb-1 truncate">
-            {product.productName}
-          </h3>
-          <p className="text-sm font-bold text-green-800">
-            {product.price.toLocaleString()}원
-          </p>
-        </div>
+        {/* 상품명 - 중앙 정렬, 전체 표시 */}
+        <h3 className="text-sm font-medium text-gray-900 text-center leading-tight">
+          {product.productName}
+        </h3>
       </div>
     );
   }
