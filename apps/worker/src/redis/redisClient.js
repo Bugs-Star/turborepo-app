@@ -13,6 +13,17 @@ import { REDIS_STREAM_KEY, REDIS_CONSUMER_GROUP } from "../config/config.js";
 // 기본적으로 localhost:6379로 연결하며, 필요하면 환경변수나 옵션으로 설정 가능.
 const redis = new Redis();
 
+// --- 추가된 부분 시작 ---
+/**
+ * 생성된 Redis 클라이언트 인스턴스를 반환하는 함수.
+ * 다른 모듈에서 Redis 인스턴스가 필요할 때 이 함수를 통해 명시적으로 가져갈 수 있음.
+ * @returns {Redis} ioredis 인스턴스
+ */
+export function getRedisClient() {
+  return redis;
+}
+// --- 추가된 부분 끝 ---
+
 /**
  * 컨슈머 그룹이 존재하지 않으면 생성하는 함수
  * - Redis Streams는 XGROUP CREATE 명령으로 컨슈머 그룹을 만들어야 메시지를 읽을 수 있음
