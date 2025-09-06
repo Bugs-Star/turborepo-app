@@ -13,7 +13,7 @@ export default function ProductImage({ src, alt }: ProductImageProps) {
   };
 
   return (
-    <div className="relative w-full bg-gray-100 pt-16">
+    <div className="relative w-full bg-gray-100 pt-14">
       <Image
         src={src}
         alt={alt}
