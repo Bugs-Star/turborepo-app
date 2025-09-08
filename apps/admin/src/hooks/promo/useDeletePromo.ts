@@ -1,8 +1,13 @@
+// hooks/promo/useDeletePromo.ts (드롭인 예시)
 "use client";
 
 import axiosInstance from "@/lib/api/axios";
-import { notify } from "@/lib/notify";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQueryClient,
+  type QueryKey,
+} from "@tanstack/react-query";
+import type { AxiosError } from "axios";
 
 type Promotion = {
   _id: string;
@@ -14,60 +19,45 @@ type Promotion = {
   isActive: boolean;
 };
 
+type DeleteResponse = { message: string };
+type PromotionsList = { promotions: Promotion[] };
+
 export const useDeletePromo = () => {
   const qc = useQueryClient();
 
-  return useMutation({
-    mutationFn: async (promoId: string) => {
-      if (!promoId || promoId.length !== 24) {
-        throw new Error(`Invalid promotionId: ${promoId}`);
-      }
+  return useMutation<
+    DeleteResponse, // TData
+    AxiosError<{ message?: string }>, // TError
+    string, // TVariables (promotionId)
+    { previous: Array<[QueryKey, unknown]> } // TContext
+  >({
+    mutationFn: async (promotionId) => {
       const { data } = await axiosInstance.delete(
-        `/admin/promotions/${promoId}`
+        `/admin/promotions/${promotionId}`
       );
-      return data as { success?: boolean; message?: string };
+      return data as DeleteResponse;
     },
-
-    // ▶ Optimistic Update: 모든 ["promotions", *] 캐시에서 해당 항목 제거
-    onMutate: async (promoId) => {
+    onMutate: async (promotionId) => {
       await qc.cancelQueries({ queryKey: ["promotions"] });
-
       const previous = qc.getQueriesData({ queryKey: ["promotions"] });
 
-      const entries = qc.getQueriesData<{ promotions: Promotion[] }>({
+      const entries = qc.getQueriesData<PromotionsList>({
         queryKey: ["promotions"],
       });
       for (const [key, data] of entries) {
         if (!data?.promotions) continue;
-        const next = data.promotions.filter((p) => p._id !== promoId);
-        qc.setQueryData(key, { ...data, promotions: next });
+        qc.setQueryData(key, {
+          ...data,
+          promotions: data.promotions.filter((p) => p._id !== promotionId),
+        });
       }
-
       return { previous };
     },
-
-    onSuccess: (res) => {
-      notify.success("프로모션이 삭제되었습니다.");
+    onError: (_err, _vars, ctx) => {
+      if (!ctx?.previous) return;
+      for (const [key, data] of ctx.previous) qc.setQueryData(key, data);
     },
-
-    onError: (err: any, _vars, ctx) => {
-      // 롤백
-      if (ctx?.previous) {
-        for (const [key, data] of ctx.previous as any[]) {
-          qc.setQueryData(key, data);
-        }
-      }
-      const msg = err?.response?.data?.message || "삭제에 실패했습니다.";
-      notify.error(msg);
-      console.error(
-        "[DeletePromo error]",
-        err?.response?.status,
-        err?.response?.data
-      );
-    },
-
     onSettled: () => {
-      // 서버 파생 필드 동기화
       qc.invalidateQueries({ queryKey: ["promotions"] });
     },
   });

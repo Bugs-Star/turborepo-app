@@ -6,6 +6,15 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAddPromo } from "@/hooks/promo/useAddPromo";
 import { notify } from "@/lib/notify";
+import { AxiosError } from "axios";
+
+function getAxiosMessage(err: unknown) {
+  const ax = err as AxiosError<{ message?: string }>;
+  if (ax?.isAxiosError)
+    return ax.response?.data?.message || ax.message || "요청 오류";
+  if (err instanceof Error) return err.message;
+  return "요청 오류";
+}
 
 const AddPromo = () => {
   const router = useRouter();
@@ -54,11 +63,8 @@ const AddPromo = () => {
           notify.success("광고가 성공적으로 등록되었습니다.");
           router.push("/promo-management");
         },
-        onError: (err: any) => {
-          const msg =
-            err?.response?.data?.message || "광고 등록에 실패했습니다.";
-          setError(msg);
-          notify.error(msg);
+        onError: (err: unknown) => {
+          notify.error(getAxiosMessage(err));
         },
       }
     );
