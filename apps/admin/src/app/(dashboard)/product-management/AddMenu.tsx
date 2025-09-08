@@ -93,7 +93,7 @@ const AddMenu = () => {
                 key={key}
                 type="button"
                 onClick={() => setCategory(key)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition cursor-pointer
                   ${category === key ? "bg-[#005C14] text-white" : "bg-white border-gray-300 hover:bg-gray-50"}`}
               >
                 <Icon className="w-4 h-4" />

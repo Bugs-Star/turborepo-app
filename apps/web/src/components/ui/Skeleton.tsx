@@ -74,19 +74,13 @@ export function RecommendedMenuSkeleton({ count = 5 }: { count?: number }) {
   return (
     <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
       {Array.from({ length: count }).map((_, index) => (
-        <div
-          key={index}
-          className="flex-shrink-0 w-32 bg-white rounded-lg shadow-sm border border-gray-200"
-        >
-          {/* 이미지 스켈레톤 */}
-          <div className="w-32 h-32 rounded-t-lg overflow-hidden">
-            <Skeleton className="w-full h-full" />
+        <div key={index} className="flex-shrink-0 w-28">
+          {/* 동그라미 이미지 스켈레톤 */}
+          <div className="w-28 h-28 rounded-full overflow-hidden mb-2">
+            <Skeleton className="w-full h-full" rounded="full" />
           </div>
-          {/* 정보 스켈레톤 */}
-          <div className="p-3">
-            <Skeleton className="h-4 mb-1 w-3/4" />
-            <Skeleton className="h-4 w-1/2" />
-          </div>
+          {/* 상품명 스켈레톤 */}
+          <Skeleton className="h-4 w-full" />
         </div>
       ))}
     </div>

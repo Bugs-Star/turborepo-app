@@ -33,8 +33,20 @@ const PromoBanner = () => {
   }, [fetched]);
 
   const [adsItem, setAdsItem] = useState<AdsItem[]>([]);
+
   useEffect(() => {
-    setAdsItem(fetchedAds);
+    setAdsItem((prev) => {
+      const sameLength = prev.length === fetchedAds.length;
+      const sameOrderAndFields =
+        sameLength &&
+        prev.every((it, i) => {
+          const f = fetchedAds[i];
+          return (
+            f && it.id === f.id && it.name === f.name && it.image === f.image
+          );
+        });
+      return sameOrderAndFields ? prev : fetchedAds;
+    });
   }, [fetchedAds]);
 
   const [editingId, setEditingId] = useState<string | null>(null);

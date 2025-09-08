@@ -1,14 +1,32 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 
-interface Column<T> {
-  key: keyof T | "actions" | "delete";
+/** ── 컬럼 타입: 데이터 컬럼 vs 액션 컬럼 구분 ── */
+export type DataColumn<T extends Record<string, unknown>> = {
+  kind: "data";
+  key: keyof T;
   label: string;
   render?: (row: T) => React.ReactNode;
-}
+};
 
-interface SearchableTableProps<T> {
+export type ActionColumn<T extends Record<string, unknown>> = {
+  kind: "action";
+  key: "actions" | "delete";
+  label: string;
+  render: (row: T) => React.ReactNode; // 액션은 반드시 렌더러 필요
+};
+
+export type Column<T extends Record<string, unknown>> =
+  | DataColumn<T>
+  | ActionColumn<T>;
+
+export const isDataColumn = <T extends Record<string, unknown>>(
+  col: Column<T>
+): col is DataColumn<T> => col.key !== "actions" && col.key !== "delete";
+
+/** ── 컴포넌트 프롭스 ── */
+interface SearchableTableProps<T extends Record<string, unknown>> {
   title: string;
   searchPlaceholder?: string;
   filters?: React.ReactNode;
@@ -16,7 +34,7 @@ interface SearchableTableProps<T> {
   data: T[];
 }
 
-function SearchableTable<T extends { [key: string]: any }>({
+function SearchableTable<T extends Record<string, unknown>>({
   title,
   searchPlaceholder,
   filters,
@@ -25,10 +43,27 @@ function SearchableTable<T extends { [key: string]: any }>({
 }: SearchableTableProps<T>) {
   const [search, setSearch] = useState("");
 
-  const filteredData = data.filter((row) =>
-    columns.some((col) =>
-      String(row[col.key]).toLowerCase().includes(search.toLowerCase())
-    )
+  const dataColumns = useMemo(() => columns.filter(isDataColumn), [columns]);
+
+  const q = search.toLowerCase();
+
+  const filteredData = useMemo(
+    () =>
+      q
+        ? data.filter((row) =>
+            dataColumns.some((col) => {
+              const v = row[col.key];
+              // 문자열/숫자/불린만 검색 대상으로
+              return (
+                (typeof v === "string" ||
+                  typeof v === "number" ||
+                  typeof v === "boolean") &&
+                String(v).toLowerCase().includes(q)
+              );
+            })
+          )
+        : data,
+    [data, dataColumns, q]
   );
 
   return (
@@ -37,6 +72,7 @@ function SearchableTable<T extends { [key: string]: any }>({
         <h2 className="text-lg font-bold">{title}</h2>
         {filters}
       </div>
+
       {searchPlaceholder && (
         <input
           type="text"
@@ -46,6 +82,7 @@ function SearchableTable<T extends { [key: string]: any }>({
           className="border border-gray-300 rounded-lg px-3 py-1 w-full mb-4"
         />
       )}
+
       <table className="w-full table-auto border-collapse border border-gray-200">
         <thead>
           <tr className="bg-gray-100">
@@ -67,13 +104,18 @@ function SearchableTable<T extends { [key: string]: any }>({
                   key={String(col.key)}
                   className="border-b border-gray-200 px-3 py-2"
                 >
-                  {col.render ? col.render(row) : row[col.key]}
+                  {isDataColumn(col)
+                    ? col.render
+                      ? col.render(row) // ✅ row만 넘김
+                      : String(row[col.key] ?? "")
+                    : col.render(row)}
                 </td>
               ))}
             </tr>
           ))}
         </tbody>
       </table>
+
       {filteredData.length === 0 && (
         <div className="text-center py-4 text-gray-500">
           검색 결과가 없습니다.

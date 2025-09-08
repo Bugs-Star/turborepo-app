@@ -12,6 +12,8 @@ app.use(cors({
     'http://localhost:3000',
     'http://localhost:3001',
     'http://localhost:3002',
+    'https://turborepo-app-web.vercel.app',
+    'https://turborepo-app-admin.vercel.app',
     'https://bugs-star-web.vercel.app',
     'https://bugs-star-admin.vercel.app'
   ],

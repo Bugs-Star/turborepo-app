@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { House, Coffee, ShoppingCart, User } from "lucide-react";
-import { useCartCountFetch, useAnalytics } from "@/hooks";
+import { House, Coffee, ShoppingCart, User, ChevronUp } from "lucide-react";
+import { useCartCountFetch, useAnalytics, useScrollPosition } from "@/hooks";
 import { useAuthStore } from "@/stores/authStore";
 import { useToast } from "@/hooks/useToast";
 
@@ -15,6 +15,7 @@ export default function BottomNavigation() {
   const { trackNavLinkClick } = useAnalytics();
   const { isAuthenticated } = useAuthStore();
   const { showWarning } = useToast();
+  const { showScrollToTop, scrollToTop } = useScrollPosition(300);
 
   const handleProfileClick = (e: React.MouseEvent) => {
     if (!isAuthenticated) {
@@ -35,6 +36,19 @@ export default function BottomNavigation() {
 
   return (
     <div className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-lg bg-white border-t border-gray-200 pt-3 pb-2 z-50">
+      {/* 스크롤 투 탑 버튼 */}
+      {showScrollToTop && (
+        <div className="absolute -top-12 right-4 z-10">
+          <button
+            onClick={scrollToTop}
+            className="bg-green-800 text-white rounded-full p-2 shadow-lg hover:bg-green-700 transition-colors duration-200"
+            aria-label="맨 위로 이동"
+          >
+            <ChevronUp className="w-5 h-5" />
+          </button>
+        </div>
+      )}
+
       <div className="flex justify-around items-center">
         <Link
           href="/home"

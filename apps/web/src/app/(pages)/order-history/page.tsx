@@ -29,7 +29,7 @@ export default function OrderHistoryPage() {
           <PageHeader title="주문 내역" />
 
           {/* Main Content - 여백 추가 */}
-          <div className="pt-20 flex-1 px-6 py-6">
+          <div className="pt-18 flex-1 px-6 py-6">
             {orderHistory.length > 0 ? (
               <div className="space-y-4">
                 {orderHistory.map((order) => (

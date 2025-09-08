@@ -6,6 +6,9 @@ import { useEffect, useMemo, useState } from "react";
 import { EventItem } from "@/lib/api/events";
 import { useGetAllEvents } from "@/hooks/event/useGetAllEvents";
 import { useReorderEvents } from "@/hooks/event/useReorderEvents";
+import EditEvent from "./EditEvent";
+import { useDeleteEvent } from "@/hooks/event/useDeleteEvent";
+import { notify } from "@/lib/notify";
 
 const byOrder = (a: EventItem, b: EventItem) => {
   const ao =
@@ -20,6 +23,10 @@ const byOrder = (a: EventItem, b: EventItem) => {
 const EventList = () => {
   const { data, isLoading, isError } = useGetAllEvents();
   const { mutate: commitOrder, isPending } = useReorderEvents();
+  const [open, setOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [initialData, setInitialData] = useState<any | null>(null);
+  const { mutate: deleteEvent, isPending: isDeleting } = useDeleteEvent();
 
   // 1) 서버 응답을 항상 eventOrder 기준으로 정렬해서 로컬에 반영
   const sortedFromServer = useMemo(
@@ -32,13 +39,40 @@ const EventList = () => {
     setEvents(sortedFromServer);
   }, [sortedFromServer]);
 
-  const handleEdit = () => {
-    console.log("edit");
+  const handleEdit = (id: string) => {
+    const target = events.find((e) => e._id === id);
+    if (!target) return;
+
+    setEditingId(target._id);
+    setInitialData({
+      eventImgUrl: target.eventImg,
+      title: target.title,
+      description: target.description,
+      startDate: target.startDate,
+      endDate: target.endDate,
+      isActive: target.isActive,
+      eventOrder: target.eventOrder,
+    });
+    setOpen(true);
   };
 
   const handleDelete = (id: string) => {
-    setEvents((prev) => prev.filter((item) => item._id !== id));
-    // 실제 삭제 API 사용 시 invalidate 필요
+    if (!confirm("정말 삭제하시겠어요?")) return;
+
+    // 현재 리스트를 캡처해 두어 실패 시 롤백
+    const prev = events;
+    // 낙관적 업데이트
+    setEvents((p) => p.filter((it) => it._id !== id));
+
+    deleteEvent(id, {
+      onSuccess: () => {
+        notify?.success?.("이벤트가 삭제되었습니다.");
+      },
+      onError: () => {
+        setEvents(prev); // 롤백
+        notify?.error?.("삭제에 실패했어요. 다시 시도해주세요.");
+      },
+    });
   };
 
   // 2) 드래그 직후: DraggableList가 넘겨준 "전체 순서"로 **완전히 재구성**
@@ -139,6 +173,14 @@ const EventList = () => {
           <span className="text-gray-600 text-sm">{item.description}</span>
         )}
       />
+
+      {open && editingId && (
+        <EditEvent
+          eventId={editingId}
+          initialData={initialData ?? undefined}
+          onClose={() => setOpen(false)}
+        />
+      )}
     </div>
   );
 };

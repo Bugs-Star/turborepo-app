@@ -1,4 +1,3 @@
-// src/hooks/useLogout.ts
 "use client";
 
 import { useRouter } from "next/navigation";
