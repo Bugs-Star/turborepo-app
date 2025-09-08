@@ -1,6 +1,6 @@
 "use client";
 
-import useLogout from "@/hooks/useLogout";
+import useLogout from "@/hooks/auth/useLogout";
 import {
   Coffee,
   ShoppingCart,

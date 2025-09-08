@@ -65,9 +65,13 @@ export interface ReorderRecommendedResponse {
   newOrder: string[];
 }
 
+// 🔧 JSON 업데이트에서 업로드 파일을 제외한 필드만 허용
+type JsonUpdatable = Omit<AddProductPayload, "productImg">;
+
 export const ProductsService = {
   // 상품 추가
   addProduct: async (payload: AddProductPayload): Promise<ProductResponse> => {
+    // 참고 로그
     console.log({
       name: payload.productImg?.name,
       type: payload.productImg?.type,
@@ -96,8 +100,11 @@ export const ProductsService = {
       formData.append("recommendedOrder", payload.recommendedOrder.toString());
     }
 
-    const response = await axiosInstance.post("/admin/products", formData);
-    return response.data;
+    const { data } = await axiosInstance.post<ProductResponse>(
+      "/admin/products",
+      formData
+    );
+    return data;
   },
 
   // 상품 수정 (파일 포함 시 사용)
@@ -116,11 +123,11 @@ export const ProductsService = {
       formData.append("productContents", payload.productContents);
     if (payload.category) formData.append("category", payload.category);
     if (payload.price !== undefined)
-      formData.append("price", payload.price.toString());
+      formData.append("price", String(payload.price));
     if (payload.optimalStock !== undefined)
-      formData.append("optimalStock", payload.optimalStock.toString());
+      formData.append("optimalStock", String(payload.optimalStock));
     if (payload.currentStock !== undefined)
-      formData.append("currentStock", payload.currentStock.toString());
+      formData.append("currentStock", String(payload.currentStock));
     if (payload.isRecommended !== undefined) {
       formData.append(
         "isRecommended",
@@ -128,25 +135,26 @@ export const ProductsService = {
       );
     }
     if (payload.recommendedOrder !== undefined) {
-      formData.append("recommendedOrder", payload.recommendedOrder.toString());
+      formData.append("recommendedOrder", String(payload.recommendedOrder));
     }
     if (payload.productOrder !== undefined) {
-      formData.append("productOrder", payload.productOrder.toString());
+      formData.append("productOrder", String(payload.productOrder));
     }
 
-    const response = await axiosInstance.put(
+    const { data } = await axiosInstance.put<ProductResponse>(
       `/admin/products/${productId}`,
       formData
     );
-    return response.data;
+    return data;
   },
 
-  // ✅ 파일 없이 숫자/불리언만 바꿀 때 JSON PUT (FormData 400 방지용)
+  // ✅ 파일 없이 숫자/불리언만 바꿀 때 JSON PUT
   updateProductJson: async (
     productId: string,
-    payload: Partial<AddProductPayload>
+    payload: Partial<JsonUpdatable>
   ): Promise<ProductResponse> => {
-    const body: any = {};
+    const body: Partial<JsonUpdatable> = {};
+
     if (payload.productCode !== undefined)
       body.productCode = payload.productCode;
     if (payload.productName !== undefined)
@@ -166,35 +174,37 @@ export const ProductsService = {
     if (payload.productOrder !== undefined)
       body.productOrder = payload.productOrder;
 
-    const { data } = await axiosInstance.put(
+    const { data } = await axiosInstance.put<ProductResponse>(
       `/admin/products/${productId}`,
       body,
-      {
-        headers: { "Content-Type": "application/json" },
-      }
+      { headers: { "Content-Type": "application/json" } }
     );
     return data;
   },
 
   // 상품 삭제
   deleteProduct: async (productId: string): Promise<DeleteProductResponse> => {
-    const res = await axiosInstance.delete(`/admin/products/${productId}`);
-    return res.data;
+    const { data } = await axiosInstance.delete<DeleteProductResponse>(
+      `/admin/products/${productId}`
+    );
+    return data;
   },
 
   // 모든 상품 조회
   getAll: async (params?: GetProductsParams): Promise<GetProductsResponse> => {
-    const response = await axiosInstance.get("/products", { params });
-    return response.data;
+    const { data } = await axiosInstance.get<GetProductsResponse>("/products", {
+      params,
+    });
+    return data;
   },
 
-  // 추천메뉴 배치 재정렬(
+  // 추천메뉴 배치 재정렬
   reorderRecommended: async (
     productIds: string[]
   ): Promise<ReorderRecommendedResponse> => {
     const { data } = await axiosInstance.post<ReorderRecommendedResponse>(
       "/admin/products/reorder-recommended",
-      { productIds: productIds },
+      { productIds },
       { headers: { "Content-Type": "application/json" } }
     );
     return data;
