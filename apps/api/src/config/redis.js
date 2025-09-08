@@ -1,4 +1,14 @@
+/* ------------------------------------------------------------
+ * File      : /config/redis.js
+ * Brief     : Redis 설정 파일
+ * Author    : 송용훈
+ * Date      : 2025-08-08
+ * Version   : 
+ * History
+ * ------------------------------------------------------------*/
+
 import { createClient } from 'redis';
+
 
 // Redis 클라이언트 생성
 const redisClient = createClient({
@@ -6,12 +16,12 @@ const redisClient = createClient({
 });
 
 // Redis 연결
-redisClient.on('error', (err) => {
-  console.error('❌ Redis 연결 에러:', err);
-});
-
 redisClient.on('connect', () => {
   console.log('✅ Redis 연결 성공');
+});
+
+redisClient.on('error', (err) => {
+  console.error('❌ Redis 연결 에러:', err);
 });
 
 // Redis 연결 함수
@@ -49,7 +59,7 @@ export const isBlacklisted = async (token) => {
 // Redis 연결 종료
 export const disconnectRedis = async () => {
   try {
-    await redisClient.disconnect();
+    await redisClient.close();
     console.log('🔌 Redis 연결 종료');
   } catch (error) {
     console.error('❌ Redis 연결 종료 실패:', error);

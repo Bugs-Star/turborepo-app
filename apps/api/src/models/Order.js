@@ -1,4 +1,14 @@
+/* ------------------------------------------------------------
+ * File      : /models/Order.js
+ * Brief     : Order 모델 정의
+ * Author    : 송용훈
+ * Date      : 2025-08-08
+ * Version   : 
+ * History
+ * ------------------------------------------------------------*/
+
 import mongoose from 'mongoose';
+
 
 const orderItemSchema = new mongoose.Schema({
   productId: {
