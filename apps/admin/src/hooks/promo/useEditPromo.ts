@@ -6,7 +6,6 @@ import {
   useQueryClient,
   type QueryKey,
 } from "@tanstack/react-query";
-import type { AxiosError } from "axios";
 
 const buildUrl = (id: string) => `/admin/promotions/${id}`;
 
@@ -20,30 +19,22 @@ export type Promotion = {
   isActive: boolean;
 };
 
-// 캐시에 들어있는 리스트 형태
-type PromotionsList = { promotions: Promotion[] };
+type PromotionsListCache = { promotions: Promotion[] };
+type PromotionsCacheEntry = [QueryKey, PromotionsListCache | undefined];
+type PromotionsCacheSnapshot = PromotionsCacheEntry[];
 
-// 서버 응답: Promotion 단일 또는 { promotion: Promotion }
-type EditPromoResponse = Promotion | { promotion: Promotion };
+// 서버 응답이 두 형태일 수 있어 유니온으로 처리
+type PromotionResponse = Promotion | { promotion: Promotion };
 
-// 타입 가드
-function isWrappedPromotion(v: unknown): v is { promotion: Promotion } {
-  return (
-    typeof v === "object" &&
-    v !== null &&
-    "promotion" in v &&
-    typeof (v as any).promotion === "object" &&
-    (v as any).promotion !== null &&
-    typeof (v as any).promotion._id === "string"
-  );
+function normalizePromotionResponse(res: PromotionResponse): Promotion {
+  return "promotion" in res ? res.promotion : res;
 }
 
-// 폰트 캐시 업데이트
 function patchPromotionInAllCaches(
   qc: ReturnType<typeof useQueryClient>,
   updated: Promotion
 ) {
-  const entries = qc.getQueriesData<PromotionsList>({
+  const entries = qc.getQueriesData<PromotionsListCache>({
     queryKey: ["promotions"],
   });
   for (const [key, data] of entries) {
@@ -59,12 +50,13 @@ export const useEditPromo = (promotionId: string) => {
   const qc = useQueryClient();
 
   return useMutation<
-    EditPromoResponse, // TData
-    AxiosError<{ message?: string }>, // TError
-    FormData, // TVariables
-    { previous: Array<[QueryKey, unknown]> } // TContext
+    PromotionResponse,
+    Error,
+    FormData,
+    { previous: PromotionsCacheSnapshot }
   >({
-    mutationFn: async (formData) => {
+    // FormData 전송(이미지 포함)
+    mutationFn: async (formData: FormData) => {
       if (!promotionId || promotionId.length !== 24) {
         throw new Error(`Invalid promotionId: ${promotionId}`);
       }
@@ -75,26 +67,28 @@ export const useEditPromo = (promotionId: string) => {
           headers: { "Content-Type": "multipart/form-data" },
         }
       );
-      return data as EditPromoResponse;
+      return data as PromotionResponse;
     },
 
     // ▶ Optimistic Update
-    onMutate: async (formData) => {
+    onMutate: async (formData: FormData) => {
       await qc.cancelQueries({ queryKey: ["promotions"] });
 
       // 현재 캐시 스냅샷 (롤백용)
-      const previous = qc.getQueriesData({ queryKey: ["promotions"] });
+      const previous = qc.getQueriesData<PromotionsListCache>({
+        queryKey: ["promotions"],
+      });
 
-      // formData의 주요 필드만 미리 반영
+      // formData에서 미리 반영할 수 있는 값 추출
       const toStr = (v: FormDataEntryValue | null) =>
         typeof v === "string" ? v : "";
-
       const title = toStr(formData.get("title"));
       const description = toStr(formData.get("description"));
       const startDate = toStr(formData.get("startDate"));
       const endDate = toStr(formData.get("endDate"));
 
-      const entries = qc.getQueriesData<PromotionsList>({
+      // 모든 promotions 캐시에서 해당 아이템 필드만 교체
+      const entries = qc.getQueriesData<PromotionsListCache>({
         queryKey: ["promotions"],
       });
       for (const [key, data] of entries) {
@@ -113,19 +107,16 @@ export const useEditPromo = (promotionId: string) => {
         qc.setQueryData(key, { ...data, promotions: next });
       }
 
-      // 컨텍스트 반환 (롤백용)
       return { previous };
     },
 
     // 서버 성공 → 실제 응답으로 확정치 반영
     onSuccess: (res) => {
-      const updated: Promotion = isWrappedPromotion(res)
-        ? res.promotion
-        : (res as Promotion);
-
+      const updated = normalizePromotionResponse(res);
       if (updated?._id) {
         patchPromotionInAllCaches(qc, updated);
       } else {
+        // 방어적 처리
         qc.invalidateQueries({ queryKey: ["promotions"] });
       }
     },
