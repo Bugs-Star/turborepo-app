@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import SearchableTable from "@/components/SearchableTable";
+import SearchableTable, { Column } from "@/components/SearchableTable";
 import EditMenu from "./EditMenu";
 import { useGetAllProducts } from "@/hooks/menu/useGetAllProducts";
 import { useDeleteMenu } from "@/hooks/menu/useDeleteMenu";
@@ -28,6 +28,10 @@ const categoryLabel = (c: Category) =>
 const apiToUiCategory = (c: Category) =>
   c === "beverage" ? "drink" : c === "goods" ? "product" : "food";
 
+type AllOrCategory = "all" | Category;
+
+type EditMenuInitial = React.ComponentProps<typeof EditMenu>["initialData"];
+
 const ProductList = () => {
   const { data, isLoading, isError, refetch } = useGetAllProducts();
 
@@ -41,7 +45,7 @@ const ProductList = () => {
   // 수정 모달 상태
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [initialData, setInitialData] = useState<any | null>(null);
+  const [initialData, setInitialData] = useState<EditMenuInitial | null>(null);
 
   // 테이블에 넣을 행 데이터 생성
   const rows: Row[] = useMemo(() => {
@@ -117,7 +121,7 @@ const ProductList = () => {
     <div className="flex items-center gap-2">
       <select
         value={categoryFilter}
-        onChange={(e) => setCategoryFilter(e.target.value as any)}
+        onChange={(e) => setCategoryFilter(e.target.value as AllOrCategory)}
         className="border border-gray-300 rounded-lg px-3 py-1"
       >
         <option value="all">카테고리 필터</option>
@@ -157,11 +161,15 @@ const ProductList = () => {
   );
 
   // 컬럼 정의
-  const columns = [
+  // ...생략...
+
+  // ✅ 컬럼 정의
+  const columns: Column<Row>[] = [
     {
+      kind: "data", // ← 추가
       key: "image",
       label: "제품 이미지",
-      render: (r: Row) => (
+      render: (r) => (
         <img
           src={r.image}
           alt={r.name}
@@ -169,22 +177,25 @@ const ProductList = () => {
         />
       ),
     },
-    { key: "name", label: "제품명" },
-    { key: "code", label: "제품코드" },
+    { kind: "data", key: "name", label: "제품명" }, // ← 추가
+    { kind: "data", key: "code", label: "제품코드" }, // ← 추가
     {
+      kind: "data", // ← 추가
       key: "price",
       label: "가격",
-      render: (r: Row) => `${r.price.toLocaleString("ko-KR")}`,
+      render: (r) => `${r.price.toLocaleString("ko-KR")}`,
     },
     {
+      kind: "data", // ← 추가
       key: "category",
       label: "카테고리",
-      render: (r: Row) => categoryLabel(r.category),
+      render: (r) => categoryLabel(r.category),
     },
     {
+      kind: "data", // ← 추가
       key: "currentStock",
       label: "재고 수량",
-      render: (r: Row) => {
+      render: (r) => {
         const max = Math.max(1, r.optimalStock ?? 0);
         const ratio = Math.min(1, (r.currentStock ?? 0) / max);
         const pct = Math.round(ratio * 100);
@@ -212,9 +223,10 @@ const ProductList = () => {
       },
     },
     {
+      kind: "data", // ← 추가
       key: "statusText",
       label: "재고 상태",
-      render: (r: Row) => {
+      render: (r) => {
         const max = Math.max(1, r.optimalStock ?? 0);
         const ratio = Math.min(1, (r.currentStock ?? 0) / max);
         const cls =
@@ -231,9 +243,10 @@ const ProductList = () => {
       },
     },
     {
+      kind: "action",
       key: "actions",
       label: "액션",
-      render: (r: Row) => (
+      render: (r) => (
         <div className="flex items-center gap-2">
           <button
             className="px-2 py-1 rounded bg-orange-400 text-white text-sm hover:bg-orange-500 cursor-pointer"
@@ -251,7 +264,7 @@ const ProductList = () => {
         </div>
       ),
     },
-  ] as const;
+  ]; // ← ✅ 여기서 'as const' 제거!
 
   if (isLoading) {
     return (
@@ -284,7 +297,7 @@ const ProductList = () => {
         title="모든 제품"
         searchPlaceholder="제품명 또는 SKU 검색…"
         filters={filters}
-        columns={columns as any}
+        columns={columns}
         data={tableData}
       />
 

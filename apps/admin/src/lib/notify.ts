@@ -20,7 +20,6 @@ type ToastAPI = {
   ) => Promise<unknown>;
 };
 
-// unknown 캐스팅으로 any 회피
 const t = toast as unknown as ToastAPI;
 
 export const notify = {

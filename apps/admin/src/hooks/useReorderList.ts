@@ -1,31 +1,22 @@
-// hooks/common/useReorderList.ts
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-/** 서버로 보낼 기본 업데이트 형태 (id + order) */
 export interface ReorderUpdate {
   id: string;
   order: number;
 }
 
 export interface UseReorderListOptions<TData, TItem> {
-  /** 루트 쿼리 키(예: "products", "promos") */
   queryKeyRoot: string;
-
-  /** 캐시 데이터에서 리스트를 꺼내는 함수 */
   getList: (data: TData) => TItem[];
 
-  /** 수정된 리스트를 다시 캐시에 넣어 새 데이터로 만드는 함수 */
   setList: (data: TData, nextList: TItem[]) => TData;
 
-  /** 아이템의 고유 ID 추출 */
   getId: (item: TItem) => string;
 
-  /** 아이템에 새 order를 반영해서 리턴 */
   setOrder: (item: TItem, order: number) => TItem;
 
-  /** (선택) 리스트 정렬 함수. 주로 order 기준 오름차순 */
   sort?: (a: TItem, b: TItem) => number;
 
   /**
@@ -47,18 +38,13 @@ export interface UseReorderListOptions<TData, TItem> {
   ) => boolean;
 
   /** 실제 서버에 순서를 저장하는 배치 API */
-  persist: (updates: ReorderUpdate[]) => Promise<any>;
+  persist: (updates: ReorderUpdate[]) => Promise<void | unknown>;
 }
 
-/**
- * 범용 재정렬 훅: onMutate에서 낙관적 업데이트(정렬 포함) + 실패 시 롤백 + onSettled invalidate
- */
 export function useReorderList<TData, TItem>(
   opts: UseReorderListOptions<TData, TItem>
 ) {
   const qc = useQueryClient();
-
-  // 루트 키 판별 유틸
   const isRoot = (key: readonly unknown[]) => key[0] === opts.queryKeyRoot;
 
   return useMutation<
@@ -68,7 +54,7 @@ export function useReorderList<TData, TItem>(
     { prev: Array<[readonly unknown[], TData | undefined]> }
   >({
     mutationKey: [opts.queryKeyRoot, "reorder"],
-    mutationFn: (updates) => opts.persist(updates),
+    mutationFn: (updates) => opts.persist(updates).then(() => undefined),
 
     async onMutate(updates) {
       // 1) 관련 쿼리 취소

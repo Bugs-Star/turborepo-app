@@ -1,5 +1,12 @@
 "use client";
-import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+import {
+  DragDropContext,
+  Droppable,
+  Draggable,
+  type DropResult,
+  type DroppableProvided,
+  type DraggableProvided,
+} from "@hello-pangea/dnd";
 import { Calendar } from "lucide-react";
 import React from "react";
 
@@ -7,7 +14,7 @@ interface BaseItem {
   id: string;
   name: string;
   image: string;
-  description?: string; // ✅ 옵션으로 허용
+  description?: string;
   startDate?: string;
   endDate?: string;
   startAt?: string;
@@ -49,7 +56,7 @@ const DraggableList = <T extends BaseItem>({
   onDelete,
   renderExtra,
 }: DraggableListProps<T>) => {
-  const handleDragEnd = (result: any) => {
+  const handleDragEnd = (result: DropResult) => {
     if (!result.destination) return;
 
     const oldItems = items;
@@ -79,7 +86,7 @@ const DraggableList = <T extends BaseItem>({
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
       <Droppable droppableId="list">
-        {(provided) => (
+        {(provided: DroppableProvided) => (
           <div
             ref={provided.innerRef}
             {...provided.droppableProps}
@@ -92,7 +99,7 @@ const DraggableList = <T extends BaseItem>({
 
               return (
                 <Draggable key={item.id} draggableId={item.id} index={index}>
-                  {(provided) => (
+                  {(provided: DraggableProvided) => (
                     <div
                       ref={provided.innerRef}
                       {...provided.draggableProps}
