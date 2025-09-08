@@ -44,3 +44,11 @@ yarn-error.log*
 # python
 __pycache__
 
+
+# clickhouse
+metadata/
+data/
+preprocessed_configs/
+uuid
+status
+store/
