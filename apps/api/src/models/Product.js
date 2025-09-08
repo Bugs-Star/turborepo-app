@@ -1,3 +1,12 @@
+/* ------------------------------------------------------------
+ * File      : /models/Product.js
+ * Brief     : Product 모델 정의
+ * Author    : 송용훈
+ * Date      : 2025-08-08
+ * Version   : 
+ * History
+ * ------------------------------------------------------------*/
+
 import mongoose from 'mongoose';
 
 const productSchema = new mongoose.Schema({

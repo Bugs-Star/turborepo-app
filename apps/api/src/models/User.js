@@ -1,6 +1,17 @@
+/* ------------------------------------------------------------
+ * File      : /models/User.js
+ * Brief     : User 모델 정의
+ * Author    : 송용훈
+ * Date      : 2025-08-08
+ * Version   : 
+ * History
+ * ------------------------------------------------------------*/
+
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 
+
+// user Schema
 const userSchema = new mongoose.Schema({
   email: {
     type: String,
