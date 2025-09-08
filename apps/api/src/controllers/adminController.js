@@ -129,6 +129,17 @@ export const getAdminProfile = async (req, res) => {
   });
 };
 
+// 현재 로그인한 관리자 정보 조회
+export const getMe = async (req, res) => {
+  try {
+    const { _id, email, name, roles } = req.admin;
+    res.json({ id: _id, email, name, roles });
+  } catch (error) {
+    console.error('관리자 정보 조회 오류:', error);
+    res.status(500).json({ message: '서버 오류가 발생했습니다.' });
+  }
+};
+
 // 일반 유저 목록 조회
 export const getUsers = async (req, res) => {
   try {

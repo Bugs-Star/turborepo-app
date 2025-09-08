@@ -18,6 +18,10 @@ const adminSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
+  roles: {
+    type: [String],
+    default: ['admin']
+  },
   profileImg: {
     type: String,
     default: null
