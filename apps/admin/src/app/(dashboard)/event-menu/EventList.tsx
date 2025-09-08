@@ -25,7 +25,9 @@ const EventList = () => {
   const { mutate: commitOrder, isPending } = useReorderEvents();
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [initialData, setInitialData] = useState<any | null>(null);
+
+  type EditEventInitial = React.ComponentProps<typeof EditEvent>["initialData"];
+  const [initialData, setInitialData] = useState<EditEventInitial | null>(null);
   const { mutate: deleteEvent, isPending: isDeleting } = useDeleteEvent();
 
   // 1) 서버 응답을 항상 eventOrder 기준으로 정렬해서 로컬에 반영

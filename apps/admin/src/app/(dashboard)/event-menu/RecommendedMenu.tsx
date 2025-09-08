@@ -7,17 +7,19 @@ import DraggableList from "@/components/DraggableList";
 import { useGetAllRecommendedMenu } from "@/hooks/event/useGetAllRecommendedMenu";
 import { useReorderRecommended } from "@/hooks/event/useReorderRecommended";
 
-interface EventItem {
+type MenuItem = {
   id: string;
   name: string;
   image: string;
-}
+  /** 로컬 표시용 정렬 인덱스(선택) */
+  localOrder?: number;
+};
 
 const RecommendMenu = () => {
   const { data, isLoading, isError } = useGetAllRecommendedMenu(1, 50);
 
   // 서버 데이터 → 초기 표시 순서 보장 (recommendedOrder ASC, tie: _id)
-  const initialMenus = useMemo<EventItem[]>(() => {
+  const initialMenus = useMemo<MenuItem[]>(() => {
     if (!data?.products) return [];
     return [...data.products]
       .sort((a, b) => {
@@ -39,7 +41,7 @@ const RecommendMenu = () => {
       }));
   }, [data]);
 
-  const [menus, setMenus] = useState<EventItem[]>(initialMenus);
+  const [menus, setMenus] = useState<MenuItem[]>(initialMenus);
   useEffect(() => setMenus(initialMenus), [initialMenus]);
 
   const { mutate: commitOrder, isPending } = useReorderRecommended();
@@ -65,7 +67,8 @@ const RecommendMenu = () => {
   }: {
     oldItems: { id: string }[];
     newItems: { id: string }[];
-    moves: { id: string; from: number; to: number }[];
+    // moves는 사용하지 않으면 제거하거나 앞에 _ 붙여 ESLint 경고 방지
+    // moves: { id: string; from: number; to: number }[];
   }) => {
     if (!newItems.length) return;
 
@@ -74,9 +77,8 @@ const RecommendMenu = () => {
 
     commitOrder(ids, {
       onSuccess: () => {
-        setMenus((prev) =>
-          prev.map((it, idx) => ({ ...it, _order: idx }) as any)
-        );
+        // ⬇️ any 대신 명시적 선택 필드(localOrder) 갱신
+        setMenus((prev) => prev.map((it, idx) => ({ ...it, localOrder: idx })));
       },
       onError: () => {
         const pos = new Map(oldItems.map((it, i) => [it.id, i]));
@@ -87,6 +89,7 @@ const RecommendMenu = () => {
       },
     });
   };
+
   if (isLoading) {
     return (
       <div className="max-w-5xl mx-auto mt-5 bg-white p-6 rounded-lg">
