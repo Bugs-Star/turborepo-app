@@ -54,9 +54,11 @@ export const authService = {
   logout: async () => {
     try {
       // 서버에 로그아웃 요청 (리프레시 토큰 무효화)
-      // Zustand store에서 refreshToken을 가져와서 사용
-      const { useAuthStore } = await import("@/stores/authStore");
-      const refreshToken = useAuthStore.getState().tokens.refreshToken;
+      // sessionStorage에서 refreshToken을 가져와서 사용
+      const refreshToken: string | null =
+        typeof window !== "undefined"
+          ? sessionStorage.getItem("refreshToken")
+          : null;
 
       if (refreshToken) {
         await api.post("/auth/logout", { refreshToken });

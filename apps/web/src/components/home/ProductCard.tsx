@@ -16,16 +16,16 @@ export const ProductCard = React.memo(
     }, [product, onClick]);
 
     return (
-      <div className="flex-shrink-0 w-28 cursor-pointer" onClick={handleClick}>
+      <div className="flex-shrink-0 w-24 cursor-pointer" onClick={handleClick}>
         {/* 동그라미 이미지 */}
-        <div className="w-28 h-28 rounded-full overflow-hidden mb-2">
+        <div className="w-24 h-24 rounded-full overflow-hidden mb-2">
           <Image
             src={product.productImg}
             alt={product.productName}
-            width={112}
-            height={112}
+            width={96}
+            height={96}
             className="w-full h-full object-cover"
-            sizes="(max-width: 768px) 112px, 112px"
+            sizes="(max-width: 768px) 96px, 96px"
             priority={false}
             loading="lazy"
           />
