@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useLogin } from "@/hooks/useLogin";
+import { useLogin } from "@/hooks/auth/useLogin";
 
 const Login = () => {
   const { mutate: login, isPending } = useLogin();

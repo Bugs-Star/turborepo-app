@@ -19,7 +19,7 @@ const StockAlert = ({ products }: Props) => {
         const optimal = Math.max(0, p.optimalStock ?? 0);
         const current = Math.max(0, p.currentStock ?? 0);
         const ratio = optimal > 0 ? current / optimal : 0; // optimal이 0이면 부족 취급
-        const isLow = (p as any).isLowStock ?? ratio <= 0.4;
+        const isLow = p.isLowStock ?? ratio <= 0.4;
         return {
           id: p._id,
           name: p.productName,
