@@ -1,8 +1,8 @@
 import Admin from '../models/Admin.js';
 import User from '../models/User.js';
 import { addToBlacklist } from '../utils/jwtBlacklist.js';
-import { generateAccessToken, verifyAccessToken } from '../utils/accessTokenUtils.js';
-import { generateRefreshToken, decodeRefreshToken } from '../utils/refreshTokenUtils.js';
+import { generateAccessToken } from '../utils/accessTokenUtils.js';
+import { generateRefreshToken, decodeRefreshToken, verifyRefreshToken } from '../utils/refreshTokenUtils.js';
 
 // Admin 로그인
 export const adminLogin = async (req, res) => {
@@ -35,6 +35,7 @@ export const adminLogin = async (req, res) => {
       _id: admin._id
     });
   } catch (error) {
+    console.error('Admin login error:', error);
     res.status(500).json({ message: '서버 오류가 발생했습니다.' });
   }
 };
@@ -49,7 +50,7 @@ export const adminRefresh = async (req, res) => {
     }
 
     // Refresh Token 검증
-    const decoded = verifyAccessToken(refreshToken);
+    const decoded = verifyRefreshToken(refreshToken);
     
     // Admin 찾기 및 Refresh Token 확인
     const admin = await Admin.findById(decoded.adminId);
