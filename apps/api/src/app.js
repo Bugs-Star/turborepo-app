@@ -26,7 +26,7 @@ app.use(cors({
     'https://turborepo-app-web.vercel.app',
     'https://turborepo-app-admin.vercel.app',
     'https://bugs-star-web.vercel.app',
-    'https://bugs-star-admin.vercel.app'
+    'https://bugs-star-admin-alpha.vercel.app'
   ],
   credentials: true,   // 쿠키나 인증 헤더 같은 자격 증명을 포함한 요청을 허용
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
