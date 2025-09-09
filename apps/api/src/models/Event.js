@@ -1,5 +1,15 @@
+/* ------------------------------------------------------------
+ * File      : /models/Event.js
+ * Brief     : Event 모델 정의
+ * Author    : 송용훈
+ * Date      : 2025-08-08
+ * Version   : 
+ * History
+ * ------------------------------------------------------------*/
+
 import mongoose from 'mongoose';
 
+// event Schema
 const eventSchema = new mongoose.Schema({
   adminId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -69,7 +79,7 @@ eventSchema.statics.deactivateExpiredEvents = async function() {
   }
 };
 
-// 인스턴스 메서드: 현재 활성 상태 확인
+// 인스턴스 메서드: 현재 활성 여부 확인
 eventSchema.methods.isCurrentlyActive = function() {
   const now = new Date();
   return this.isActive && this.startDate <= now && this.endDate >= now;

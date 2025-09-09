@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import Admin from '../models/Admin.js';
-import { isBlacklisted } from '../config/redis.js';
+import { isBlacklisted } from '../utils/jwtBlacklist.js';
 
 export const adminAuth = async (req, res, next) => {
   try {

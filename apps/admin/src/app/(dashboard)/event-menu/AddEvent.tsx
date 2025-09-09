@@ -5,6 +5,24 @@ import BaseForm from "@/components/BaseForm";
 import type { AddEventPayload } from "@/lib/api/events";
 import { useAddEvent } from "@/hooks/event/useAddEvent";
 import { notify } from "@/lib/notify";
+import { AxiosError } from "axios";
+
+function getErrorMessage(err: unknown): string {
+  // 문자열 에러
+  if (typeof err === "string") return err;
+
+  // AxiosError 형태 추론
+  const ax = err as AxiosError<{ message?: string }>;
+  if (ax?.isAxiosError) {
+    return ax.response?.data?.message || ax.message || "요청 처리 중 오류";
+  }
+
+  // 일반 Error
+  if (err instanceof Error) return err.message;
+
+  // 그 외
+  return "이벤트 등록 중 오류 발생";
+}
 
 const AddEvent = () => {
   const [title, setTitle] = useState("");
@@ -48,10 +66,8 @@ const AddEvent = () => {
         setEndDate("");
         setImageFile(null);
       },
-      onError: (err: any) => {
-        notify.error(
-          err?.response?.data?.message || "이벤트 등록 중 오류 발생"
-        );
+      onError: (err: unknown) => {
+        notify.error(getErrorMessage(err));
       },
     });
   };

@@ -4,8 +4,18 @@ import { Coffee, Utensils, Gift, Star } from "lucide-react";
 import BaseForm from "@/components/BaseForm";
 import type { AddProductPayload } from "@/lib/api/products";
 import { useAddMenu } from "@/hooks/menu/useAddMenu";
+import { AxiosError } from "axios";
 
 type CategoryType = "drink" | "food" | "product";
+
+function getErrorMessage(err: unknown): string {
+  if (typeof err === "string") return err;
+  const ax = err as AxiosError<{ message?: string }>;
+  if (ax?.isAxiosError)
+    return ax.response?.data?.message || ax.message || "요청 오류";
+  if (err instanceof Error) return err.message;
+  return "상품 추가 실패";
+}
 
 const categoryOptions: {
   key: CategoryType;
@@ -70,8 +80,8 @@ const AddMenu = () => {
         setProductImg(null);
         setIsRecommended(false);
       },
-      onError: (err: any) => {
-        alert(err?.response?.data?.message || "상품 추가 실패");
+      onError: (err: unknown) => {
+        alert(getErrorMessage || "상품 추가 실패");
       },
     });
   };

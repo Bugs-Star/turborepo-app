@@ -1,6 +1,16 @@
+/* ------------------------------------------------------------
+ * File      : /models/Admin.js
+ * Brief     : Admin 모델 정의
+ * Author    : 송용훈
+ * Date      : 2025-08-08
+ * Version   : 
+ * History
+ * ------------------------------------------------------------*/
+
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 
+// admin Schema
 const adminSchema = new mongoose.Schema({
   email: {
     type: String,
@@ -11,7 +21,8 @@ const adminSchema = new mongoose.Schema({
   },
   passwordHash: {
     type: String,
-    required: true
+    required: true,
+    select: false
   },
   name: {
     type: String,
