@@ -9,7 +9,7 @@
 
 import mongoose from 'mongoose';
 
-
+// event Schema
 const eventSchema = new mongoose.Schema({
   adminId: {
     type: mongoose.Schema.Types.ObjectId,
