@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { adminLogin, adminRefresh, adminLogout, getUsers } from '../controllers/adminController.js';
+import { adminLogin, adminRefresh, adminLogout, getMe, getUsers } from '../controllers/adminController.js';
 import { 
   createProduct, 
   updateProduct, 
@@ -31,6 +31,7 @@ const router = Router();
 router.post('/login', adminLogin);
 router.post('/refresh', adminRefresh);
 router.post('/logout', adminAuth, adminLogout);
+router.get('/me', adminAuth, getMe); // 현재 로그인한 관리자 정보 조회
 
 // 유저 관리 라우트
 router.get('/users', adminAuth, getUsers);                    // 일반 유저 목록 조회

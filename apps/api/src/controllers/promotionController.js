@@ -148,6 +148,9 @@ export const createPromotion = async (req, res) => {
 // 프로모션 목록 조회 (공통 - 관리자/일반 사용자)
 export const getPromotions = async (req, res) => {
   try {
+    // 만료된 프로모션 자동 비활성화
+    await Promotion.deactivateExpiredPromotions();
+
     const { isActive } = req.query;
 
     // 쿼리 조건 구성

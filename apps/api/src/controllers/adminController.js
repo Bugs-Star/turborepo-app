@@ -1,7 +1,6 @@
-import jwt from 'jsonwebtoken';
 import Admin from '../models/Admin.js';
 import User from '../models/User.js';
-import { addToBlacklist } from '../config/redis.js';
+import { addToBlacklist } from '../utils/jwtBlacklist.js';
 import { generateAccessToken, verifyAccessToken } from '../utils/accessTokenUtils.js';
 import { generateRefreshToken, decodeRefreshToken } from '../utils/refreshTokenUtils.js';
 
@@ -127,6 +126,17 @@ export const getAdminProfile = async (req, res) => {
   res.json({
     admin: req.admin
   });
+};
+
+// 현재 로그인한 관리자 정보 조회
+export const getMe = async (req, res) => {
+  try {
+    const { _id, email, name, roles } = req.admin;
+    res.json({ id: _id, email, name, roles });
+  } catch (error) {
+    console.error('관리자 정보 조회 오류:', error);
+    res.status(500).json({ message: '서버 오류가 발생했습니다.' });
+  }
 };
 
 // 일반 유저 목록 조회
