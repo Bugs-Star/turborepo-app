@@ -2,6 +2,7 @@ import User from '../models/User.js';
 import Product from '../models/Product.js';
 import Order from '../models/Order.js';
 import mongoose from 'mongoose';
+import { getNextSequenceValue } from '../utils/sequenceUtil.js';
 
 // 주문 생성 (결제)
 export const createOrder = async (req, res) => {
@@ -85,29 +86,23 @@ export const createOrder = async (req, res) => {
       });
     }
 
-    // 주문번호 생성
+    // 주문 번호 생성
     const today = new Date();
     const dateStr = today.getFullYear().toString() +
                    (today.getMonth() + 1).toString().padStart(2, '0') +
                    today.getDate().toString().padStart(2, '0');
-    
-    // 오늘 날짜의 마지막 주문번호 찾기 (세션 사용)
-    const lastOrder = await Order.findOne({
-      orderNumber: new RegExp(`^${dateStr}-`)
-    }).session(session).sort({ orderNumber: -1 });
-    
-    let sequence = 1;
-    if (lastOrder) {
-      const lastSequence = parseInt(lastOrder.orderNumber.split('-')[1]);
-      sequence = lastSequence + 1;
-    }
-    
+    const sequenceName = `order_${dateStr}`;
+
+    // -- 원자적으로 시퀀스 값을 가져옴 (트랜잭션 세션 전달)
+    const sequence = await getNextSequenceValue(sequenceName, session);
+
+    // -- 'YYYYMMDD-XXXXX' 형식의 최종 주문번호를 생성하여 현재 문서에 할당
     const orderNumber = `${dateStr}-${sequence.toString().padStart(5, '0')}`;
 
     // 주문 생성
     const order = new Order({
       userId: user._id,
-      orderNumber: orderNumber,
+      orderNumber: orderNumber, // 생성된 주문번호를 직접 할당
       items: orderItems,
       totalPrice: totalPrice,
       paymentMethod: paymentMethod
@@ -283,5 +278,3 @@ export const getOrder = async (req, res) => {
     res.status(500).json({ message: '서버 오류가 발생했습니다.' });
   }
 };
-
-

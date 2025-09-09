@@ -1,14 +1,13 @@
 /* ------------------------------------------------------------
- * File      : current_file
- * Brief     : 
+ * File      : /config/clickhouse.js
+ * Brief     : ClickHouse 설정 파일
  * Author    : 송용훈
- * Date      : 2025-09-08
+ * Date      : 2025-09-02
  * Version   : 
  * History
  * ------------------------------------------------------------*/
 
 import { createClient } from "@clickhouse/client";
-
 
 // ClickHouse 설정 객체
 const CLICKHOUSE_CONFIG = {
@@ -22,9 +21,10 @@ const CLICKHOUSE_CONFIG = {
 const clickhouseClient = createClient(CLICKHOUSE_CONFIG);
 
 // ClickHouse 쿼리
-export const queryDatabase = async (query) => {
+export const queryDatabase = async (query, params = {}) => {
   const resultSet = await clickhouseClient.query({
     query: query,
+    query_params: params,
     format: 'JSONEachRow',
   });
   return await resultSet.json();

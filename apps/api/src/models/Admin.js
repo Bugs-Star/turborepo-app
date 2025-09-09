@@ -10,6 +10,7 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 
+// admin Schema
 const adminSchema = new mongoose.Schema({
   email: {
     type: String,
@@ -20,7 +21,8 @@ const adminSchema = new mongoose.Schema({
   },
   passwordHash: {
     type: String,
-    required: true
+    required: true,
+    select: false
   },
   name: {
     type: String,

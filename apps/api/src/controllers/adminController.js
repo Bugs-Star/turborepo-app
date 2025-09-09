@@ -1,7 +1,6 @@
-import jwt from 'jsonwebtoken';
 import Admin from '../models/Admin.js';
 import User from '../models/User.js';
-import { addToBlacklist } from '../config/redis.js';
+import { addToBlacklist } from '../utils/jwtBlacklist.js';
 import { generateAccessToken, verifyAccessToken } from '../utils/accessTokenUtils.js';
 import { generateRefreshToken, decodeRefreshToken } from '../utils/refreshTokenUtils.js';
 

@@ -1,7 +1,6 @@
 import jwt from 'jsonwebtoken';
-import mongoose from 'mongoose';
 import User from '../models/User.js';
-import { isBlacklisted } from '../config/redis.js';
+import { isBlacklisted } from '../utils/jwtBlacklist.js';
 
 export const auth = async (req, res, next) => {
   try {
