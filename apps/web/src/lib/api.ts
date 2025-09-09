@@ -36,13 +36,18 @@ const processQueue = (error: unknown, token: string | null = null) => {
 
 // 토큰 갱신 처리 함수 (단순화)
 const handleTokenRefresh = async (originalRequest: AxiosRequestConfig) => {
-  // Zustand store에서 토큰 가져오기
-  const { useAuthStore } = await import("@/stores/authStore");
-  const refreshToken = useAuthStore.getState().tokens.refreshToken;
+  // sessionStorage에서 리프레시 토큰 가져오기
+  const refreshToken: string | null =
+    typeof window !== "undefined"
+      ? sessionStorage.getItem("refreshToken")
+      : null;
 
   if (!refreshToken) {
     processQueue(new Error("No refresh token"), null);
     isRefreshing = false;
+
+    // Zustand store에서 인증 정보 초기화
+    const { useAuthStore } = await import("@/stores/authStore");
     useAuthStore.getState().clearAuth();
     window.location.href = "/login";
     return Promise.reject(new Error("No refresh token"));
@@ -58,7 +63,16 @@ const handleTokenRefresh = async (originalRequest: AxiosRequestConfig) => {
 
     const { accessToken, refreshToken: newRefreshToken } = response.data;
 
-    // Zustand store에 새로운 토큰 저장
+    // 새로운 토큰들을 각각 다른 스토리지에 저장
+    if (typeof window !== "undefined") {
+      localStorage.setItem("accessToken", accessToken);
+      if (newRefreshToken) {
+        sessionStorage.setItem("refreshToken", newRefreshToken);
+      }
+    }
+
+    // Zustand store 상태 업데이트
+    const { useAuthStore } = await import("@/stores/authStore");
     useAuthStore
       .getState()
       .setTokens(accessToken, newRefreshToken || refreshToken);
@@ -93,8 +107,9 @@ const handleTokenRefresh = async (originalRequest: AxiosRequestConfig) => {
     }
 
     // 3초 후 로그아웃
-    setTimeout(() => {
+    setTimeout(async () => {
       processQueue(refreshError, null);
+      const { useAuthStore } = await import("@/stores/authStore");
       useAuthStore.getState().clearAuth();
       window.location.href = "/login?message=session_expired";
     }, 3000);
@@ -108,12 +123,12 @@ const handleTokenRefresh = async (originalRequest: AxiosRequestConfig) => {
 // 요청 인터셉터
 apiClient.interceptors.request.use(
   async (config) => {
-    // Zustand store에서 토큰 가져오기
-    const { useAuthStore } = await import("@/stores/authStore");
-    const accessToken = useAuthStore.getState().tokens.accessToken;
-
-    if (accessToken) {
-      config.headers.Authorization = `Bearer ${accessToken}`;
+    // localStorage에서 액세스 토큰 가져오기
+    if (typeof window !== "undefined") {
+      const accessToken: string | null = localStorage.getItem("accessToken");
+      if (accessToken) {
+        config.headers.Authorization = `Bearer ${accessToken}`;
+      }
     }
 
     // FormData인 경우 Content-Type을 자동으로 설정하지 않음 (브라우저가 자동 설정)

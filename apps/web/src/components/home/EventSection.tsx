@@ -5,7 +5,7 @@ import Image from "next/image";
 import { Event } from "@/lib/services";
 import { SectionAsyncWrapper, EventSectionSkeleton } from "@/components/ui";
 
-const ITEMS_PER_PAGE = 3;
+const ITEMS_PER_PAGE = 5;
 
 interface EventSectionProps {
   events: Event[];
@@ -18,7 +18,7 @@ export default React.memo(function EventSection({
   loading = false,
   onEventClick,
 }: EventSectionProps) {
-  const [displayCount, setDisplayCount] = useState(3);
+  const [displayCount, setDisplayCount] = useState(5);
 
   // 현재 표시할 이벤트들
   const displayedEvents = React.useMemo(
@@ -95,7 +95,7 @@ export default React.memo(function EventSection({
       subtitle="놓치기 아까운 혜택과 이야기를 전해드려요!"
       loadingMessage="이벤트를 불러오는 중..."
       errorMessage="이벤트를 불러올 수 없습니다."
-      skeleton={<EventSectionSkeleton count={3} />}
+      skeleton={<EventSectionSkeleton count={5} />}
     >
       <div className="space-y-4">{renderEventList()}</div>
     </SectionAsyncWrapper>

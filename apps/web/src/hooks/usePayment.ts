@@ -41,7 +41,7 @@ export const usePayment = () => {
       console.log("결제 요청 데이터:", { paymentMethod: method });
 
       // 토큰 상태 확인
-      const accessToken = localStorage.getItem("accessToken");
+      const accessToken: string | null = localStorage.getItem("accessToken");
       console.log("액세스 토큰 존재:", !!accessToken);
 
       const response = await orderService.createOrder({

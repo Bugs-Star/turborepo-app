@@ -8,6 +8,7 @@ import AddToCartButton from "@/components/menu/AddToCartButton";
 import ProductHeader from "@/components/menu/ProductHeader";
 import ProductImage from "@/components/menu/ProductImage";
 import ProductDetails from "@/components/menu/ProductDetails";
+import QuantitySelector from "@/components/menu/QuantitySelector";
 import { useProductDetailsFetch } from "@/hooks/useProductDetailsFetch";
 import { useAnalytics, useProductDetailActions } from "@/hooks";
 
@@ -45,9 +46,10 @@ export default function MenuItemDetailPage() {
       loadingMessage="상품 정보를 불러오는 중..."
       errorMessage="잠시 후 다시 시도해주세요."
       onRetry={refetch}
+      useSkeleton={true}
     >
       {product && (
-        <div className="min-h-screen bg-white flex flex-col pb-20">
+        <div className="min-h-screen bg-white flex flex-col pb-44">
           {/* Product Header */}
           <ProductHeader productName={product.productName} />
 
@@ -58,20 +60,23 @@ export default function MenuItemDetailPage() {
 
             {/* Product Details */}
             <div className="px-6">
-              <ProductDetails
-                product={product}
-                quantity={quantity}
-                onQuantityChange={handleQuantityChange}
-              />
-
-              {/* Add to Cart Button */}
-              <AddToCartButton
-                product={product}
-                quantity={quantity}
-                onCartAdd={handleCartAdd}
-              />
+              <ProductDetails product={product} />
             </div>
           </div>
+
+          {/* Quantity Selector - 하단 고정 */}
+          <QuantitySelector
+            quantity={quantity}
+            onQuantityChange={handleQuantityChange}
+            isOutOfStock={product.currentStock <= 0}
+          />
+
+          {/* Add to Cart Button - 하단 고정 */}
+          <AddToCartButton
+            product={product}
+            quantity={quantity}
+            onCartAdd={handleCartAdd}
+          />
 
           {/* Bottom Navigation */}
           <BottomNavigation />

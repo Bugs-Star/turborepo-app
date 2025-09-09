@@ -60,7 +60,10 @@ export default function AddToCartButton({
   // 재고가 없는 경우 Sold Out 버튼 표시
   if (isOutOfStock) {
     return (
-      <div className="pb-6">
+      <div
+        className="fixed bottom-10 left-1/2 transform -translate-x-1/2 w-full max-w-lg px-6 pb-10 pt-6 bg-white rounded-t-3xl"
+        style={{ boxShadow: "0 -4px 6px -1px rgba(0, 0, 0, 0.1)" }}
+      >
         <Button
           variant="red"
           size="lg"
@@ -77,10 +80,10 @@ export default function AddToCartButton({
     );
   }
 
-  // 재고가 있는 경우 기존 장바구니 추가 버튼 표시
+  // 재고가 있는 경우 하단 고정 장바구니 추가 버튼 표시
   return (
     <>
-      <div className="pb-6">
+      <div className="fixed bottom-10 left-1/2 transform -translate-x-1/2 w-full max-w-lg px-6 pb-10 pt-4 bg-white">
         <Button
           onClick={handleAddToCart}
           disabled={disabled || isLoading}
