@@ -28,10 +28,10 @@ export const useReorderEvents = () => {
 
     /** ✅ 변경: updates → id 배열로 변환하여 배치 엔드포인트 호출 */
     persist: async (updates: ReorderUpdate[]) => {
-      const ids = [...updates]
+      const normalized = [...updates]
         .sort((a, b) => a.order - b.order)
-        .map((u) => u.id);
-      await EventsService.reorderEvents(ids);
+        .map((u, idx) => ({ id: u.id, order: idx })); // 안전하게 0..n-1 재부여
+      await EventsService.reorderEvents(normalized);
     },
   });
 };
