@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useParams } from "next/navigation";
-import { BottomNavigation } from "@/components/layout";
+import { BottomNavigation, Footer } from "@/components/layout";
 import AsyncWrapper from "@/components/ui/AsyncWrapper";
 import AddToCartButton from "@/components/menu/AddToCartButton";
 import ProductHeader from "@/components/menu/ProductHeader";
@@ -49,7 +49,7 @@ export default function MenuItemDetailPage() {
       useSkeleton={true}
     >
       {product && (
-        <div className="min-h-screen bg-white flex flex-col pb-44">
+        <div className="min-h-screen bg-white flex flex-col pb-50">
           {/* Product Header */}
           <ProductHeader productName={product.productName} />
 
@@ -59,7 +59,7 @@ export default function MenuItemDetailPage() {
             <ProductImage src={product.productImg} alt={product.productName} />
 
             {/* Product Details */}
-            <div className="px-6">
+            <div className="px-6 mb-50">
               <ProductDetails product={product} />
             </div>
           </div>
@@ -77,6 +77,9 @@ export default function MenuItemDetailPage() {
             quantity={quantity}
             onCartAdd={handleCartAdd}
           />
+
+          {/* Footer */}
+          <Footer />
 
           {/* Bottom Navigation */}
           <BottomNavigation />

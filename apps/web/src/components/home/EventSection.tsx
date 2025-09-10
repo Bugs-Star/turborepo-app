@@ -39,7 +39,7 @@ export default React.memo(function EventSection({
 
   const renderEventList = useCallback(
     () => (
-      <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+      <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide -mx-6 px-6">
         {displayedEvents.map((event) => (
           <div
             key={event._id}
