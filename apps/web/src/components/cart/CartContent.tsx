@@ -35,7 +35,7 @@ export default function CartContent({
             />
           ))
         ) : (
-          <div className="text-center py-12">
+          <div className="text-center py-12 pointer-events-none">
             <p className="text-gray-500">장바구니가 비어있습니다.</p>
           </div>
         )}

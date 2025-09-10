@@ -118,7 +118,7 @@ function MenuContent() {
         >
           {(categoryFilteredProducts, activeCategory) => (
             <>
-              <div className="fixed top-23 left-1/2 transform -translate-x-1/2 w-full max-w-lg z-40 bg-white border-b border-gray-100">
+              <div className="fixed top-23 left-1/2 transform -translate-x-1/2 w-full max-w-lg z-40 bg-white border-b border-gray-100 rounded-b-lg shadow-sm">
                 <div className="px-6 pt-1 pb-2">
                   <SearchBox
                     onSearch={handleSearch}

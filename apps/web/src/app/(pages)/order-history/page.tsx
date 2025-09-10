@@ -18,18 +18,18 @@ export default function OrderHistoryPage() {
 
   return (
     <AuthGuard backgroundColor="bg-white" title="주문 내역" showHeader={true}>
-      <AsyncWrapper
-        loading={loading}
-        error={error}
-        loadingMessage="주문 내역을 불러오는 중..."
-        errorMessage="잠시 후 다시 시도해주세요."
-        onRetry={refetch}
-      >
-        <div className="min-h-screen bg-white flex flex-col pb-20">
-          <PageHeader title="주문 내역" />
+      <div className="min-h-screen bg-white flex flex-col pb-20">
+        <PageHeader title="주문 내역" />
 
-          {/* Main Content - 여백 추가 */}
-          <div className="pt-18 flex-1 px-6 py-6">
+        {/* Main Content - 여백 추가 */}
+        <div className="pt-18 flex-1 px-6 py-6">
+          <AsyncWrapper
+            loading={loading}
+            error={error}
+            loadingMessage="주문 내역을 불러오는 중..."
+            errorMessage="잠시 후 다시 시도해주세요."
+            onRetry={refetch}
+          >
             {orderHistory.length > 0 ? (
               <div className="space-y-4">
                 {orderHistory.map((order) => (
@@ -76,12 +76,12 @@ export default function OrderHistoryPage() {
                 <p className="text-gray-500">주문 내역이 없습니다.</p>
               </div>
             )}
-          </div>
-
-          {/* Bottom Navigation */}
-          <BottomNavigation />
+          </AsyncWrapper>
         </div>
-      </AsyncWrapper>
+
+        {/* Bottom Navigation */}
+        <BottomNavigation />
+      </div>
     </AuthGuard>
   );
 }

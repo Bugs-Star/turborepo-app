@@ -55,7 +55,7 @@ export default React.memo(function HomeContent({
       <GreetingSection />
 
       {/* 최상단 히어로 배너 (고정) */}
-      <div className="mb-6">
+      <div className="mb-6 pointer-events-none">
         <HeroBanner />
       </div>
 

@@ -40,7 +40,7 @@ export default function PageHeader({
             <BackButton onClick={onBackClick} />
           </div>
         )}
-        <h1 className="flex-1 text-center text-lg font-semibold text-gray-900">
+        <h1 className="flex-1 text-center text-lg font-semibold text-gray-900 pointer-events-none">
           {showSkeleton ? <Skeleton className="h-6 w-32 mx-auto" /> : title}
         </h1>
         {showBackButton && <div className="w-10 flex-shrink-0" />}
@@ -59,7 +59,7 @@ export default function PageHeader({
           <BackButton onClick={onBackClick} />
         </div>
       )}
-      <h1 className="flex-1 text-center text-lg font-semibold text-gray-900">
+      <h1 className="flex-1 text-center text-lg font-semibold text-gray-900 pointer-events-none">
         {showSkeleton ? <Skeleton className="h-6 w-32 mx-auto" /> : title}
       </h1>
       {/* 뒤로가기 버튼이 있을 때 오른쪽 공간을 맞추기 위한 더미 요소 */}
