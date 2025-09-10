@@ -33,18 +33,10 @@ export default function EventDetailContent({ event }: EventDetailContentProps) {
           className="w-full h-auto object-contain"
           onError={handleImageError}
         />
-        {/* 그라데이션 오버레이 요소 */}
-        <div
-          className="absolute bottom-0 left-0 right-0 h-1/3 pointer-events-none"
-          style={{
-            background:
-              "linear-gradient(to bottom, transparent 0%, rgba(255, 255, 255, 0.1) 20%, rgba(255, 255, 255, 0.3) 40%, rgba(255, 255, 255, 0.7) 70%, rgba(255, 255, 255, 1) 100%)",
-          }}
-        ></div>
       </div>
 
       {/* 하단 상세 정보 섹션 - 흰색 배경 */}
-      <div className="px-6 py-6 bg-white">
+      <div className="px-6 py-6 bg-white pb-20">
         {/* 이벤트 제목 */}
         <h2 className="text-2xl font-bold text-gray-900 mb-4">{event.title}</h2>
 

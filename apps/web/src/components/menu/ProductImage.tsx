@@ -23,14 +23,6 @@ export default function ProductImage({ src, alt }: ProductImageProps) {
         className="w-full h-auto object-contain"
         onError={handleImageError}
       />
-      {/* 그라데이션 오버레이 요소 */}
-      <div
-        className="absolute bottom-0 left-0 right-0 h-1/3 pointer-events-none"
-        style={{
-          background:
-            "linear-gradient(to bottom, transparent 0%, rgba(255, 255, 255, 0.1) 20%, rgba(255, 255, 255, 0.3) 40%, rgba(255, 255, 255, 0.7) 70%, rgba(255, 255, 255, 1) 100%)",
-        }}
-      ></div>
     </div>
   );
 }

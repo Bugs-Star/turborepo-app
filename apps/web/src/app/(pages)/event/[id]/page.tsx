@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { use, useEffect, useRef } from "react";
-import { BottomNavigation } from "@/components/layout";
+import { BottomNavigation, Footer } from "@/components/layout";
 import { PageHeader, EventDetailContent, AsyncWrapper } from "@/components";
 import { useEventDetailFetch, useAnalytics } from "@/hooks";
 
@@ -46,6 +46,9 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
       <AsyncWrapper loading={isLoading} error={error?.message || null}>
         <EventDetailContent event={event!} />
       </AsyncWrapper>
+
+      {/* Footer */}
+      <Footer />
 
       {/* Bottom Navigation */}
       <BottomNavigation />

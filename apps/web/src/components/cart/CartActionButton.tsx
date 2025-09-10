@@ -16,7 +16,10 @@ export default function CartActionButton({
   onGoToMenu,
 }: CartActionButtonProps) {
   return (
-    <div className="fixed bottom-20 left-1/2 transform -translate-x-1/2 w-full max-w-md px-6 pb-4">
+    <div
+      className="fixed bottom-14 left-1/2 transform -translate-x-1/2 w-full max-w-lg px-6 pb-6 pt-6 bg-white rounded-t-3xl"
+      style={{ boxShadow: "0 -4px 6px -1px rgba(0, 0, 0, 0.1)" }}
+    >
       {hasItems ? (
         <Button
           onClick={onPaymentClick}

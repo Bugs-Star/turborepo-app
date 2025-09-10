@@ -17,7 +17,7 @@ export default React.memo(function RecommendedMenu({
 
   const renderProductList = useCallback(
     () => (
-      <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+      <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide -mx-6 px-6">
         {products?.products?.map((product: Product) => (
           <ProductCard
             key={product._id}
