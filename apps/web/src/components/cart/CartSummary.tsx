@@ -4,7 +4,7 @@ interface CartSummaryProps {
 
 export default function CartSummary({ total }: CartSummaryProps) {
   return (
-    <div className="bg-gray-50 rounded-lg p-4 mb-6">
+    <div className="bg-gray-50 rounded-lg p-4 mb-6 pointer-events-none">
       <div className="flex justify-between items-center mb-2">
         <span className="text-gray-700">소계:</span>
         <span className="text-gray-900 font-medium">

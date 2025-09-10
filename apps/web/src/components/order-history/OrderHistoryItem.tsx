@@ -49,7 +49,7 @@ export default function OrderHistoryItem({ order }: OrderHistoryItemProps) {
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 mb-4">
       {/* Header */}
-      <div className="mb-3">
+      <div className="mb-3 pointer-events-none">
         <div className="flex justify-between items-start">
           <p className="text-xs text-gray-500">{formatDate(order.createdAt)}</p>
           <p className="text-xs text-gray-400 font-mono">{order.orderNumber}</p>
@@ -61,7 +61,7 @@ export default function OrderHistoryItem({ order }: OrderHistoryItemProps) {
         {displayItems.map((item, index) => (
           <div
             key={`${order._id}-${item.productId}-${index}`}
-            className="flex items-center space-x-3"
+            className="flex items-center space-x-3 pointer-events-none"
           >
             <Image
               src={item.productImg}
@@ -102,7 +102,7 @@ export default function OrderHistoryItem({ order }: OrderHistoryItemProps) {
       </div>
 
       {/* Total */}
-      <div className="flex justify-between items-center pt-3 border-t border-gray-100">
+      <div className="flex justify-between items-center pt-3 border-t border-gray-100 pointer-events-none">
         <div>
           <span className="text-sm text-gray-700 font-semibold">
             총 결제금액

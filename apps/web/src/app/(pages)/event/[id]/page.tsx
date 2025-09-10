@@ -43,7 +43,12 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
       />
 
       {/* Main Content */}
-      <AsyncWrapper loading={isLoading} error={error?.message || null}>
+      <AsyncWrapper
+        loading={isLoading}
+        error={error?.message || null}
+        useSkeleton={true}
+        skeletonType="promotion-event"
+      >
         <EventDetailContent event={event!} />
       </AsyncWrapper>
 

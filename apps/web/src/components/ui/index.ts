@@ -10,6 +10,9 @@ export { default as InfiniteScroll } from "./InfiniteScroll";
 export { HydrationWrapper, ClientOnly } from "./HydrationWrapper";
 export { LoadingIndicator, LoadingSpinner } from "./LoadingIndicator";
 export { Expandable, Hoverable, Focusable, Modal } from "./UIComponents";
+export { default as PrivacyPolicyModal } from "./PrivacyPolicyModal";
+export { default as WebsiteTermsModal } from "./WebsiteTermsModal";
+export { default as BucksstarCardTermsModal } from "./BucksstarCardTermsModal";
 export {
   Skeleton,
   ProductCardSkeleton,

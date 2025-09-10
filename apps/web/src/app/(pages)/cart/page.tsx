@@ -65,17 +65,17 @@ export default function CartPage() {
 
   return (
     <AuthGuard backgroundColor="bg-white" title="장바구니" showHeader={true}>
-      <AsyncWrapper
-        loading={isLoading || isFetching}
-        error={error?.message || null}
-        loadingMessage="장바구니를 불러오는 중..."
-        errorMessage="장바구니를 불러오는데 실패했습니다."
-      >
-        <div className="min-h-screen bg-white flex flex-col pb-20">
-          <PageHeader title="장바구니" />
+      <div className="min-h-screen bg-white flex flex-col pb-20">
+        <PageHeader title="장바구니" />
 
-          {/* Main Content - 고정 헤더 아래 여백 추가 */}
-          <div className="pt-14 px-6">
+        {/* Main Content - 고정 헤더 아래 여백 추가 */}
+        <div className="pt-14 px-6">
+          <AsyncWrapper
+            loading={isLoading || isFetching}
+            error={error?.message || null}
+            loadingMessage="장바구니를 불러오는 중..."
+            errorMessage="장바구니를 불러오는데 실패했습니다."
+          >
             <CartContent
               cartItems={cartItems}
               total={total}
@@ -92,12 +92,12 @@ export default function CartPage() {
               onPaymentClick={handlePaymentClickWithLogging}
               onGoToMenu={goToMenu}
             />
-          </div>
-
-          {/* Bottom Navigation */}
-          <BottomNavigation />
+          </AsyncWrapper>
         </div>
-      </AsyncWrapper>
+
+        {/* Bottom Navigation */}
+        <BottomNavigation />
+      </div>
     </AuthGuard>
   );
 }

@@ -74,7 +74,12 @@ export default function PromotionDetailPage({
       />
 
       {/* Main Content */}
-      <AsyncWrapper loading={loading} error={error?.message || null}>
+      <AsyncWrapper
+        loading={loading}
+        error={error?.message || null}
+        useSkeleton={true}
+        skeletonType="promotion-event"
+      >
         {promotion && <PromotionDetailContent promotion={promotion} />}
       </AsyncWrapper>
 
