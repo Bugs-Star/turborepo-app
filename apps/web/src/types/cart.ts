@@ -38,6 +38,7 @@ export interface CartItemUI {
   quantity: number;
   imageUrl: string;
   productCode: string;
+  productId: string;
   currentStock: number;
 }
 
@@ -49,6 +50,7 @@ export const transformCartItemForUI = (item: CartItem): CartItemUI => ({
   quantity: item.quantity,
   imageUrl: item.product.productImg,
   productCode: item.product.productCode,
+  productId: item.product._id,
   currentStock: item.product.currentStock,
 });
 

@@ -85,6 +85,20 @@ const classifyError = (error: any): ErrorClassification => {
 
   // 4xx 에러들은 모두 배치 전송 (중요하지 않음)
   if (error.response?.status >= 400 && error.response?.status < 500) {
+    // 서버에서 반환한 구체적인 에러 메시지 확인
+    const serverMessage = error.response?.data?.message;
+
+    // 서버 메시지가 있으면 그대로 사용
+    if (serverMessage) {
+      return {
+        type: "validation_error",
+        isCritical: false,
+        priority: "medium",
+        userFriendlyMessage: serverMessage,
+      };
+    }
+
+    // 기본 메시지
     return {
       type: "validation_error",
       isCritical: false,

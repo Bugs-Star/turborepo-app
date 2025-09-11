@@ -6,7 +6,7 @@ export interface OrderHistoryItem {
   _id: string;
   orderNumber: string;
   items: {
-    productId: string;
+    productId: string | { _id: string }; // 백엔드에서 객체로 올 수도 있음
     productName: string;
     productImg: string;
     price: number;

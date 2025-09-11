@@ -46,11 +46,9 @@ export default function SignupForm() {
           window.location.href = "home";
         }, 1500);
       } catch (error: unknown) {
-        // 통합 에러 핸들러로 에러 처리
-        handleError(error as Error, "SIGNUP_FORM");
-
-        // 사용자에게 친화적인 메시지 표시
+        // 사용자 친화적 메시지 생성 및 에러 처리
         const errorMessage = getUserFriendlyMessage(error);
+        handleError(error as Error, "SIGNUP_FORM");
         handleSignupFailure(formData.email, formData.name, errorMessage);
         showError(errorMessage);
       } finally {
