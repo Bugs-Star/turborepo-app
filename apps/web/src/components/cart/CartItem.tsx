@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { CartItemUI } from "@/types/cart";
 import { Trash2 } from "lucide-react";
+import { useToast } from "@/hooks/useToast";
 
 interface CartItemProps {
   item: CartItemUI;
@@ -17,11 +18,27 @@ export default function CartItem({
   onRemove,
   disabled = false,
 }: CartItemProps) {
+  const { showWarning } = useToast();
+
   const handleQuantityChange = (newQuantity: number) => {
     if (disabled) return;
     if (newQuantity >= 1) {
       onQuantityChange(item.id, newQuantity);
     }
+  };
+
+  const handleIncreaseQuantity = () => {
+    if (disabled) return;
+
+    const newQuantity = item.quantity + 1;
+
+    // 재고 초과 검증
+    if (newQuantity > item.currentStock) {
+      showWarning(`재고가 부족합니다. (현재 재고: ${item.currentStock}개)`);
+      return;
+    }
+
+    handleQuantityChange(newQuantity);
   };
 
   const handleRemove = () => {
@@ -70,7 +87,7 @@ export default function CartItem({
                 {item.quantity}
               </span>
               <button
-                onClick={() => handleQuantityChange(item.quantity + 1)}
+                onClick={handleIncreaseQuantity}
                 disabled={disabled}
                 className={`px-3 py-1 text-gray-600 hover:bg-gray-50 rounded-r-lg transition-colors ${
                   disabled ? "opacity-50 cursor-not-allowed" : ""

@@ -69,6 +69,7 @@ export default function MenuItemDetailPage() {
             quantity={quantity}
             onQuantityChange={handleQuantityChange}
             isOutOfStock={product.currentStock <= 0}
+            product={product}
           />
 
           {/* Add to Cart Button - 하단 고정 */}

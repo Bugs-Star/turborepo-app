@@ -152,7 +152,7 @@ export const userService = {
   },
 };
 
-// 장바구니 관련 API (향후 구현 예정)
+// 장바구니 관련 API
 export const cartService = {
   // 장바구니 조회
   getCart: async () => {
