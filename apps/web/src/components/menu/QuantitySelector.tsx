@@ -1,18 +1,37 @@
+import { useToast } from "@/hooks/useToast";
+import { Product } from "@/types";
+
 interface QuantitySelectorProps {
   quantity: number;
   onQuantityChange: (quantity: number) => void;
   isOutOfStock: boolean;
+  product: Product;
 }
 
 export default function QuantitySelector({
   quantity,
   onQuantityChange,
   isOutOfStock,
+  product,
 }: QuantitySelectorProps) {
+  const { showWarning } = useToast();
+
   const handleQuantityChange = (newQuantity: number) => {
     if (newQuantity >= 1 && newQuantity <= 99) {
       onQuantityChange(newQuantity);
     }
+  };
+
+  const handleIncreaseQuantity = () => {
+    const newQuantity = quantity + 1;
+
+    // 재고 초과 검증
+    if (newQuantity > product.currentStock) {
+      showWarning(`재고가 부족합니다. (현재 재고: ${product.currentStock}개)`);
+      return;
+    }
+
+    handleQuantityChange(newQuantity);
   };
 
   // 재고가 없는 경우 수량 선택기를 표시하지 않음
@@ -39,7 +58,7 @@ export default function QuantitySelector({
         </span>
 
         <button
-          onClick={() => handleQuantityChange(quantity + 1)}
+          onClick={handleIncreaseQuantity}
           className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-50 transition-colors"
           disabled={quantity >= 99}
         >

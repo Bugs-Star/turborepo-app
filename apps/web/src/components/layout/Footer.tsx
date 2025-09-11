@@ -26,7 +26,7 @@ export default function Footer() {
   return (
     <div className="bg-white py-8">
       {/* 상단 내비게이션 링크 섹션 */}
-      <div className="mb-6 bg-gray-50 -mx-6 px-6 py-4">
+      <div className="mb-6 bg-gray-50 py-4">
         <div className="text-sm text-gray-500 px-6">
           <span
             className="font-semibold cursor-pointer hover:text-gray-700 transition-colors"
@@ -55,12 +55,12 @@ export default function Footer() {
         {/* 회사 정보 섹션 */}
         <div className="mb-6">
           <div className="flex items-center mb-4">
-            <span className="text-green-800 font-bold text-lg">
+            <span className="text-green-800 font-black text-lg">
               BUCKSSTAR®
             </span>
           </div>
 
-          <div className="text-sm text-gray-500 space-y-1">
+          <div className="text-xs text-gray-500 space-y-1">
             <div>주식회사 벅스스타컴퍼니</div>
             <div className="flex items-center">
               <span>대표이사 : 칼디(Kaldi)</span>
@@ -83,7 +83,7 @@ export default function Footer() {
         </div>
 
         {/* 저작권 및 호스팅 정보 섹션 */}
-        <div className="text-xs text-gray-500">
+        <div className="text-[10px] text-gray-500">
           © 2025 Bucksstar Coffee Company. All Rights Reserved. Hosting By
           Caffeine Overflow Co.
         </div>
