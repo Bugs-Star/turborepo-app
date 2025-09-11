@@ -24,8 +24,12 @@ export default function SectionAsyncWrapper({
   return (
     <div className="mb-6">
       <div className="mb-2">
-        <h2 className="text-xl font-bold text-gray-900">{title}</h2>
-        {subtitle && <p className="text-sm text-gray-600">{subtitle}</p>}
+        <h2 className="text-xl font-bold text-gray-900 cursor-default">
+          {title}
+        </h2>
+        {subtitle && (
+          <p className="text-sm text-gray-600 cursor-default">{subtitle}</p>
+        )}
       </div>
 
       {loading &&

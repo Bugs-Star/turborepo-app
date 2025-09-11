@@ -3,6 +3,7 @@ import { Product } from "@/types";
 import { ShoppingCart } from "lucide-react";
 import { Button } from "@repo/ui/button";
 import { useCart } from "@/hooks/useCart";
+import { useCartFetch } from "@/hooks/useCartFetch";
 import { useAuthStore } from "@/stores/authStore";
 import { useToast } from "@/hooks/useToast";
 import { useRouter } from "next/navigation";
@@ -33,6 +34,7 @@ export default function AddToCartButton({
     onError,
     onCartAddSuccess: () => setIsModalOpen(true), // 모달 표시
   });
+  const { cartItems } = useCartFetch();
   const { isAuthenticated } = useAuthStore();
   const { showWarning } = useToast();
   const router = useRouter();
@@ -47,6 +49,21 @@ export default function AddToCartButton({
     if (!isAuthenticated) {
       showWarning("로그인이 필요한 서비스입니다.");
       router.push("/login");
+      return;
+    }
+
+    // 현재 장바구니에서 해당 상품의 수량 확인
+    const existingCartItem = cartItems.find(
+      (item) => item.productCode === product.productCode
+    );
+    const currentCartQuantity = existingCartItem?.quantity || 0;
+    const newTotalQuantity = currentCartQuantity + quantity;
+
+    // 재고 초과 검증
+    if (newTotalQuantity > product.currentStock) {
+      showWarning(
+        `재고가 부족합니다. (현재 재고: ${product.currentStock}개, 장바구니: ${currentCartQuantity}개)`
+      );
       return;
     }
 

@@ -44,7 +44,7 @@ export default function ProfilePage() {
           {/* Main Content - 여백 추가 */}
           <div className="pt-18 flex-1 px-6 py-6">
             {/* 프로필 카드 */}
-            <div className="mb-6 pointer-events-none">
+            <div className="mb-6">
               <ProfileCard
                 user={
                   user || {

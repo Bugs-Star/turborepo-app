@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { CartItemUI } from "@/types/cart";
 import { Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/useToast";
@@ -19,6 +20,7 @@ export default function CartItem({
   disabled = false,
 }: CartItemProps) {
   const { showWarning } = useToast();
+  const router = useRouter();
 
   const handleQuantityChange = (newQuantity: number) => {
     if (disabled) return;
@@ -48,6 +50,10 @@ export default function CartItem({
     onRemove(item.id);
   };
 
+  const handleImageClick = () => {
+    router.push(`/menu/${item.productId}?from=cart`);
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 mb-4">
       <div className="flex items-center space-x-4">
@@ -58,16 +64,17 @@ export default function CartItem({
             alt={item.name}
             width={80}
             height={80}
-            className="w-20 h-20 rounded-lg object-cover object-center"
+            className="w-20 h-20 rounded-lg object-cover object-center cursor-pointer"
+            onClick={handleImageClick}
           />
         </div>
 
         {/* Product Details */}
         <div className="flex-1 min-w-0">
-          <h3 className="text-sm font-medium text-gray-900 mb-1">
+          <h3 className="text-sm font-medium text-gray-900 mb-1 cursor-default">
             {item.name}
           </h3>
-          <p className="text-sm font-semibold text-green-800 mb-3">
+          <p className="text-sm font-semibold text-green-800 mb-3 cursor-default">
             {item.price.toLocaleString()}원
           </p>
 

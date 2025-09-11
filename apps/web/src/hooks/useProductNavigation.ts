@@ -14,6 +14,10 @@ export const useProductNavigation = () => {
 
     if (from === "home") {
       router.push("/home");
+    } else if (from === "cart") {
+      router.push("/cart");
+    } else if (from === "order-history") {
+      router.push("/order-history");
     } else if (category) {
       router.push(`/menu?category=${category}`);
     } else {
