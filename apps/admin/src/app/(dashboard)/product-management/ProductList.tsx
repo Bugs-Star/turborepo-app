@@ -249,13 +249,13 @@ const ProductList = () => {
       render: (r) => (
         <div className="flex items-center gap-2">
           <button
-            className="px-2 py-1 rounded bg-orange-400 text-white text-sm hover:bg-orange-500 cursor-pointer"
+            className="px-2 py-1 rounded-xl bg-edit text-sm cursor-pointer"
             onClick={() => handleEdit(r)}
           >
             수정
           </button>
           <button
-            className="px-2 py-1 rounded bg-[#D74753] text-white text-sm hover:bg-red-500 cursor-pointer"
+            className="px-2 py-1 rounded-xl bg-danger text-sm cursor-pointer"
             onClick={() => handleDelete(r)}
             disabled={isDeleting}
           >
@@ -264,7 +264,7 @@ const ProductList = () => {
         </div>
       ),
     },
-  ]; // ← ✅ 여기서 'as const' 제거!
+  ];
 
   if (isLoading) {
     return (

@@ -81,9 +81,7 @@ const PromoBanner = () => {
     commitOrder(updates, {
       onSuccess: () => {
         // 서버 배치 성공 전/후 깜빡임 방지용: 로컬에도 즉시 주입
-        setAdsItem((prev) =>
-          prev.map((it, idx) => ({ ...it, promotionOrder: idx }))
-        );
+        setAdsItem((prev) => prev.map((it) => ({ ...it })));
       },
       onError: () => {
         // 롤백: oldItems 순서로 복원
@@ -118,16 +116,16 @@ const PromoBanner = () => {
   return (
     <>
       {isLoading && (
-        <div className="max-w-5xl mx-auto mt-5 bg-white p-6 rounded-lg">
+        <div className="max-w-5xl mx-auto mt-5 bg-card text-card-foreground p-6 rounded-lg">
           <div className="flex items-center justify-between mb-6">
             <h1 className="text-lg font-bold">배너 광고 등장 순서</h1>
           </div>
-          <div className="text-sm text-gray-500">불러오는 중...</div>
+          <div className="text-sm text-muted-foreground">불러오는 중...</div>
         </div>
       )}
 
       {isError && (
-        <div className="max-w-5xl mx-auto mt-5 bg-white p-6 rounded-lg">
+        <div className="max-w-5xl mx-auto mt-5 bg-card text-card-foreground p-6 rounded-lg">
           <div className="flex items-center justify-between mb-6">
             <h1 className="text-lg font-bold">배너 광고 등장 순서</h1>
             <button
@@ -144,29 +142,31 @@ const PromoBanner = () => {
       )}
 
       {!isLoading && !isError && adsItem.length === 0 && (
-        <div className="max-w-5xl mx-auto mt-5 bg-white p-6 rounded-lg">
+        <div className="max-w-5xl mx-auto mt-5 bg-card text-card-foreground p-6 rounded-lg">
           <div className="flex items-center justify-between mb-6">
             <h1 className="text-lg font-bold">배너 광고 등장 순서</h1>
           </div>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-muted-foreground">
             표시할 상단 배너 프로모션이 없습니다.
           </p>
         </div>
       )}
 
       {!isLoading && !isError && adsItem.length > 0 && (
-        <div className="max-w-5xl mx-auto mt-5 bg-white p-6 rounded-lg">
+        <div className="max-w-5xl mx-auto mt-5 bg-card text-card-foreground p-6 rounded-lg">
           <div className="flex items-center justify-between mb-6">
             <h1 className="text-lg font-bold">배너 광고 등장 순서</h1>
             <div className="flex items-center gap-2 text-gray-700 min-h-5">
               {isPending ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  <span className="text-xs text-gray-500">저장중..</span>
+                  <span className="text-xs text-muted-foreground">
+                    저장중..
+                  </span>
                 </>
               ) : (
                 <>
-                  <ArrowUpDown className="w-4 h-4" />
+                  <ArrowUpDown className="w-4 h-4 text-muted-foreground" />
                   재정렬
                 </>
               )}

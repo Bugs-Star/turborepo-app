@@ -9,8 +9,6 @@ import { notify } from "@/lib/notify";
 export interface EditPromoInitialData {
   title?: string;
   description?: string;
-  // 서버에서 내려오는 기존 이미지는 URL(string)
-  // 새로 업로드할 이미지는 File
   promotionImgUrl?: string;
   startDate?: string; // ISO
   endDate?: string; // ISO
