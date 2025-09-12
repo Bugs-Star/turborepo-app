@@ -22,6 +22,7 @@ import {
   getAllOrders, 
   getUserOrders
 } from '../controllers/adminOrderController.js';
+import { getReports } from '../controllers/reportController.js';
 import { adminAuth } from '../middlewares/adminAuth.js';
 import { uploadFields } from '../middlewares/upload.js';
 
@@ -57,5 +58,8 @@ router.post('/promotions/reorder', adminAuth, reorderPromotions); // 프로모�
 // 주문 관리 라우트
 router.get('/order', adminAuth, getAllOrders);                    // 모든 주문 목록 조회
 router.get('/order/:userId', adminAuth, getUserOrders);           // 특정 사용자 주문 목록 조회
+
+// 리포트 라우트
+router.get('/reports/:periodType', adminAuth, getReports);
 
 export default router;
