@@ -1,6 +1,7 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 import { handleError } from "./errorHandler";
 import { AxiosErrorResponse } from "@/types";
+import { useAuthStore } from "@/stores/authStore";
 
 // API 기본 설정
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3002";
@@ -12,6 +13,7 @@ const apiClient: AxiosInstance = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
+  withCredentials: true, // cross-origin 요청에 쿠키를 포함시키기 위한 설정
 });
 
 // 토큰 갱신 중인지 확인하는 플래그
@@ -34,48 +36,19 @@ const processQueue = (error: unknown, token: string | null = null) => {
   failedQueue = [];
 };
 
-// 토큰 갱신 처리 함수 (단순화)
+// 토큰 갱신 처리 함수 (쿠키 기반)
 const handleTokenRefresh = async (originalRequest: AxiosRequestConfig) => {
-  // sessionStorage에서 리프레시 토큰 가져오기
-  const refreshToken: string | null =
-    typeof window !== "undefined"
-      ? sessionStorage.getItem("refreshToken")
-      : null;
-
-  if (!refreshToken) {
-    processQueue(new Error("No refresh token"), null);
-    isRefreshing = false;
-
-    // Zustand store에서 인증 정보 초기화
-    const { useAuthStore } = await import("@/stores/authStore");
-    useAuthStore.getState().clearAuth();
-    window.location.href = "/login";
-    return Promise.reject(new Error("No refresh token"));
-  }
-
   try {
     console.log("🔄 토큰 갱신 시도...");
 
-    // 토큰 갱신 요청
-    const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {
-      refreshToken,
-    });
+    // 토큰 갱신 요청 (쿠키가 자동으로 전송됨)
+    const response = await axios.post(`${API_BASE_URL}/auth/refresh`);
 
-    const { accessToken, refreshToken: newRefreshToken } = response.data;
-
-    // 새로운 토큰들을 각각 다른 스토리지에 저장
-    if (typeof window !== "undefined") {
-      localStorage.setItem("accessToken", accessToken);
-      if (newRefreshToken) {
-        sessionStorage.setItem("refreshToken", newRefreshToken);
-      }
-    }
+    const { accessToken } = response.data;
 
     // Zustand store 상태 업데이트
     const { useAuthStore } = await import("@/stores/authStore");
-    useAuthStore
-      .getState()
-      .setTokens(accessToken, newRefreshToken || refreshToken);
+    useAuthStore.getState().setAccessToken(accessToken);
 
     console.log("✅ 토큰 갱신 성공");
 
@@ -93,6 +66,9 @@ const handleTokenRefresh = async (originalRequest: AxiosRequestConfig) => {
       (refreshError as AxiosErrorResponse)?.response?.data ||
         (refreshError as Error)?.message
     );
+    
+    // 리프레시 토큰이 만료되었거나 유효하지 않은 경우, 서버는 401을 반환함.
+    // 이 경우, 모든 인증 상태를 클리어하고 로그인 페이지로 리디렉션.
 
     // 사용자에게 알림
     if (
@@ -106,13 +82,15 @@ const handleTokenRefresh = async (originalRequest: AxiosRequestConfig) => {
       });
     }
 
-    // 3초 후 로그아웃
+    // 잠시 후 로그아웃 처리
     setTimeout(async () => {
       processQueue(refreshError, null);
       const { useAuthStore } = await import("@/stores/authStore");
       useAuthStore.getState().clearAuth();
-      window.location.href = "/login?message=session_expired";
-    }, 3000);
+      if (typeof window !== "undefined") {
+        window.location.href = "/login?message=session_expired";
+      }
+    }, 1000); // 딜레이를 줄여 더 빠른 피드백 제공
 
     return Promise.reject(refreshError);
   } finally {
@@ -123,12 +101,10 @@ const handleTokenRefresh = async (originalRequest: AxiosRequestConfig) => {
 // 요청 인터셉터
 apiClient.interceptors.request.use(
   async (config) => {
-    // localStorage에서 액세스 토큰 가져오기
-    if (typeof window !== "undefined") {
-      const accessToken: string | null = localStorage.getItem("accessToken");
-      if (accessToken) {
-        config.headers.Authorization = `Bearer ${accessToken}`;
-      }
+    // Zustand 스토어에서 액세스 토큰 가져오기
+    const accessToken = useAuthStore.getState().accessToken;
+    if (accessToken) {
+      config.headers.Authorization = `Bearer ${accessToken}`;
     }
 
     // FormData인 경우 Content-Type을 자동으로 설정하지 않음 (브라우저가 자동 설정)

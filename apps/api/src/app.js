@@ -11,6 +11,7 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import qs from "qs";  // 쿼리 파싱 모듈
+import cookieParser from "cookie-parser";
 import routes from "./routes/index.js";
 
 // Express App 생성
@@ -34,6 +35,7 @@ app.use(cors({
 
 // -- Helmet 설정
 app.use(helmet()); 
+app.use(cookieParser()); 
 
 // Middleware 설정
 // -- Body Parser
