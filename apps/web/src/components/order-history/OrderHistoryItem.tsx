@@ -1,12 +1,13 @@
 "use client";
 
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { ChevronRight, ChevronDown } from "lucide-react";
 import { useExpanded } from "@/hooks";
 
 // API 응답 형식에 맞는 타입 정의
 interface OrderItem {
-  productId: string;
+  productId: string | { _id: string }; // 백엔드에서 객체로 올 수도 있음
   productName: string;
   productImg: string;
   price: number;
@@ -29,6 +30,16 @@ interface OrderHistoryItemProps {
 
 export default function OrderHistoryItem({ order }: OrderHistoryItemProps) {
   const { isExpanded, toggle } = useExpanded(`order-${order._id}`);
+  const router = useRouter();
+
+  const handleImageClick = (productId: string | { _id: string }) => {
+    // productId가 객체인 경우 _id를 추출, 문자열인 경우 그대로 사용
+    const id =
+      typeof productId === "object" && productId?._id
+        ? productId._id
+        : String(productId);
+    router.push(`/menu/${id}?from=order-history`);
+  };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -49,7 +60,7 @@ export default function OrderHistoryItem({ order }: OrderHistoryItemProps) {
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 mb-4">
       {/* Header */}
-      <div className="mb-3">
+      <div className="mb-3 pointer-events-none">
         <div className="flex justify-between items-start">
           <p className="text-xs text-gray-500">{formatDate(order.createdAt)}</p>
           <p className="text-xs text-gray-400 font-mono">{order.orderNumber}</p>
@@ -68,13 +79,14 @@ export default function OrderHistoryItem({ order }: OrderHistoryItemProps) {
               alt={item.productName}
               width={48}
               height={48}
-              className="w-12 h-12 rounded-lg object-cover object-center"
+              className="w-12 h-12 rounded-lg object-cover object-center cursor-pointer"
+              onClick={() => handleImageClick(item.productId)}
             />
             <div className="flex-1 min-w-0">
-              <p className="text-sm text-gray-900 truncate">
+              <p className="text-sm text-gray-900 truncate cursor-default">
                 {item.productName}
               </p>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-gray-500 cursor-default">
                 {item.price.toLocaleString()}원 × {item.quantity}개
               </p>
             </div>
@@ -102,7 +114,7 @@ export default function OrderHistoryItem({ order }: OrderHistoryItemProps) {
       </div>
 
       {/* Total */}
-      <div className="flex justify-between items-center pt-3 border-t border-gray-100">
+      <div className="flex justify-between items-center pt-3 border-t border-gray-100 pointer-events-none">
         <div>
           <span className="text-sm text-gray-700 font-semibold">
             총 결제금액

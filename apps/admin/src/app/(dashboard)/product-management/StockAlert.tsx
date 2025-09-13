@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { AlertCircle, X } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import type { ProductResponse } from "@/lib/api/products";
 import StockAlertModal from "./StockAlertModal";
 
@@ -11,14 +11,14 @@ type Props = {
 };
 
 const StockAlert = ({ products }: Props) => {
-  // 부족 기준: current/optimal <= 0.4 (ProductList의 기준과 동일 계열)
+  // 부족 기준: current/optimal <= 0.4
   const lowItems = useMemo(() => {
     const list = products ?? [];
     return list
       .map((p) => {
         const optimal = Math.max(0, p.optimalStock ?? 0);
         const current = Math.max(0, p.currentStock ?? 0);
-        const ratio = optimal > 0 ? current / optimal : 0; // optimal이 0이면 부족 취급
+        const ratio = optimal > 0 ? current / optimal : 0;
         const isLow = p.isLowStock ?? ratio <= 0.4;
         return {
           id: p._id,
@@ -31,7 +31,7 @@ const StockAlert = ({ products }: Props) => {
         };
       })
       .filter((x) => x.isLow)
-      .sort((a, b) => a.ratio - b.ratio); // 가장 부족한 순
+      .sort((a, b) => a.ratio - b.ratio);
   }, [products]);
 
   const [open, setOpen] = useState(false);
@@ -41,14 +41,23 @@ const StockAlert = ({ products }: Props) => {
 
   return (
     <>
-      <div className="bg-green-50 p-6 rounded-md mt-5 mb-6">
+      <div
+        className="
+          mt-5 mb-6 rounded-md p-6
+          bg-card text-card-foreground border border-border
+          relative
+        "
+        role="status"
+        aria-live="polite"
+        style={{ borderLeft: "4px solid var(--color-danger)" }}
+      >
         {/* 헤더 */}
         <div className="flex flex-col items-start gap-2 mb-3">
           <div className="flex items-center">
-            <AlertCircle className="text-red-500 mr-2" size={18} />
+            <AlertCircle className="mr-2 text-danger" size={18} />
             <div className="font-semibold">재고 부족 알림</div>
           </div>
-          <div className="text-sm text-gray-700">
+          <div className="text-sm text-muted-foreground">
             다음 제품들의 재고가 부족합니다. 빠른 시일 내에 재고를 보충해주세요.
           </div>
         </div>
@@ -58,7 +67,7 @@ const StockAlert = ({ products }: Props) => {
           {preview.map((item) => (
             <div key={item.id} className="flex justify-between">
               <span className="truncate pr-4">{item.name}</span>
-              <span className="text-red-600">현재 재고 : {item.stock}</span>
+              <span className="text-danger">현재 재고 : {item.stock}</span>
             </div>
           ))}
         </div>
@@ -67,12 +76,16 @@ const StockAlert = ({ products }: Props) => {
         {lowItems.length > 3 && (
           <button
             onClick={() => setOpen(true)}
-            className="mt-5 px-3 py-1 border border-green-600 text-green-700 rounded hover:bg-green-100 text-sm cursor-pointer"
+            className="
+              mt-5 px-3 py-1 text-sm rounded cursor-pointer transition
+              border border-border bg-muted text-card-foreground hover:opacity-90
+            "
           >
             모두 보기
           </button>
         )}
       </div>
+
       <StockAlertModal
         open={open}
         onClose={() => setOpen(false)}

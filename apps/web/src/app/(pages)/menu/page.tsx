@@ -2,7 +2,7 @@
 
 import { useSearchParams } from "next/navigation";
 import { useEffect, useRef, Suspense } from "react";
-import { BottomNavigation } from "@/components/layout";
+import { BottomNavigation, Footer } from "@/components/layout";
 import { useHybridProductFetch } from "@/hooks";
 import ProductGrid from "@/components/menu/ProductGrid";
 import { PageHeader, InfiniteScroll } from "@/components/ui";
@@ -93,6 +93,7 @@ function MenuContent() {
             </button>
           </div>
         </div>
+        <Footer />
         <BottomNavigation />
       </div>
     );
@@ -117,7 +118,7 @@ function MenuContent() {
         >
           {(categoryFilteredProducts, activeCategory) => (
             <>
-              <div className="fixed top-23 left-1/2 transform -translate-x-1/2 w-full max-w-lg z-40 bg-white border-b border-gray-100">
+              <div className="fixed top-23 left-1/2 transform -translate-x-1/2 w-full max-w-lg z-40 bg-white border-b border-gray-100 rounded-b-lg shadow-sm">
                 <div className="px-6 pt-1 pb-2">
                   <SearchBox
                     onSearch={handleSearch}
@@ -159,6 +160,7 @@ function MenuContent() {
         </CategoryFilter>
       </div>
 
+      <Footer />
       <BottomNavigation />
     </div>
   );
@@ -172,6 +174,7 @@ function MenuLoading() {
       <div className="flex-1 flex items-center justify-center">
         <div className="text-gray-500">메뉴를 불러오는 중...</div>
       </div>
+      <Footer />
       <BottomNavigation />
     </div>
   );

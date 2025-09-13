@@ -7,20 +7,16 @@ interface AuthState {
   // 상태
   isAuthenticated: boolean;
   user: User | null;
+  accessToken: string | null;
   isLoading: boolean;
-  tokens: {
-    accessToken: string | null;
-    refreshToken: string | null;
-  };
 
   // 액션
   login: (email: string, password: string) => Promise<void>;
   signup: (name: string, email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   setUser: (user: User) => void;
-  setTokens: (accessToken: string, refreshToken: string) => void;
+  setAccessToken: (accessToken: string) => void;
   clearAuth: () => void;
-  refreshTokens: () => Promise<boolean>;
   checkAuth: () => Promise<boolean>;
 }
 
@@ -30,11 +26,8 @@ export const useAuthStore = create<AuthState>()(
       // 초기 상태
       isAuthenticated: false,
       user: null,
+      accessToken: null,
       isLoading: false,
-      tokens: {
-        accessToken: null,
-        refreshToken: null,
-      },
 
       // 로그인
       login: async (email: string, password: string) => {
@@ -42,13 +35,10 @@ export const useAuthStore = create<AuthState>()(
         try {
           const response = await authService.login({ email, password });
 
-          if (response.accessToken && response.refreshToken) {
+          if (response.accessToken) {
             set({
               isAuthenticated: true,
-              tokens: {
-                accessToken: response.accessToken,
-                refreshToken: response.refreshToken,
-              },
+              accessToken: response.accessToken,
               user: {
                 _id: response._id || "",
                 name: "고객", // 임시값, 나중에 getCurrentUser로 업데이트
@@ -58,7 +48,7 @@ export const useAuthStore = create<AuthState>()(
               isLoading: false,
             });
           } else {
-            throw new Error("토큰이 없습니다.");
+            throw new Error("액세스 토큰이 없습니다.");
           }
         } catch (error) {
           set({ isLoading: false });
@@ -70,23 +60,13 @@ export const useAuthStore = create<AuthState>()(
       signup: async (name: string, email: string, password: string) => {
         set({ isLoading: true });
         try {
-          // 1. 회원가입 요청
-          await authService.signup({
-            name,
-            email,
-            password,
-          });
-
-          // 2. 회원가입 성공 후 자동 로그인
+          await authService.signup({ name, email, password });
           const loginResponse = await authService.login({ email, password });
 
-          if (loginResponse.accessToken && loginResponse.refreshToken) {
+          if (loginResponse.accessToken) {
             set({
               isAuthenticated: true,
-              tokens: {
-                accessToken: loginResponse.accessToken,
-                refreshToken: loginResponse.refreshToken,
-              },
+              accessToken: loginResponse.accessToken,
               user: {
                 _id: loginResponse._id || "",
                 name: "고객", // 임시값, 나중에 getCurrentUser로 업데이트
@@ -115,10 +95,7 @@ export const useAuthStore = create<AuthState>()(
           set({
             isAuthenticated: false,
             user: null,
-            tokens: {
-              accessToken: null,
-              refreshToken: null,
-            },
+            accessToken: null,
             isLoading: false,
           });
         }
@@ -129,97 +106,48 @@ export const useAuthStore = create<AuthState>()(
         set({ user });
       },
 
-      // 토큰 설정
-      setTokens: (accessToken: string, refreshToken: string) => {
-        set({
-          tokens: { accessToken, refreshToken },
-          isAuthenticated: true,
-        });
+      // 액세스 토큰 설정 (토큰 갱신 시 인터셉터가 호출)
+      setAccessToken: (accessToken: string) => {
+        set({ accessToken, isAuthenticated: true });
       },
 
-      // 인증 정보 초기화
+      // 인증 정보 초기화 (토큰 갱신 실패 시 인터셉터가 호출)
       clearAuth: () => {
         set({
           isAuthenticated: false,
           user: null,
-          tokens: {
-            accessToken: null,
-            refreshToken: null,
-          },
+          accessToken: null,
         });
       },
 
-      // 토큰 갱신
-      refreshTokens: async (): Promise<boolean> => {
-        const { tokens } = get();
-        if (!tokens.refreshToken) {
-          return false;
-        }
+      // 인증 상태 확인 (앱 시작 시)
+      checkAuth: async (): Promise<boolean> => {
+        const { accessToken } = get();
 
-        try {
-          const response = await authService.refreshTokens(tokens.refreshToken);
-
-          if (response.accessToken && response.refreshToken) {
-            set({
-              tokens: {
-                accessToken: response.accessToken,
-                refreshToken: response.refreshToken,
-              },
-              isAuthenticated: true,
-            });
-            return true;
-          }
-          return false;
-        } catch {
-          console.error("토큰 갱신 실패");
+        if (!accessToken) {
           get().clearAuth();
           return false;
         }
-      },
 
-      // 인증 상태 확인
-      checkAuth: async (): Promise<boolean> => {
-        const { tokens, isAuthenticated } = get();
-
-        if (!tokens.accessToken || !tokens.refreshToken) {
-          set({ isAuthenticated: false, user: null });
-          return false;
-        }
-
-        if (!isAuthenticated) {
-          return false;
-        }
-
+        set({ isAuthenticated: true });
         try {
-          // 현재 사용자 정보 조회로 토큰 유효성 확인
           const user = await authService.getCurrentUser();
           set({ user });
           return true;
-        } catch {
-          // 토큰이 만료된 경우 갱신 시도
-          const refreshed = await get().refreshTokens();
-          if (refreshed) {
-            try {
-              const user = await authService.getCurrentUser();
-              set({ user });
-              return true;
-            } catch (userError) {
-              console.error("사용자 정보 조회 실패:", userError);
-              return false;
-            }
-          }
+        } catch (error) {
+          console.error("CheckAuth 실패:", error);
           return false;
         }
       },
     }),
     {
-      name: "auth-storage",
+      name: "auth-storage", // localStorage에 저장될 때 사용될 키
       storage: createJSONStorage(() => localStorage),
-      // 민감한 정보는 제외하고 저장
+      // user, isAuthenticated, accessToken 상태만 localStorage에 저장
       partialize: (state) => ({
-        tokens: state.tokens,
         user: state.user,
         isAuthenticated: state.isAuthenticated,
+        accessToken: state.accessToken,
       }),
     }
   )

@@ -11,6 +11,7 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import qs from "qs";  // 쿼리 파싱 모듈
+import cookieParser from "cookie-parser";
 import routes from "./routes/index.js";
 
 // Express App 생성
@@ -20,13 +21,12 @@ const app = express();
 // -- CORS 설정
 app.use(cors({
   origin: [
-    'http://localhost:3000',
-    'http://localhost:3001',
-    'http://localhost:3002',
-    'https://turborepo-app-web.vercel.app',
-    'https://turborepo-app-admin.vercel.app',
-    'https://bugs-star-web.vercel.app',
-    'https://bugs-star-admin-alpha.vercel.app'
+    'http://localhost:3000',                     // dev local web 주소
+    'http://localhost:3001',                     // dev local admin 주소
+    'https://turborepo-app-web.vercel.app',      // dev deploy web 주소
+    'https://bugs-star-admin-alpha.vercel.app',  // dev deploy admin 주소
+    'https://bugs-star-web.vercel.app',          // main deploy web 주소
+    'https://bugs-star-admin.vercel.app'         // main deploy admin 주소
   ],
   credentials: true,   // 쿠키나 인증 헤더 같은 자격 증명을 포함한 요청을 허용
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -35,6 +35,7 @@ app.use(cors({
 
 // -- Helmet 설정
 app.use(helmet()); 
+app.use(cookieParser()); 
 
 // Middleware 설정
 // -- Body Parser

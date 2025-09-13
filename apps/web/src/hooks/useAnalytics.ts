@@ -134,12 +134,13 @@ export const useAnalytics = () => {
         sourceComponent: "cart_page",
         totalAmount: totalAmount,
         itemCount: itemCount,
-        // 🆕 상품 정보 (수량 × 가격으로 계산)
+        // 상품 정보 (수량 × 가격으로 계산)
         products: cartItems.map((item) => ({
-          productCode: item.productCode,
+          productCode: item.productCode, //상품명(영문)
+          productName: item.name, //상품명(한글)
           quantity: item.quantity,
-          price: item.price * item.quantity, // 🆕 수량 × 가격
-          unitPrice: item.price, // 🆕 개별 가격도 추가
+          price: item.price * item.quantity, // 수량 × 가격
+          unitPrice: item.price, // 개별 가격
         })),
       });
     },

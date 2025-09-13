@@ -1,3 +1,12 @@
+/* ------------------------------------------------------------
+ * File      : /src/controllers/authController.js
+ * Brief     : auth(회원가입, 로그인, 로그아웃, 토큰 갱신) 컨트롤러
+ * Author    : 송용훈
+ * Date      : 2025-09-13
+ * Version   : 
+ * History
+ * ------------------------------------------------------------*/
+
 import User from "../models/User.js";
 import { generateAccessToken } from "../utils/accessTokenUtils.js";
 import {
@@ -68,13 +77,21 @@ export const login = async (req, res) => {
     const accessToken = generateAccessToken({ userId: user._id });
     const refreshToken = generateRefreshToken({ userId: user._id });
 
-    // Refresh Token을 DB에 저장
+    // Refresh Token을 DB에 저장 (세션 관리를 위해 유지)
     user.refreshToken = refreshToken;
     await user.save();
 
+    // Refresh Token을 httpOnly 쿠키에 담아 전송
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production", // 프로덕션 환경에서는 https를 사용해야 함
+      sameSite: "lax", // CSRF 공격 방지
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7일
+    });
+
+    // Access Token은 body에 담아 전송
     res.json({
       accessToken,
-      refreshToken,
       _id: user._id,
     });
   } catch (error) {
@@ -89,7 +106,7 @@ export const login = async (req, res) => {
 // 토큰 갱신
 export const refresh = async (req, res) => {
   try {
-    const { refreshToken } = req.body;
+    const { refreshToken } = req.cookies; // body가 아닌 cookies에서 토큰을 가져옵니다.
 
     const result = await refreshTokens(refreshToken);
     res.json(result);
@@ -250,7 +267,7 @@ export const updateProfile = async (req, res) => {
 export const logout = async (req, res) => {
   try {
     const accessToken = req.header("Authorization")?.replace("Bearer ", "");
-    const { refreshToken } = req.body;
+    const { refreshToken } = req.cookies; // body가 아닌 cookies에서 토큰을 가져옵니다.
 
     if (!accessToken) {
       return res.status(400).json({ message: "Access Token이 필요합니다." });
@@ -266,6 +283,9 @@ export const logout = async (req, res) => {
         await User.findByIdAndUpdate(decoded.userId, { refreshToken: null });
       }
     }
+
+    // 클라이언트의 쿠키를 삭제
+    res.clearCookie("refreshToken");
 
     res.json({ message: "로그아웃되었습니다." });
   } catch (error) {

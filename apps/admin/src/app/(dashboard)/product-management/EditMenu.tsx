@@ -171,7 +171,7 @@ const EditMenu: React.FC<EditMenuProps> = ({
       onClick={onClose}
     >
       <div
-        className="relative bg-white rounded-2xl shadow-lg w-full max-w-2xl p-6"
+        className="relative bg-background rounded-2xl shadow-lg w-full max-w-2xl p-6"
         onClick={(e) => e.stopPropagation()}
       >
         {/* 닫기 버튼 */}

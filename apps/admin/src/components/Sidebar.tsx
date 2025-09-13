@@ -9,7 +9,7 @@ import {
   BarChart3,
   LogOut,
 } from "lucide-react";
-import { Dancing_Script, Pacifico } from "next/font/google";
+import { Pacifico } from "next/font/google";
 import { usePathname, useRouter } from "next/navigation";
 
 const menuItems = [
@@ -22,7 +22,7 @@ const menuItems = [
 
 const pacifico = Pacifico({
   subsets: ["latin"],
-  weight: ["400", "400"],
+  weight: ["400"],
 });
 
 const Sidebar = () => {
@@ -31,11 +31,11 @@ const Sidebar = () => {
   const { logout } = useLogout();
 
   return (
-    <div className="flex flex-col w-48 h-screen border-r border-gray-200 bg-white">
+    <div className="flex flex-col w-48 h-screen border-r border-border bg-card text-card-foreground">
       {/* Logo */}
       <div className="flex items-center gap-2 p-4 cursor-pointer">
         <img src="/bugs_star_logo.png" alt="Bugs Star" className="w-10 h-10" />
-        <span className={`${pacifico.className} font-extrabold text-[#005C14]`}>
+        <span className={`${pacifico.className} font-extrabold text-brand`}>
           Bugs Star
         </span>
       </div>
@@ -50,8 +50,12 @@ const Sidebar = () => {
             <button
               key={index}
               onClick={() => router.push(item.path)}
-              className={`flex items-center w-full px-4 py-2 text-sm 
-                ${isActive ? "bg-gray-100 font-semibold text-green-700" : "text-gray-700 hover:bg-gray-50 cursor-pointer"}`}
+              className={`flex items-center w-full px-4 py-2 text-sm rounded
+                ${
+                  isActive
+                    ? "bg-muted font-semibold text-brand"
+                    : "text-muted-foreground hover:bg-muted cursor-pointer"
+                }`}
             >
               <Icon className="w-4 h-4 mr-2" />
               {item.label}
@@ -61,13 +65,13 @@ const Sidebar = () => {
       </nav>
 
       {/* Divider */}
-      <div className="border-t border-gray-200 mx-2" />
+      <div className="border-t border-border mx-2" />
 
       {/* Logout */}
       <div className="p-4">
         <button
           onClick={() => void logout()}
-          className="flex items-center justify-center w-full px-4 py-2 text-sm text-gray-700 border border-gray-200 rounded hover:bg-gray-50 cursor-pointer"
+          className="flex items-center justify-center w-full px-4 py-2 text-sm border border-border rounded bg-muted hover:opacity-90 cursor-pointer text-card-foreground"
         >
           <LogOut className="w-4 h-4 mr-2" />
           로그아웃

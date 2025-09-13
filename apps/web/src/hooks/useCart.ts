@@ -59,6 +59,7 @@ export const useCart = (options: UseCartOptions = {}) => {
               price: productInfo.price,
               category: productInfo.category,
               productCode: productInfo.productCode,
+              currentStock: productInfo.currentStock,
             }
           : {
               _id: productId,
@@ -67,9 +68,10 @@ export const useCart = (options: UseCartOptions = {}) => {
               price: 0,
               category: "",
               productCode: "",
+              currentStock: 0,
             },
         isAvailable: true,
-        stockStatus: "available", // stockStatus 필드 추가
+        stockStatus: "available",
       };
       return updateCartResponse(oldData, [...oldData.cart, newItem]);
     });

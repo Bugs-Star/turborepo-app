@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { use, useEffect, useRef } from "react";
-import { BottomNavigation } from "@/components/layout";
+import { BottomNavigation, Footer } from "@/components/layout";
 import { PageHeader, PromotionDetailContent, AsyncWrapper } from "@/components";
 import { usePromotionDetailFetch, useAnalytics } from "@/hooks";
 
@@ -74,9 +74,17 @@ export default function PromotionDetailPage({
       />
 
       {/* Main Content */}
-      <AsyncWrapper loading={loading} error={error?.message || null}>
+      <AsyncWrapper
+        loading={loading}
+        error={error?.message || null}
+        useSkeleton={true}
+        skeletonType="promotion-event"
+      >
         {promotion && <PromotionDetailContent promotion={promotion} />}
       </AsyncWrapper>
+
+      {/* Footer */}
+      <Footer />
 
       {/* Bottom Navigation */}
       <BottomNavigation />

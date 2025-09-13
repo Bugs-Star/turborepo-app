@@ -26,7 +26,6 @@ type MoveDiff = { id: string; from: number; to: number };
 interface DraggableListProps<T extends BaseItem> {
   items: T[];
   onReorder: (newItems: T[]) => void;
-  /** ✅ 드래그 종료 후 서버 반영 등 커밋용 (옵션) */
   onReorderCommit?: (args: {
     oldItems: T[];
     newItems: T[];
@@ -64,10 +63,8 @@ const DraggableList = <T extends BaseItem>({
     const [removed] = reordered.splice(result.source.index, 1);
     reordered.splice(result.destination.index, 0, removed);
 
-    // 로컬 즉시 반영
     onReorder(reordered);
 
-    // ✅ 커밋 콜백: 변경된 항목만 diff로 전달
     if (onReorderCommit) {
       const oldIndex = new Map(oldItems.map((it, i) => [it.id, i]));
       const moves: MoveDiff[] = reordered
@@ -103,11 +100,12 @@ const DraggableList = <T extends BaseItem>({
                     <div
                       ref={provided.innerRef}
                       {...provided.draggableProps}
-                      className="flex items-center justify-between border border-gray-200 rounded-lg p-3 bg-white shadow-sm"
+                      className="flex items-center justify-between border border-border rounded-lg p-3 bg-card text-card-foreground shadow-sm"
                     >
                       <div
                         {...provided.dragHandleProps}
-                        className="cursor-grab text-gray-400 pr-2"
+                        className="cursor-grab text-muted-foreground pr-2"
+                        aria-label="드래그 핸들"
                       >
                         ⋮⋮
                       </div>
@@ -121,7 +119,7 @@ const DraggableList = <T extends BaseItem>({
                         <div className="flex flex-col">
                           <span className="font-medium">{item.name}</span>
                           {renderExtra && (
-                            <div className="text-sm text-gray-600">
+                            <div className="text-sm text-muted-foreground">
                               {renderExtra(item)}
                             </div>
                           )}
@@ -129,7 +127,7 @@ const DraggableList = <T extends BaseItem>({
                       </div>
 
                       {hasRange && (
-                        <div className="flex items-center text-gray-500 ml-4 mr-4 text-xs">
+                        <div className="flex items-center text-muted-foreground ml-4 mr-4 text-xs">
                           <Calendar className="w-4 h-4 mr-1" />
                           <span>
                             {formatDate(start)} ~ {formatDate(end)}
@@ -142,7 +140,7 @@ const DraggableList = <T extends BaseItem>({
                           <button
                             type="button"
                             onClick={() => onEdit(item.id)}
-                            className="bg-orange-400 text-sm text-white px-3 py-1 rounded-xl cursor-pointer"
+                            className="text-sm px-3 py-1 rounded-xl cursor-pointer border border-border bg-edit text-card-foreground hover:opacity-90 transition"
                           >
                             수정
                           </button>
@@ -151,7 +149,7 @@ const DraggableList = <T extends BaseItem>({
                           <button
                             type="button"
                             onClick={() => onDelete(item.id)}
-                            className="bg-[#D74753] text-sm text-white px-3 py-1 rounded-xl cursor-pointer"
+                            className="text-sm px-3 py-1 rounded-xl cursor-pointer bg-danger text-foreground hover:opacity-90 transition"
                           >
                             삭제
                           </button>

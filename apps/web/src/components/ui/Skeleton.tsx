@@ -1,4 +1,8 @@
+"use client";
+
 import { cn } from "@/utils/commonUtils";
+import { BottomNavigation, Footer } from "@/components/layout";
+import ProductHeader from "@/components/menu/ProductHeader";
 
 interface SkeletonProps {
   className?: string;
@@ -74,9 +78,9 @@ export function RecommendedMenuSkeleton({ count = 5 }: { count?: number }) {
   return (
     <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
       {Array.from({ length: count }).map((_, index) => (
-        <div key={index} className="flex-shrink-0 w-28">
+        <div key={index} className="flex-shrink-0 w-24">
           {/* 동그라미 이미지 스켈레톤 */}
-          <div className="w-28 h-28 rounded-full overflow-hidden mb-2">
+          <div className="w-24 h-24 rounded-full overflow-hidden mb-2">
             <Skeleton className="w-full h-full" rounded="full" />
           </div>
           {/* 상품명 스켈레톤 */}
@@ -119,6 +123,99 @@ export function EventSectionSkeleton({ count = 3 }: { count?: number }) {
           </div>
         </div>
       ))}
+    </div>
+  );
+}
+
+// 프로모션/이벤트 상세 페이지 스켈레톤
+export function PromotionEventDetailSkeleton() {
+  return (
+    <div className="min-h-screen bg-white flex flex-col pb-20">
+      {/* 헤더 - 실제 ProductHeader 컴포넌트 사용하되 제목만 스켈레톤 */}
+      <ProductHeader showSkeleton={true} />
+
+      {/* Main Content */}
+      <div className="flex-1">
+        {/* 이미지 스켈레톤 */}
+        <div className="relative w-full bg-gray-100 pt-14">
+          <Skeleton className="aspect-video w-full" />
+        </div>
+
+        {/* 프로모션/이벤트 정보 스켈레톤 */}
+        <div className="px-6 py-6 pb-20 bg-white">
+          {/* 제목 */}
+          <Skeleton className="h-8 w-3/4 mb-4" />
+
+          {/* 기간 */}
+          <Skeleton className="h-5 w-1/2 mb-6" />
+
+          {/* 상세 설명 */}
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-2/3" />
+            <Skeleton className="h-4 w-4/5" />
+            <Skeleton className="h-4 w-1/2" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// 상품 상세 페이지 스켈레톤
+export function ProductDetailSkeleton() {
+  return (
+    <div className="min-h-screen bg-white flex flex-col pb-50">
+      {/* 헤더 - 실제 ProductHeader 컴포넌트 사용하되 상품명만 스켈레톤 */}
+      <ProductHeader showSkeleton={true} />
+
+      {/* Main Content */}
+      <div className="flex-1">
+        {/* 이미지 스켈레톤 */}
+        <div className="relative w-full bg-gray-100 pt-14">
+          <Skeleton className="aspect-square w-full" />
+        </div>
+
+        {/* 상품 정보 스켈레톤 */}
+        <div className="px-6 mb-50">
+          <div className="py-6 mb-6">
+            {/* 상품명 */}
+            <Skeleton className="h-8 w-3/4 mb-2" />
+
+            {/* 상품 설명 */}
+            <Skeleton className="h-4 w-full mb-2" />
+            <Skeleton className="h-4 w-full mb-2" />
+            <Skeleton className="h-4 w-2/3 mb-4" />
+
+            {/* 가격 */}
+            <Skeleton className="h-6 w-1/2 mb-6" />
+          </div>
+        </div>
+      </div>
+
+      {/* 수량 조절 버튼 - 하단 고정 */}
+      <div className="fixed bottom-36 left-1/2 transform -translate-x-1/2 w-full max-w-lg">
+        <div
+          className="flex items-center justify-center bg-white py-3 px-6 rounded-t-3xl"
+          style={{ boxShadow: "0 -4px 6px -1px rgba(0, 0, 0, 0.1)" }}
+        >
+          <Skeleton className="w-10 h-10 rounded-full" />
+          <Skeleton className="h-6 w-8 mx-8" />
+          <Skeleton className="w-10 h-10 rounded-full" />
+        </div>
+      </div>
+
+      {/* 장바구니 버튼 - 하단 고정 */}
+      <div className="fixed bottom-10 left-1/2 transform -translate-x-1/2 w-full max-w-lg px-6 pb-10 pt-4 bg-white">
+        <Skeleton className="h-12 w-full rounded-lg" />
+      </div>
+
+      {/* 푸터 - 실제 컴포넌트 사용 */}
+      <Footer />
+
+      {/* 하단 네비게이션은 실제 컴포넌트 사용 */}
+      <BottomNavigation />
     </div>
   );
 }

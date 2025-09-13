@@ -1,8 +1,10 @@
 "use client";
 
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { CartItemUI } from "@/types/cart";
 import { Trash2 } from "lucide-react";
+import { useToast } from "@/hooks/useToast";
 
 interface CartItemProps {
   item: CartItemUI;
@@ -17,6 +19,9 @@ export default function CartItem({
   onRemove,
   disabled = false,
 }: CartItemProps) {
+  const { showWarning } = useToast();
+  const router = useRouter();
+
   const handleQuantityChange = (newQuantity: number) => {
     if (disabled) return;
     if (newQuantity >= 1) {
@@ -24,11 +29,29 @@ export default function CartItem({
     }
   };
 
+  const handleIncreaseQuantity = () => {
+    if (disabled) return;
+
+    const newQuantity = item.quantity + 1;
+
+    // 재고 초과 검증
+    if (newQuantity > item.currentStock) {
+      showWarning(`재고가 부족합니다. (현재 재고: ${item.currentStock}개)`);
+      return;
+    }
+
+    handleQuantityChange(newQuantity);
+  };
+
   const handleRemove = () => {
     if (disabled) return;
 
     // 기존 제거 로직
     onRemove(item.id);
+  };
+
+  const handleImageClick = () => {
+    router.push(`/menu/${item.productId}?from=cart`);
   };
 
   return (
@@ -41,16 +64,17 @@ export default function CartItem({
             alt={item.name}
             width={80}
             height={80}
-            className="w-20 h-20 rounded-lg object-cover object-center"
+            className="w-20 h-20 rounded-lg object-cover object-center cursor-pointer"
+            onClick={handleImageClick}
           />
         </div>
 
         {/* Product Details */}
         <div className="flex-1 min-w-0">
-          <h3 className="text-sm font-medium text-gray-900 mb-1">
+          <h3 className="text-sm font-medium text-gray-900 mb-1 cursor-default">
             {item.name}
           </h3>
-          <p className="text-sm font-semibold text-green-800 mb-3">
+          <p className="text-sm font-semibold text-green-800 mb-3 cursor-default">
             {item.price.toLocaleString()}원
           </p>
 
@@ -70,7 +94,7 @@ export default function CartItem({
                 {item.quantity}
               </span>
               <button
-                onClick={() => handleQuantityChange(item.quantity + 1)}
+                onClick={handleIncreaseQuantity}
                 disabled={disabled}
                 className={`px-3 py-1 text-gray-600 hover:bg-gray-50 rounded-r-lg transition-colors ${
                   disabled ? "opacity-50 cursor-not-allowed" : ""

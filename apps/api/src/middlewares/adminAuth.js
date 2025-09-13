@@ -17,7 +17,7 @@ export const adminAuth = async (req, res, next) => {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const admin = await Admin.findById(decoded.adminId).select('-passwordHash');
+    const admin = await Admin.findById(decoded.adminId);
     
     if (!admin) {
       return res.status(401).json({ message: '유효하지 않은 토큰입니다.' });
