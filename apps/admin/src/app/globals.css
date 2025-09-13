@@ -1,28 +1,67 @@
 @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css");
 
 @import "tailwindcss";
-
 :root {
+  color-scheme: light dark;
+
+  /* page */
   --background: #ffffff;
   --foreground: #171717;
-}
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* surfaces */
+  --card: #ffffff;
+  --card-foreground: #0f0f0f;
+
+  --muted: #f4f4f5;
+  --muted-foreground: #6b7280;
+
+  --border: #e5e7eb;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
+    --brand: #005c14;
+    --danger: #d74753;
+    --edit: #6b7280;
+    --accent: #f59e0b;
+
+    /* dark용 카드/보더 */
+    --card: #111213;
+    --card-foreground: #e6e6e6;
+    --muted: #17181a;
+    --muted-foreground: #9ca3af;
+    --border: #24262a;
+    --danger: #e25562;
   }
+}
+
+/* Tailwind v4 @theme 연결 */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+
+  --color-brand: var(--brand);
+
+  --color-edit: var(--edit);
+
+  --color-danger: var(--danger);
+
+  --color-accent: var(--accent);
+
+  --color-border: var(--border);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: "Pretendard", "Noto Sans KR", sans-serif;
+  font-family:
+    "Pretendard", "Noto Sans KR", ui-sans-serif, system-ui, sans-serif;
 }

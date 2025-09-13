@@ -107,12 +107,12 @@ const RecommendMenu = () => {
   }
 
   return (
-    <div className="max-w-5xl mx-auto mt-5 bg-white p-6 rounded-lg">
+    <div className="max-w-5xl mx-auto mt-5 bg-background p-6 rounded-lg">
       {/* 헤더 */}
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-lg font-bold">추천 메뉴 재정렬</h1>
 
-        <div className="flex items-center gap-2 text-gray-700 min-h-5">
+        <div className="flex items-center gap-2 text-muted-foreground min-h-5">
           {isPending ? (
             <>
               <Loader2 className="w-4 h-4 animate-spin" />
