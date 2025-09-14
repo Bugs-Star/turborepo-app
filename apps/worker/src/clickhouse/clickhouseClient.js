@@ -10,136 +10,93 @@ const clickhouse = createClient(CLICKHOUSE_CONFIG);
  * 각 객체는 테이블 이름과 생성 쿼리를 포함합니다.
  */
 const tableSchemas = [
+  // --- 원본 데이터 테이블 (변경 없음) ---
   {
     tableName: "events",
     query: `
       CREATE TABLE IF NOT EXISTS events (
-        event_id UUID,
-        user_id String,
-        session_id String,
-        event_type String,
-        event_time DateTime,
-        store_id String,
-        metadata JSON
+        event_id UUID, user_id String, session_id String, event_type String,
+        event_time DateTime, store_id String, metadata JSON
       ) ENGINE = MergeTree()
       PARTITION BY toYYYYMM(event_time)
-      ORDER BY (user_id, session_id, event_time)
-      SETTINGS index_granularity = 8192;
+      ORDER BY (user_id, session_id, event_time);
     `,
   },
   {
     tableName: "orders",
     query: `
       CREATE TABLE IF NOT EXISTS orders (
-        order_id UUID,
-        user_id String,
-        session_id String,
-        store_id String,
-        menu_id String,
-        quantity UInt8,
-        price_per_item UInt32,
-        total_price UInt32,
+        order_id UUID, user_id String, session_id String, store_id String,
+        menu_id String, quantity UInt8, price_per_item UInt32, total_price UInt32,
         status Enum8('paid' = 1, 'canceled' = 2, 'refunded' = 3, 'initiated' = 4),
-        ordered_at DateTime,
-        updated_at DateTime
+        ordered_at DateTime, updated_at DateTime
       ) ENGINE = MergeTree()
-      ORDER BY ordered_at
-      SETTINGS index_granularity = 8192;
+      ORDER BY (store_id, ordered_at); -- 수정: store_id를 정렬 키에 추가하여 조회 성능 향상
+    `,
+  },
+
+  // --- 사전 집계 테이블 (ReplacingMergeTree로 모두 변경) ---
+  {
+    tableName: "summary_stats_by_period",
+    query: `
+      CREATE TABLE IF NOT EXISTS summary_stats_by_period (
+        period_type String, period_start Date, store_id String,
+        total_sales Float64, total_orders UInt32, avg_order_value Float64,
+        unique_visitors UInt32, created_at DateTime
+      ) ENGINE = ReplacingMergeTree() -- 수정: ReplacingMergeTree로 변경
+      PARTITION BY period_type
+      ORDER BY (period_start, store_id); -- 이 키가 고유 식별자이므로 유지
     `,
   },
   {
     tableName: "best_selling_menu_items",
     query: `
       CREATE TABLE IF NOT EXISTS best_selling_menu_items (
-        period_type String,
-        period_start Date,
-        store_id String,
-        menu_id String,
-        order_count UInt32,
-        total_revenue Float64,
-        rank UInt8
-      ) ENGINE = MergeTree()
+        period_type String, period_start Date, store_id String, menu_id String,
+        order_count UInt32, total_revenue Float64, rank UInt8
+      ) ENGINE = ReplacingMergeTree() -- 수정: ReplacingMergeTree로 변경
       PARTITION BY period_type
-      ORDER BY (period_start, store_id, rank)
-      SETTINGS index_granularity = 8192;
+      -- 수정: rank 대신 menu_id를 키에 추가하여 고유 메뉴를 식별하도록 변경
+      ORDER BY (period_start, store_id, menu_id);
     `,
   },
   {
     tableName: "golden_path_stats",
     query: `
       CREATE TABLE IF NOT EXISTS golden_path_stats (
-        period_type String,
-        period_start Date,
-        store_id String,
-        path Array(String),
-        user_count UInt32,
-        total_sessions UInt32
-      ) ENGINE = MergeTree()
+        period_type String, period_start Date, store_id String, path Array(String),
+        user_count UInt32, total_sessions UInt32
+      ) ENGINE = ReplacingMergeTree() -- 수정: ReplacingMergeTree로 변경
       PARTITION BY period_type
-      ORDER BY (period_start, store_id, user_count)
-      SETTINGS index_granularity = 8192;
+      -- 수정: user_count 대신 path를 키에 추가하여 고유 경로를 식별하도록 변경
+      ORDER BY (period_start, store_id, path);
     `,
   },
   {
     tableName: "purchase_golden_path_stats",
     query: `
       CREATE TABLE IF NOT EXISTS purchase_golden_path_stats (
-        period_type String,
-        period_start Date,
-        store_id String,
-        path Array(String),
-        user_count UInt32,
-        total_sessions UInt32
-      ) ENGINE = MergeTree()
+        period_type String, period_start Date, store_id String, path Array(String),
+        user_count UInt32, total_sessions UInt32
+      ) ENGINE = ReplacingMergeTree() -- 수정: ReplacingMergeTree로 변경
       PARTITION BY period_type
-      ORDER BY (period_start, store_id, user_count)
-      SETTINGS index_granularity = 8192;
+      -- 수정: user_count 대신 path를 키에 추가하여 고유 경로를 식별하도록 변경
+      ORDER BY (period_start, store_id, path);
     `,
   },
   {
     tableName: "rag_unified_store_summary",
     query: `
       CREATE TABLE IF NOT EXISTS rag_unified_store_summary (
-        period_type String,
-        period_start Date,
-        store_id String,
-        total_sales Float64,
-        total_orders UInt32,
-        avg_order_value Float64,
-        unique_visitors UInt32,
-        top_1_menu_id String,
-        top_1_order_count UInt32,
-        top_2_menu_id String,
-        top_2_order_count UInt32,
-        top_3_menu_id String,
-        top_3_order_count UInt32,
-        top_1_path Array(String),
-        top_1_path_users UInt32,
-        top_2_path Array(String),
-        top_2_path_users UInt32,
-        created_at DateTime DEFAULT now()
-      ) ENGINE = MergeTree()
+        period_type String, period_start Date, store_id String, total_sales Float64,
+        total_orders UInt32, avg_order_value Float64, unique_visitors UInt32,
+        top_1_menu_id String, top_1_order_count UInt32, top_2_menu_id String,
+        top_2_order_count UInt32, top_3_menu_id String, top_3_order_count UInt32,
+        top_1_path Array(String), top_1_path_users UInt32, top_2_path Array(String),
+        top_2_path_users UInt32, created_at DateTime DEFAULT now()
+      ) ENGINE = ReplacingMergeTree() -- 수정: ReplacingMergeTree로 변경
       PARTITION BY period_type
-      ORDER BY (period_start, store_id)
-      SETTINGS index_granularity = 8192;
-    `,
-  },
-  {
-    tableName: "summary_stats_by_period",
-    query: `
-      CREATE TABLE IF NOT EXISTS summary_stats_by_period (
-        period_type String,
-        period_start Date,
-        store_id String,
-        total_sales Float64,
-        total_orders UInt32,
-        avg_order_value Float64,
-        unique_visitors UInt32,
-        created_at DateTime
-      ) ENGINE = MergeTree()
-      PARTITION BY period_type
-      ORDER BY (period_start, store_id)
-      SETTINGS index_granularity = 8192;
+      ORDER BY (period_start, store_id); -- 이 키가 고유 식별자이므로 유지
     `,
   },
 ];
