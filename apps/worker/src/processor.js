@@ -49,7 +49,7 @@ export async function processMessages(messages) {
               menu_id: product.productCode,
               quantity: String(product.quantity),
               price_per_item: String(product.unitPrice || product.price),
-              total_price: String(orderPayload.totalAmount),
+              total_price: String(product.quantity * parseInt(String(product.unitPrice || product.price))),
               status: 'paid',
               ordered_at: formatDateForCH(new Date(logData.eventTimestamp)),
               updated_at: formatDateForCH(new Date(logData.eventTimestamp))
