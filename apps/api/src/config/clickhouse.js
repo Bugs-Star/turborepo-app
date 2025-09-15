@@ -21,6 +21,10 @@ const CLICKHOUSE_CONFIG = {
 const clickhouseClient = createClient(CLICKHOUSE_CONFIG);
 
 // ClickHouse 쿼리
+// 사용 예시
+// const userInput = "some_user_id";
+// const query = 'SELECT * FROM logs WHERE user_id = {userId:String}';
+// const results = await queryDatabase(query, { userId: userInput });
 export const queryDatabase = async (query, params = {}) => {
   const resultSet = await clickhouseClient.query({
     query: query,

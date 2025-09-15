@@ -1,10 +1,15 @@
+/* ------------------------------------------------------------
+ * File      : /src/utils/refreshTokenUtils.js
+ * Brief     : Refresh Token 관련 함수
+ * Author    : 이정관
+ * Date      : 2025-08-15
+ * Version   : 
+ * History
+ * ------------------------------------------------------------*/
+
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 import { generateAccessToken } from './accessTokenUtils.js';
-
-// -------------------------------------
-//       Refresh Token 관련
-// -------------------------------------
 
 // Refresh Token 생성 (7일)
 export const generateRefreshToken = (payload) => {
@@ -29,12 +34,11 @@ export const decodeRefreshToken = (token) => {
 };
 
 // Refresh Token을 사용하여 새로운 Access Token 생성
-export const refreshTokens = async (refreshToken) => {
+export const refreshAccessToken = async (refreshToken) => {
+  // Refresh Token 검증
   if (!refreshToken) {
     throw new Error('Refresh Token이 필요합니다.');
   }
-
-  // Refresh Token 검증
   const decoded = verifyRefreshToken(refreshToken);
   
   // 유저 찾기 및 Refresh Token 확인

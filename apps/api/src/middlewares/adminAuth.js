@@ -1,3 +1,12 @@
+/* ------------------------------------------------------------
+ * File      : /src/middlewares/adminAuth.js
+ * Brief     : 아드민 인증 관련 라우트
+ * Author    : 송용훈
+ * Date      : 2025-08-15
+ * Version   : 
+ * History
+ * ------------------------------------------------------------*/
+
 import jwt from 'jsonwebtoken';
 import Admin from '../models/Admin.js';
 import { isBlacklisted } from '../utils/jwtBlacklist.js';

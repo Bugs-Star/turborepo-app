@@ -10,7 +10,6 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 
-
 // user Schema
 const userSchema = new mongoose.Schema({
   email: {

@@ -21,6 +21,7 @@ import {
   InteractionType,
 } from "@repo/types";
 import { OfflineLogStorage } from "./offlineStorage";
+import { clear } from "console";
 
 // === SSR 안전 유틸리티 함수들 ===
 
@@ -210,26 +211,25 @@ const createLogger = (): Logger => {
 
       // 배치로 전송
       const batches = chunk(pendingLogs, state.batchSize);
-      let successCount = 0;
+      const successfullySentLogs: NewLogData[] = []; // Collect successfully sent logs
 
       for (const batch of batches) {
         try {
           await sendBatch(batch);
-          successCount += batch.length;
+          successfullySentLogs.push(...batch); // Add the entire batch if successful
         } catch (error) {
           console.error("❌ 배치 전송 실패:", error);
-          // 실패한 배치는 다시 IndexedDB에 저장됨 (sendBatch에서 처리)
+          // sendBatch already handles re-saving failed logs to IndexedDB
         }
       }
 
       // 성공적으로 전송된 로그들만 배치 마킹
-      if (successCount > 0) {
-        // 실제 전송된 로그들의 ID를 가져와서 배치 마킹
+      if (successfullySentLogs.length > 0) {
         const sentLogIds = await state.offlineStorage.getLogIdsByPayloads(
-          pendingLogs.slice(0, successCount)
+          successfullySentLogs // Use the collected successfully sent logs
         );
         await state.offlineStorage.markLogsAsSentBatch(sentLogIds);
-        console.log(`✅ ${successCount}개 오프라인 로그 전송 완료`);
+        console.log(`✅ ${successfullySentLogs.length}개 오프라인 로그 전송 완료`);
       }
 
       // 전송 실패한 로그가 있는지 확인
@@ -392,6 +392,7 @@ const createLogger = (): Logger => {
           console.log(
             `💾 즉시 전송 실패 로그 ${logs.length}개를 오프라인 저장소에 배치 저장`
           );
+          console.log(logs);
         } catch (dbError) {
           console.error("❌ IndexedDB 배치 저장 실패:", dbError);
         }
@@ -543,7 +544,11 @@ const createLogger = (): Logger => {
     // 스키마로 로그 생성
     const newLogData: NewLogData = {
       eventName: eventName,
-      eventTimestamp: new Date().toISOString(),
+      eventTimestamp: (() => {
+        const now = new Date();
+        now.setHours(now.getHours() + 9); // Add 9 hours for KST
+        return now.toISOString();
+      })(),
       userId: getUserId(),
       sessionId: sessionId,
       deviceId: deviceId,

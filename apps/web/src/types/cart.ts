@@ -40,6 +40,7 @@ export interface CartItemUI {
   productCode: string;
   productId: string;
   currentStock: number;
+  category: string;
 }
 
 // 타입 변환 함수
@@ -52,6 +53,7 @@ export const transformCartItemForUI = (item: CartItem): CartItemUI => ({
   productCode: item.product.productCode,
   productId: item.product._id,
   currentStock: item.product.currentStock,
+  category: item.product.category,
 });
 
 export const transformCartForUI = (cartResponse: CartResponse) => ({

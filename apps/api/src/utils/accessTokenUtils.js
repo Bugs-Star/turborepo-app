@@ -1,8 +1,13 @@
-import jwt from 'jsonwebtoken';
+/* ------------------------------------------------------------
+ * File      : /src/utils/accessTokenUtils.js
+ * Brief     : Access Token 관련 함수
+ * Author    : 송용훈
+ * Date      : 2025-09-14
+ * Version   : 
+ * History
+ * ------------------------------------------------------------*/
 
-// -------------------------------------
-//       Access Token 관련
-// -------------------------------------
+import jwt from 'jsonwebtoken';
 
 // Access Token 생성 (15분)
 export const generateAccessToken = (payload) => {

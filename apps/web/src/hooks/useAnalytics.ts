@@ -8,14 +8,21 @@
  * trackScreenView("/home");
  */
 
-import { useCallback } from "react";
+import { useCallback, useRef } from "react";
 import { logger } from "@/lib/logger";
 import { Product, CartItemUI } from "@/types";
 import { Promotion, Event } from "@/lib/services";
 
 export const useAnalytics = () => {
+  const lastLoggedScreen = useRef<string | null>(null); // New ref to track last logged screen
+
   // === 화면 조회 이벤트 ===
   const trackScreenView = useCallback((screenName: string) => {
+    // Only log if the screenName has changed or it's the first log
+    if (lastLoggedScreen.current === screenName) {
+      return; // Prevent duplicate logs for the same screen
+    }
+
     // 이전 페이지 가져오기
     const previousScreen = sessionStorage.getItem("currentScreen") || null;
 
@@ -26,6 +33,8 @@ export const useAnalytics = () => {
       screenName: screenName,
       previousScreenName: previousScreen,
     } as any);
+
+    lastLoggedScreen.current = screenName; // Update last logged screen
   }, []);
 
   // === 화면 체류 시간 이벤트 ===
@@ -138,6 +147,7 @@ export const useAnalytics = () => {
         products: cartItems.map((item) => ({
           productCode: item.productCode, //상품명(영문)
           productName: item.name, //상품명(한글)
+          category: item.category,
           quantity: item.quantity,
           price: item.price * item.quantity, // 수량 × 가격
           unitPrice: item.price, // 개별 가격

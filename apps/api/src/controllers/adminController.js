@@ -1,5 +1,13 @@
+/* ------------------------------------------------------------
+ * File      : /src/controllers/adminController.js
+ * Brief     : Admin 관련 컨트롤러
+ * Author    : 송용훈
+ * Date      : 2025-08-15
+ * Version   : 
+ * History
+ * ------------------------------------------------------------*/
+
 import Admin from '../models/Admin.js';
-import User from '../models/User.js';
 import { addToBlacklist } from '../utils/jwtBlacklist.js';
 import { generateAccessToken } from '../utils/accessTokenUtils.js';
 import { generateRefreshToken, decodeRefreshToken, verifyRefreshToken } from '../utils/refreshTokenUtils.js';
@@ -140,59 +148,3 @@ export const getMe = async (req, res) => {
   }
 };
 
-// 일반 유저 목록 조회
-export const getUsers = async (req, res) => {
-  try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 15;
-    const skip = (page - 1) * limit;
-
-    // 현재 날짜 기준으로 이번 달의 시작과 끝 계산
-    const now = new Date();
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
-
-    // 총 일반 유저 수
-    const totalUsers = await User.countDocuments();
-
-    // 이번 달 가입한 유저 수
-    const newUsersThisMonth = await User.countDocuments({
-      createdAt: {
-        $gte: startOfMonth,
-        $lte: endOfMonth
-      }
-    });
-
-    // 유저 리스트 (이름, 이메일, 가입일)
-    const users = await User.find()
-      .select('name email createdAt')
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit);
-
-    // 응답 데이터 구성
-    const response = {
-      summary: {
-        totalUsers,
-        newUsersThisMonth
-      },
-      users: users.map(user => ({
-        name: user.name,
-        email: user.email,
-        createdAt: user.createdAt
-      })),
-      pagination: {
-        currentPage: page,
-        totalPages: Math.ceil(totalUsers / limit),
-        totalUsers,
-        hasNextPage: page < Math.ceil(totalUsers / limit),
-        hasPrevPage: page > 1
-      }
-    };
-
-    res.json(response);
-  } catch (error) {
-    console.error('유저 목록 조회 오류:', error);
-    res.status(500).json({ message: '서버 오류가 발생했습니다.' });
-  }
-};
