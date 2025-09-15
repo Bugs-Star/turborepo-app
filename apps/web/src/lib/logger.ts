@@ -544,7 +544,11 @@ const createLogger = (): Logger => {
     // 스키마로 로그 생성
     const newLogData: NewLogData = {
       eventName: eventName,
-      eventTimestamp: new Date().toISOString(),
+      eventTimestamp: (() => {
+        const now = new Date();
+        now.setHours(now.getHours() + 9); // Add 9 hours for KST
+        return now.toISOString();
+      })(),
       userId: getUserId(),
       sessionId: sessionId,
       deviceId: deviceId,

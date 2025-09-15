@@ -147,6 +147,7 @@ export const useAnalytics = () => {
         products: cartItems.map((item) => ({
           productCode: item.productCode, //상품명(영문)
           productName: item.name, //상품명(한글)
+          category: item.category,
           quantity: item.quantity,
           price: item.price * item.quantity, // 수량 × 가격
           unitPrice: item.price, // 개별 가격
