@@ -21,7 +21,48 @@ import {
   InteractionType,
 } from "@repo/types";
 import { OfflineLogStorage } from "./offlineStorage";
-import { clear } from "console";
+
+// === 동시성 제어를 위한 Mutex 클래스 ===
+
+class Mutex {
+  private locked = false;
+  private waitingQueue: Array<() => void> = [];
+
+  async acquire(): Promise<void> {
+    return new Promise((resolve) => {
+      if (!this.locked) {
+        this.locked = true;
+        resolve();
+      } else {
+        this.waitingQueue.push(resolve);
+      }
+    });
+  }
+
+  release(): void {
+    if (this.waitingQueue.length > 0) {
+      const next = this.waitingQueue.shift();
+      if (next) {
+        next();
+      }
+    } else {
+      this.locked = false;
+    }
+  }
+
+  async run<T>(fn: () => Promise<T>): Promise<T> {
+    await this.acquire();
+    try {
+      return await fn();
+    } finally {
+      this.release();
+    }
+  }
+
+  isLocked(): boolean {
+    return this.locked;
+  }
+}
 
 // === SSR 안전 유틸리티 함수들 ===
 
@@ -108,6 +149,7 @@ const getUserId = (): string => {
 
   try {
     // Zustand store에서 사용자 이메일 가져오기
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { useAuthStore } = require("@/stores/authStore");
     const user = useAuthStore.getState().user;
     return user?.email || "";
@@ -157,6 +199,9 @@ const createLogger = (): Logger => {
     autoFlushInterval?: NodeJS.Timeout;
     offlineStorage: OfflineLogStorage;
     isOnline: boolean;
+    flushMutex: Mutex;
+    isFlushing: boolean;
+    recentLogs: Map<string, number>; // 최근 로그 추적 (중복 방지)
     performanceMetrics: {
       totalLogsSent: number;
       totalLogsStored: number;
@@ -171,6 +216,9 @@ const createLogger = (): Logger => {
     ),
     offlineStorage: new OfflineLogStorage(),
     isOnline: typeof navigator !== "undefined" ? navigator.onLine : true,
+    flushMutex: new Mutex(),
+    isFlushing: false,
+    recentLogs: new Map<string, number>(),
     performanceMetrics: {
       totalLogsSent: 0,
       totalLogsStored: 0,
@@ -189,9 +237,13 @@ const createLogger = (): Logger => {
 
       // 네트워크 복구 시 약간의 지연 후 전송 (안정성 확보)
       setTimeout(() => {
-        flushOfflineLogs().catch((error) => {
-          console.error("❌ 네트워크 복구 시 로그 전송 실패:", error);
-        });
+        if (!state.isFlushing) {
+          flushOfflineLogs().catch((error) => {
+            console.error("❌ 네트워크 복구 시 로그 전송 실패:", error);
+          });
+        } else {
+          console.log("🔄 이미 로그 전송 중 - 네트워크 복구 시 중복 실행 방지");
+        }
       }, 2000);
     });
 
@@ -201,56 +253,76 @@ const createLogger = (): Logger => {
     });
   };
 
-  // 오프라인 로그 전송
+  // 오프라인 로그 전송 (동시성 제어 적용)
   const flushOfflineLogs = async () => {
-    try {
-      const pendingLogs = await state.offlineStorage.getPendingLogs();
-      if (pendingLogs.length === 0) return;
-
-      console.log(`📤 오프라인 로그 ${pendingLogs.length}개 전송 시작`);
-
-      // 배치로 전송
-      const batches = chunk(pendingLogs, state.batchSize);
-      const successfullySentLogs: NewLogData[] = []; // Collect successfully sent logs
-
-      for (const batch of batches) {
-        try {
-          await sendBatch(batch);
-          successfullySentLogs.push(...batch); // Add the entire batch if successful
-        } catch (error) {
-          console.error("❌ 배치 전송 실패:", error);
-          // sendBatch already handles re-saving failed logs to IndexedDB
-        }
-      }
-
-      // 성공적으로 전송된 로그들만 배치 마킹
-      if (successfullySentLogs.length > 0) {
-        const sentLogIds = await state.offlineStorage.getLogIdsByPayloads(
-          successfullySentLogs // Use the collected successfully sent logs
-        );
-        await state.offlineStorage.markLogsAsSentBatch(sentLogIds);
-        console.log(`✅ ${successfullySentLogs.length}개 오프라인 로그 전송 완료`);
-      }
-
-      // 전송 실패한 로그가 있는지 확인
-      const remainingLogs = await state.offlineStorage.getPendingLogs();
-      if (remainingLogs.length > 0) {
-        console.log(
-          `⚠️ ${remainingLogs.length}개 로그 전송 실패 - 다음 네트워크 복구 시 재시도`
-        );
-      }
-    } catch (error) {
-      console.error("❌ 오프라인 로그 전송 실패:", error);
+    // 이미 전송 중이면 중복 실행 방지
+    if (state.isFlushing) {
+      console.log("🔄 이미 오프라인 로그 전송 중 - 중복 실행 방지");
+      return;
     }
+
+    return state.flushMutex.run(async () => {
+      state.isFlushing = true;
+      try {
+        const pendingLogs = await state.offlineStorage.getPendingLogs();
+        if (pendingLogs.length === 0) {
+          console.log("📭 전송할 오프라인 로그가 없습니다");
+          return;
+        }
+
+        console.log(`📤 오프라인 로그 ${pendingLogs.length}개 전송 시작`);
+
+        // 배치로 전송
+        const batches = chunk(pendingLogs, state.batchSize);
+        const successfullySentLogs: NewLogData[] = [];
+
+        for (const batch of batches) {
+          try {
+            await sendBatch(batch);
+            successfullySentLogs.push(...batch);
+            console.log(`✅ 배치 전송 성공: ${batch.length}개`);
+          } catch (error) {
+            console.error("❌ 배치 전송 실패:", error);
+            // sendBatch에서 이미 IndexedDB에 재저장했으므로 추가 처리 불필요
+          }
+        }
+
+        // 성공적으로 전송된 로그들만 배치 마킹
+        if (successfullySentLogs.length > 0) {
+          const sentLogIds =
+            await state.offlineStorage.getLogIdsByPayloads(
+              successfullySentLogs
+            );
+          await state.offlineStorage.markLogsAsSentBatch(sentLogIds);
+          console.log(
+            `✅ ${successfullySentLogs.length}개 오프라인 로그 전송 완료`
+          );
+        }
+
+        // 전송 실패한 로그가 있는지 확인
+        const remainingLogs = await state.offlineStorage.getPendingLogs();
+        if (remainingLogs.length > 0) {
+          console.log(
+            `⚠️ ${remainingLogs.length}개 로그 전송 실패 - 다음 네트워크 복구 시 재시도`
+          );
+        }
+      } catch (error) {
+        console.error("❌ 오프라인 로그 전송 실패:", error);
+      } finally {
+        state.isFlushing = false;
+      }
+    });
   };
 
-  // 자동 플러시 설정
+  // 자동 플러시 설정 (중복 실행 방지)
   const setupAutoFlush = () => {
     if (!isBrowser()) return;
 
     state.autoFlushInterval = setInterval(() => {
-      if (state.memoryQueue.length > 0) {
-        forceFlush();
+      if (state.memoryQueue.length > 0 && !state.isFlushing) {
+        forceFlush().catch((error) => {
+          console.error("❌ 자동 플러시 실패:", error);
+        });
       }
     }, state.flushInterval);
   };
@@ -316,14 +388,26 @@ const createLogger = (): Logger => {
     });
   };
 
-  // 강제 플러시
-  const forceFlush = () => {
+  // 강제 플러시 (동시성 제어 적용)
+  const forceFlush = async () => {
     if (state.memoryQueue.length === 0) return;
+
+    // 이미 전송 중이면 중복 실행 방지
+    if (state.isFlushing) {
+      console.log("🔄 이미 로그 전송 중 - forceFlush 중복 실행 방지");
+      return;
+    }
 
     const logsToSend = [...state.memoryQueue];
     state.memoryQueue = [];
 
-    sendBatch(logsToSend);
+    try {
+      await sendBatch(logsToSend);
+      console.log(`✅ forceFlush 성공: ${logsToSend.length}개 로그 전송`);
+    } catch (error) {
+      console.error("❌ forceFlush 실패:", error);
+      // sendBatch에서 이미 IndexedDB에 저장했으므로 추가 처리 불필요
+    }
   };
 
   // 즉시 전송 함수 (재시도 로직 포함)
@@ -386,13 +470,31 @@ const createLogger = (): Logger => {
           continue;
         }
 
-        // 모든 재시도 실패 시 IndexedDB에 저장
+        // 모든 재시도 실패 시 IndexedDB에 저장 (중복 저장 방지)
         try {
-          await state.offlineStorage.saveLogsBatch(logs);
-          console.log(
-            `💾 즉시 전송 실패 로그 ${logs.length}개를 오프라인 저장소에 배치 저장`
+          // 이미 IndexedDB에 있는 로그인지 확인
+          const existingLogs = await state.offlineStorage.getPendingLogs();
+          const newLogs = logs.filter(
+            (log) =>
+              !existingLogs.some(
+                (existing) =>
+                  existing.eventName === log.eventName &&
+                  existing.eventTimestamp === log.eventTimestamp &&
+                  existing.sessionId === log.sessionId &&
+                  existing.deviceId === log.deviceId
+              )
           );
-          console.log(logs);
+
+          if (newLogs.length > 0) {
+            await state.offlineStorage.saveLogsBatch(newLogs);
+            console.log(
+              `💾 즉시 전송 실패 로그 ${newLogs.length}개를 오프라인 저장소에 저장`
+            );
+          } else {
+            console.log(
+              "⚠️ 모든 로그가 이미 IndexedDB에 존재 - 중복 저장 방지"
+            );
+          }
         } catch (dbError) {
           console.error("❌ IndexedDB 배치 저장 실패:", dbError);
         }
@@ -400,7 +502,7 @@ const createLogger = (): Logger => {
     }
   };
 
-  // 배치 전송 함수 (재시도 로직 포함)
+  // 배치 전송 함수 (재시도 로직 개선)
   const sendBatch = async (logs: NewLogData[], retries = 3): Promise<void> => {
     if (!isBrowser()) return;
 
@@ -427,7 +529,14 @@ const createLogger = (): Logger => {
             console.log("🛒 상품 정보 상세:", {
               eventName: log.eventName,
               products: log.payload.products.map(
-                (product: any, index: number) => ({
+                (
+                  product: {
+                    productCode: string;
+                    quantity: number;
+                    price: number;
+                  },
+                  index: number
+                ) => ({
                   index: index + 1,
                   productCode: product.productCode,
                   quantity: product.quantity,
@@ -467,8 +576,8 @@ const createLogger = (): Logger => {
           sendTime
         );
 
-        // 성공 시 즉시 반환
-        return;
+        console.log(`✅ 배치 전송 성공: ${logs.length}개 로그`);
+        return; // 성공 시 즉시 반환
       } catch (error) {
         console.error(`❌ 배치 전송 실패 (시도 ${attempt}/${retries}):`, error);
 
@@ -480,9 +589,32 @@ const createLogger = (): Logger => {
           continue;
         }
 
-        // 모든 재시도 실패 시 IndexedDB에 저장
+        // 모든 재시도 실패 시 IndexedDB에 저장 (중복 저장 방지)
         try {
-          await state.offlineStorage.saveLogsBatch(logs);
+          // 이미 IndexedDB에 있는 로그인지 확인
+          const existingLogs = await state.offlineStorage.getPendingLogs();
+          const newLogs = logs.filter(
+            (log) =>
+              !existingLogs.some(
+                (existing) =>
+                  existing.eventName === log.eventName &&
+                  existing.eventTimestamp === log.eventTimestamp &&
+                  existing.sessionId === log.sessionId &&
+                  existing.deviceId === log.deviceId
+              )
+          );
+
+          if (newLogs.length > 0) {
+            await state.offlineStorage.saveLogsBatch(newLogs);
+            console.log(
+              `💾 ${newLogs.length}개 새 로그를 오프라인 저장소에 저장`
+            );
+          } else {
+            console.log(
+              "⚠️ 모든 로그가 이미 IndexedDB에 존재 - 중복 저장 방지"
+            );
+          }
+
           const sendTime = performance.now() - startTime;
           updatePerformanceMetrics(
             state.performanceMetrics,
@@ -490,16 +622,63 @@ const createLogger = (): Logger => {
             sendTime,
             true
           );
-          console.log(`💾 ${logs.length}개 로그를 오프라인 저장소에 배치 저장`);
         } catch (dbError) {
           console.error("❌ IndexedDB 배치 저장 실패:", dbError);
           // 최후의 수단: 메모리에 임시 저장
           state.memoryQueue.push(...logs);
         }
 
-        throw error;
+        // 에러를 다시 던져서 forceFlush에서 실패로 인식하도록 함
+        console.log(
+          `❌ ${logs.length}개 로그 전송 최종 실패 - 오프라인 저장소에 보관`
+        );
+        throw new Error(`배치 전송 실패: ${logs.length}개 로그`);
       }
     }
+  };
+
+  // 중복 로그 방지 함수 (개선된 버전)
+  const isDuplicateLog = (logData: NewLogData): boolean => {
+    let logKey: string;
+    let duplicateThreshold = 500; // 기본값
+
+    if (logData.eventName === "clickInteraction") {
+      const payload = logData.payload as ClickInteractionPayload;
+
+      // 더 구체적인 키 생성 (targetId 포함)
+      logKey = `${logData.eventName}_${payload.interactionType}_${payload.targetId}_${logData.sessionId}`;
+
+      // 중요한 상호작용은 중복 방지 시간 단축
+      if (
+        payload.interactionType === "buttonAddToCart" ||
+        payload.interactionType === "navLink" ||
+        payload.interactionType === "productCard"
+      ) {
+        duplicateThreshold = 100; // 100ms로 단축
+      }
+    } else {
+      // viewScreen 등 다른 이벤트는 기존 로직
+      logKey = `${logData.eventName}_${logData.sessionId}_${JSON.stringify(logData.payload)}`;
+    }
+
+    const now = Date.now();
+    const lastLogTime = state.recentLogs.get(logKey) || 0;
+
+    if (now - lastLogTime < duplicateThreshold) {
+      return true;
+    }
+
+    state.recentLogs.set(logKey, now);
+
+    // Map 크기 제한 (메모리 누수 방지)
+    if (state.recentLogs.size > 1000) {
+      const oldestKey = state.recentLogs.keys().next().value;
+      if (oldestKey) {
+        state.recentLogs.delete(oldestKey);
+      }
+    }
+
+    return false;
   };
 
   // 메인 로그 함수
@@ -557,6 +736,12 @@ const createLogger = (): Logger => {
       payload: payload,
     };
 
+    // 중복 로그 방지
+    if (isDuplicateLog(newLogData)) {
+      console.log(`🔄 중복 로그 방지: ${eventName}`, payload);
+      return;
+    }
+
     // 중요 로그 판별 (실패/에러만 즉시 전송)
     const isCritical = (log: NewLogData): boolean => {
       // clickInteraction에서 실패/에러 체크
@@ -603,9 +788,13 @@ const createLogger = (): Logger => {
       // 앱 시작 시 오프라인 로그 전송 시도
       if (state.isOnline) {
         setTimeout(() => {
-          flushOfflineLogs().catch((error) => {
-            console.error("❌ 앱 시작 시 오프라인 로그 전송 실패:", error);
-          });
+          if (!state.isFlushing) {
+            flushOfflineLogs().catch((error) => {
+              console.error("❌ 앱 시작 시 오프라인 로그 전송 실패:", error);
+            });
+          } else {
+            console.log("🔄 이미 로그 전송 중 - 앱 시작 시 중복 실행 방지");
+          }
         }, 1000); // 1초 후 실행
       }
 
@@ -624,7 +813,7 @@ const createLogger = (): Logger => {
     setInterval(
       async () => {
         try {
-          await state.offlineStorage.cleanupOldLogs(7); // 7일 이상 된 로그 정리
+          await state.offlineStorage.cleanupOldLogs(3); // 3일 이상 된 로그 정리 (용량 관리 + 디버깅 균형)
         } catch (error) {
           console.error("❌ 로그 정리 실패:", error);
         }

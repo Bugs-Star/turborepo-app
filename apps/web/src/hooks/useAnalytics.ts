@@ -12,6 +12,7 @@ import { useCallback, useRef } from "react";
 import { logger } from "@/lib/logger";
 import { Product, CartItemUI } from "@/types";
 import { Promotion, Event } from "@/lib/services";
+import { ViewScreenPayload } from "@repo/types";
 
 export const useAnalytics = () => {
   const lastLoggedScreen = useRef<string | null>(null); // New ref to track last logged screen
@@ -32,7 +33,7 @@ export const useAnalytics = () => {
     logger.log("viewScreen", {
       screenName: screenName,
       previousScreenName: previousScreen,
-    } as any);
+    } as ViewScreenPayload);
 
     lastLoggedScreen.current = screenName; // Update last logged screen
   }, []);
