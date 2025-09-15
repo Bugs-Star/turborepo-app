@@ -8,12 +8,12 @@
  * ------------------------------------------------------------*/
 
 import { createClient } from "@clickhouse/client";
+import dotenv from 'dotenv';
+dotenv.config();
 
 // ClickHouse 설정 객체
 const CLICKHOUSE_CONFIG = {
-  host: process.env.CLICKHOUSE_HOST,
-  username: process.env.CLICKHOUSE_USERNAME,
-  password: process.env.CLICKHOUSE_PASSWORD,
+  url: `https://${process.env.CLICKHOUSE_USERNAME}:${process.env.CLICKHOUSE_PASSWORD}@${process.env.CLICKHOUSE_HOST.replace('https://', '')}`,
   database: process.env.CLICKHOUSE_DATABASE || 'default',
 };
 
