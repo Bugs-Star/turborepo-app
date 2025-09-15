@@ -1,4 +1,12 @@
-// src/routes/logs.js
+/* ------------------------------------------------------------
+ * File      : /src/routes/logs.js
+ * Brief     : 로그 관련 라우트
+ * Author    : 송용훈
+ * Date      : 2025-09-01
+ * Version   : 
+ * History
+ * ------------------------------------------------------------*/
+
 import { Router } from "express";
 import { validateLogs } from "../utils/logValidator.js";
 import Redis from "ioredis";

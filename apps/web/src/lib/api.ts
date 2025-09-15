@@ -127,6 +127,12 @@ apiClient.interceptors.response.use(
   },
   async (error) => {
     // 401 에러는 토큰 갱신 과정에서 발생하는 정상적인 현상이므로 조용히 처리
+    if (error.response?.status === 409 && error.response?.data?.code === 'DUPLICATE_ORDER_NUMBER' && error.config?.url?.includes('/order')) {
+      // 중복 주문 번호 오류는 조용히 처리하고, 사용자에게는 별도의 메시지를 표시할 수 있도록 함
+      console.warn("⚠️ Duplicate Order Number Error:", error.response?.data?.message);
+      return Promise.reject(error); // 에러를 계속 전파하여 호출하는 쪽에서 처리할 수 있도록 함
+    }
+
     if (error.response?.status !== 401) {
       console.error(
         "❌ Response Error:",

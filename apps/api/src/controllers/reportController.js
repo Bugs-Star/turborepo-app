@@ -41,17 +41,12 @@ export const getReports = async (req, res) => {
     case 'weekly':
       if (year && month && week) {
         // 시간대 문제를 피하기 위해 모든 날짜 계산을 UTC 기준으로 수행합니다.
-        // 1. 해당 달의 첫 번째 날을 UTC 기준으로 찾는다.
-        const firstDayOfMonth = new Date(Date.UTC(year, month - 1, 1));
-        // 2. 첫째 날이 무슨 요일인지 UTC 기준으로 구한다 (0=일요일, 1=월요일, …).
-        const firstDayOfWeek = firstDayOfMonth.getUTCDay();
-        // 3. 첫째 주 시작일(바로 앞 일요일)을 UTC 기준으로 구한다.
-        const firstSunday = new Date(firstDayOfMonth);
-        firstSunday.setUTCDate(1 - firstDayOfWeek);
-        // 4. 목표 주의 시작일을 UTC 기준으로 구한다.
+        const firstDayOfMonth = new Date(Date.UTC(year, month - 1, 1));         // 1. 해당 달의 첫 번째 날을 UTC 기준으로 찾는다.
+        const firstDayOfWeek = firstDayOfMonth.getUTCDay();                     // 2. 첫째 날이 무슨 요일인지 UTC 기준으로 구한다 (0=일요일, 1=월요일, …).
+        const firstSunday = new Date(firstDayOfMonth);                          // 3. 첫째 주 시작일(바로 앞 일요일)을 UTC 기준으로 구한다.
+        firstSunday.setUTCDate(1 - firstDayOfWeek);                             // 4. 목표 주의 시작일을 UTC 기준으로 구한다.
         const targetDate = new Date(firstSunday);
-        targetDate.setUTCDate(firstSunday.getUTCDate() + (week - 1) * 7);
-        // 5. 날짜를 YYYY-MM-DD 형식으로 포맷한다.
+        targetDate.setUTCDate(firstSunday.getUTCDate() + (week - 1) * 7);       // 5. 날짜를 YYYY-MM-DD 형식으로 포맷한다.
         const period_start = targetDate.toISOString().split('T')[0];
         
         query += ' AND period_start = {period_start:String}';

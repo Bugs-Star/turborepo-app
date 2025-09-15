@@ -8,8 +8,7 @@
  * ------------------------------------------------------------*/
 
 import app from './app.js';
-import dotenv from 'dotenv';
-dotenv.config();
+import dotenv from 'dotenv'; dotenv.config();
 import { connectMongoDB, disconnectMongoDB } from './config/mongoDb.js';   
 import { connectRedis, disconnectRedis } from './config/redis.js';
 import { connectClickHouse, disconnectClickHouse } from './config/clickhouse.js';

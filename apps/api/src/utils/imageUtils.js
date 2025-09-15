@@ -1,3 +1,12 @@
+/* ------------------------------------------------------------
+ * File      : /src/utils/imageUtils.js
+ * Brief     : 이미지 관련 함수
+ * Author    : 송용훈
+ * Date      : 2025-08-15
+ * Version   : 
+ * History
+ * ------------------------------------------------------------*/
+
 import sharp from 'sharp';
 import fs from 'fs';
 

@@ -1,3 +1,12 @@
+/* ------------------------------------------------------------
+ * File      : /src/routes/index.js
+ * Brief     : 라우트 index 파일
+ * Author    : 송용훈
+ * Date      : 2025-08-14
+ * Version   : 
+ * History
+ * ------------------------------------------------------------*/
+
 // src/routes/index.js
 import { Router } from 'express';
 import authRoutes from './auth.js';
@@ -34,11 +43,5 @@ router.use('/order', orderRoutes);
 
 // 로그 관련 라우트
 router.use('/logs', logRoutes);
-
-// 테스트 라우트 (메인 라우터에 직접 추가)
-router.get('/order-test', (req, res) => {
-  console.log('=== /order-test 라우트 진입 ===');
-  res.json({ message: 'order-test route works from main router' });
-});
 
 export default router;

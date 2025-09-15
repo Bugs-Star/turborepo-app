@@ -11,7 +11,7 @@ import User from "../models/User.js";
 import { generateAccessToken } from "../utils/accessTokenUtils.js";
 import {
   generateRefreshToken,
-  refreshTokens,
+  refreshAccessToken,
   decodeRefreshToken,
 } from "../utils/refreshTokenUtils.js";
 import { compressMulterFile } from "../utils/imageUtils.js";
@@ -21,8 +21,7 @@ import { addToBlacklist } from "../utils/jwtBlacklist.js";
 export const register = async (req, res) => {
   try {
     const { email, password, name } = req.body;
-
-    console.log("회원가입 요청:", { email, name }); // 디버깅용
+    // console.log("회원가입 요청:", { email, name }); 
 
     // 이메일 중복 확인
     const existingUser = await User.findOne({ email });
@@ -38,13 +37,12 @@ export const register = async (req, res) => {
     });
     await user.save();
 
-    console.log("유저 생성 성공:", user._id); // 디버깅용
-
     res.status(201).json({
       message: "회원가입이 완료되었습니다. 로그인해주세요.",
     });
+    // console.log("유저 생성 성공:", user._id);
   } catch (error) {
-    console.error("회원가입 에러:", error); // 디버깅용
+    console.error("회원가입 에러:", error);
     res.status(500).json({
       message: "서버 오류가 발생했습니다.",
       error: error.message, // 개발 중에만 사용
@@ -106,9 +104,8 @@ export const login = async (req, res) => {
 // 토큰 갱신
 export const refresh = async (req, res) => {
   try {
-    const { refreshToken } = req.cookies; // body가 아닌 cookies에서 토큰을 가져옵니다.
-
-    const result = await refreshTokens(refreshToken);
+    const { refreshToken } = req.cookies; // body가 아닌 cookies에서 '리프레시 토큰' 을 가져옵니다.
+    const result = await refreshAccessToken(refreshToken); // Refresh Token을 사용하여 새로운 Access Token 생성
     res.json(result);
   } catch (error) {
     console.error("토큰 갱신 오류:", error);
@@ -146,119 +143,72 @@ export const updateProfile = async (req, res) => {
     const { name, currentPassword, newPassword } = req.body;
     const userId = req.user._id;
 
-    console.log("프로필 업데이트 요청:", {
-      hasName: !!name,
-      hasNewPassword: !!newPassword,
-      hasImage: !!req.file,
-    });
-
-    const updateData = {};
-
-    // 이름 수정
-    if (name) {
-      updateData.name = name;
+    // 1. 함수 시작 시 사용자 정보를 한 번만 조회합니다.
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "사용자를 찾을 수 없습니다." });
     }
 
-    // 비밀번호 수정
+    let isModified = false; // 변경사항 여부를 추적할 플래그
+
+    // 2. 이름 수정 로직
+    if (name && user.name !== name) {
+      user.name = name;
+      isModified = true;
+    }
+
+    // 3. 비밀번호 수정 로직 (이미 조회된 user 객체 사용)
     if (newPassword) {
-      // 현재 비밀번호 검증
       if (!currentPassword) {
-        return res
-          .status(400)
-          .json({ message: "현재 비밀번호를 입력해주세요." });
+        return res.status(400).json({ message: "현재 비밀번호를 입력해주세요." });
       }
 
-      // 유저 정보 가져오기
-      const user = await User.findById(userId);
-      if (!user) {
-        return res.status(404).json({ message: "사용자를 찾을 수 없습니다." });
-      }
-
-      // 현재 비밀번호 확인
-      const isCurrentPasswordValid =
-        await user.comparePassword(currentPassword);
+      const isCurrentPasswordValid = await user.comparePassword(currentPassword);
       if (!isCurrentPasswordValid) {
-        return res
-          .status(400)
-          .json({ message: "현재 비밀번호가 올바르지 않습니다." });
+        return res.status(400).json({ message: "현재 비밀번호가 올바르지 않습니다." });
       }
 
-      // 새 비밀번호가 현재 비밀번호와 동일한지 확인
       if (currentPassword === newPassword) {
-        return res
-          .status(400)
-          .json({ message: "새 비밀번호는 현재 비밀번호와 달라야 합니다." });
+        return res.status(400).json({ message: "새 비밀번호는 현재 비밀번호와 달라야 합니다." });
       }
-
-      updateData.passwordHash = newPassword; // User 모델의 pre-save 미들웨어에서 자동 해싱
+      
+      user.passwordHash = newPassword; // pre-save 훅이 해싱을 처리
+      isModified = true;
     }
 
-    // 프로필 이미지 수정
+    // 4. 프로필 이미지 수정 로직
     if (req.file) {
       try {
-        console.log("프로필 이미지 압축 시작...");
-
         const compressionResult = await compressMulterFile(
           req.file,
           { maxWidth: 300, maxHeight: 300, quality: 85 },
           "profile"
         );
-
-        console.log("프로필 이미지 압축 완료:", {
-          원본크기: `${compressionResult.original.sizeKB}KB`,
-          압축크기: `${compressionResult.compressed.sizeKB}KB`,
-          압축률: `${compressionResult.compressionRatio}%`,
-          절약공간: `${Math.round((compressionResult.savedSpace / 1024) * 100) / 100}KB`,
-        });
-
-        updateData.profileImg = compressionResult.compressed.base64;
+        user.profileImg = compressionResult.compressed.base64;
+        isModified = true;
       } catch (compressionError) {
         console.error("프로필 이미지 압축 실패:", compressionError);
         return res.status(400).json({ message: "이미지 압축에 실패했습니다." });
       }
     }
 
-    // 데이터가 없으면 에러
-    if (Object.keys(updateData).length === 0) {
-      return res.status(400).json({ message: "업데이트할 데이터가 없습니다." });
+    // 5. 변경사항이 있는지 최종 확인
+    if (!isModified) {
+      return res.status(400).json({ message: "업데이트할 새로운 데이터가 없습니다." });
     }
 
-    // 유저 정보 업데이트 (비밀번호 변경이 아닌 경우에만 user 객체 재조회)
-    let user;
-    if (!newPassword) {
-      user = await User.findById(userId);
-      if (!user) {
-        return res.status(404).json({ message: "사용자를 찾을 수 없습니다." });
-      }
-    } else {
-      // 비밀번호 변경의 경우 이미 위에서 user 객체를 가져왔으므로 재사용
-      user = await User.findById(userId);
-      if (!user) {
-        return res.status(404).json({ message: "사용자를 찾을 수 없습니다." });
-      }
-    }
-
-    // 업데이트할 필드들을 설정
-    if (name) user.name = name;
-    if (newPassword) user.passwordHash = newPassword; // pre-save 미들웨어가 자동으로 해싱
-    if (req.file) user.profileImg = updateData.profileImg;
-
-    // save()를 사용하여 pre-save 미들웨어 실행
+    // 6. 한 번의 save() 호출로 모든 변경사항을 저장 (pre-save 훅 자동 실행)
     await user.save();
-
-    // 비밀번호 필드를 제외한 사용자 정보 반환
-    const updatedUser = await User.findById(userId).select("-passwordHash");
-
-    console.log("프로필 수정 성공:", updatedUser._id);
 
     res.json({
       message: "프로필이 성공적으로 업데이트되었습니다.",
     });
+
   } catch (error) {
     console.error("프로필 업데이트 오류:", error);
     res.status(500).json({
       message: "프로필 업데이트 중 오류가 발생했습니다.",
-      error: error.message, // 개발 중에만 사용
+      error: error.message,
     });
   }
 };

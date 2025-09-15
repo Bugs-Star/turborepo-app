@@ -1,66 +1,74 @@
+/* ------------------------------------------------------------
+ * File      : /src/controllers/orderController.js
+ * Brief     : 주문 관련 컨트롤러
+ * Author    : 송용훈
+ * Date      : 2025-08-14
+ * Version   : 
+ * History
+ * ------------------------------------------------------------*/
+
 import User from '../models/User.js';
 import Product from '../models/Product.js';
 import Order from '../models/Order.js';
 import mongoose from 'mongoose';
-import { getNextSequenceValue } from '../utils/sequenceUtil.js';
+import { generateOrderNumber } from '../utils/generateOrderNumber.js';
 
 // 주문 생성 (결제)
 export const createOrder = async (req, res) => {
+  // -- 1. 주문 번호 채번 (트랜잭션 외부) ---
+  // ---- 이 작업은 롤백되어서는 안 되므로 트랜잭션 밖에서 수행합니다.
+  // ---- 이렇게 하면 다른 트랜잭션이 실패하고 롤백되더라도 시퀀스는 이미 증가했으므로
+  // ---- 중복된 주문 번호가 생성되는 것을 방지할 수 있습니다.
+  const orderNumber = await generateOrderNumber();
+
+  // -- 2. 주문 생성 트랜잭션 시작 ---
   const session = await mongoose.startSession();
   session.startTransaction();
 
   try {
-    const userId = req.user._id;  // .id → ._id로 수정
+    // 유효성 검사
+    // -- 결제 수단 검증
     const { paymentMethod = 'card' } = req.body;
-
-    // Fetch 요청 로그
-    // console.log('[FETCH] 주문 생성 요청:', {
-    //   method: req.method,
-    //   url: req.originalUrl,
-    //   userId: userId,
-    //   paymentMethod: paymentMethod,
-    //   userAgent: req.get('User-Agent'),
-    //   timestamp: new Date().toISOString()
-    // });
-
-    // 결제 수단 검증
     const validPaymentMethods = ['card', 'cash', 'point'];
     if (!validPaymentMethods.includes(paymentMethod)) {
       await session.abortTransaction();
       return res.status(400).json({ message: '유효하지 않은 결제 수단입니다.' });
     }
 
-    // 사용자 조회
+    // -- 사용자 조회
+    const userId = req.user._id;  // .id → ._id로 수정
     const user = await User.findById(userId).session(session);
     if (!user) {
       await session.abortTransaction();
       return res.status(404).json({ message: '사용자를 찾을 수 없습니다.' });
     }
 
-    // 카트가 비어있는지 확인
+    // -- 카트가 비어있는지 확인
     if (!user.cart || user.cart.length === 0) {
       await session.abortTransaction();
       return res.status(400).json({ message: '장바구니가 비어있습니다.' });
     }
 
-    // 카트 아이템들의 상품 정보 조회
+    // -- 카트 아이템들의 상품 정보 조회
     const productIds = user.cart.map(item => item.productId);
     const products = await Product.find({ _id: { $in: productIds } }).session(session);
     const productMap = new Map(products.map(product => [product._id.toString(), product]));
 
-    // 주문 아이템 생성 및 재고 확인
+    // -- 주문 아이템 생성 및 재고 확인
     const orderItems = [];
     let totalPrice = 0;
 
+    // -- 주문 아이템 검증
     for (const cartItem of user.cart) {
       const product = productMap.get(cartItem.productId.toString());
-      
+
+      // 카트 물품 재확인 - 사용자가 상품을 카트에 담았는데, 관리작 그 상품을 삭제한 경우 처리
       if (!product) {
         await session.abortTransaction();
         return res.status(400).json({ message: '존재하지 않는 상품이 포함되어 있습니다.' });
       }
 
-      // 재고 확인
+      // 재고 확인 - 프론트에서도 처리하지만, 백엔드도 한번 더 재고 확인
       if (product.currentStock < cartItem.quantity) {
         await session.abortTransaction();
         return res.status(400).json({ 
@@ -72,7 +80,7 @@ export const createOrder = async (req, res) => {
       product.currentStock -= cartItem.quantity;
       await product.save({ session });
 
-      // 주문 아이템 생성
+      // 확인된 주문 아이템 푸쉬
       const subtotal = product.price * cartItem.quantity;
       totalPrice += subtotal;
 
@@ -86,23 +94,10 @@ export const createOrder = async (req, res) => {
       });
     }
 
-    // 주문 번호 생성
-    const today = new Date();
-    const dateStr = today.getFullYear().toString() +
-                   (today.getMonth() + 1).toString().padStart(2, '0') +
-                   today.getDate().toString().padStart(2, '0');
-    const sequenceName = `order_${dateStr}`;
-
-    // -- 원자적으로 시퀀스 값을 가져옴 (트랜잭션 세션 전달)
-    const sequence = await getNextSequenceValue(sequenceName, session);
-
-    // -- 'YYYYMMDD-XXXXX' 형식의 최종 주문번호를 생성하여 현재 문서에 할당
-    const orderNumber = `${dateStr}-${sequence.toString().padStart(5, '0')}`;
-
-    // 주문 생성
+    // -- 주문 생성
     const order = new Order({
       userId: user._id,
-      orderNumber: orderNumber, // 생성된 주문번호를 직접 할당
+      orderNumber: orderNumber, // 외부에서 생성된 주문번호를 할당
       items: orderItems,
       totalPrice: totalPrice,
       paymentMethod: paymentMethod
@@ -110,19 +105,11 @@ export const createOrder = async (req, res) => {
 
     await order.save({ session });
 
-    // 카트 비우기
+    // -- 카트 비우기
     user.cart = [];
     await user.save({ session });
 
     await session.commitTransaction();
-
-    // Fetch 응답 로그
-    // console.log('[FETCH] 주문 생성 완료:', {
-    //   orderNumber: orderNumber,
-    //   totalPrice: totalPrice,
-    //   itemCount: orderItems.length,
-    //   timestamp: new Date().toISOString()
-    // });
 
     res.json({
       success: true,
@@ -131,10 +118,28 @@ export const createOrder = async (req, res) => {
 
   } catch (error) {
     await session.abortTransaction();
-    console.error('[FETCH ERROR] 주문 생성 오류:', {
+
+    // E11000 중복 키 오류(orderNumber)인지 확인하여 멱등성 처리
+    if (error.name === 'MongoServerError' && error.code === 11000 && error.keyPattern && error.keyPattern.orderNumber === 1) {
+      console.log(`[ORDER_CREATE] Gracefully handling duplicate key error for orderNumber: ${orderNumber}. Ensuring cart is cleared.`);
+      
+      const userId = req.user._id;
+      await User.findByIdAndUpdate(userId, { $set: { cart: [] } });
+
+      return res.json({
+        success: true,
+        message: '주문이 성공적으로 처리되었습니다 (중복 요청).',
+        isDuplicate: true
+      });
+    }
+
+    // 그 외 다른 모든 오류 (500)
+    console.error('[ERROR] 주문 생성 중 심각한 오류 발생:', {
       error: error.message,
+      orderNumber: orderNumber, // 실패한 주문 번호 로깅
       timestamp: new Date().toISOString()
     });
+
     res.status(500).json({ 
       message: '서버 오류가 발생했습니다.',
       error: error.message 
@@ -150,37 +155,30 @@ export const getMyOrders = async (req, res) => {
     const userId = req.user._id;  // .id → ._id로 수정
     const { page = 1, limit = 10 } = req.query;
 
-    // Fetch 요청 로그
-    // console.log('[FETCH] 주문 목록 조회 요청:', {
-    //   method: req.method,
-    //   url: req.originalUrl,
-    //   userId: userId,
-    //   page: page,
-    //   limit: limit,
-    //   userAgent: req.get('User-Agent'),
-    //   timestamp: new Date().toISOString()
-    // });
-
     const orders = await Order.find({ userId })
       .sort({ createdAt: -1 })
       .limit(limit * 1)
       .skip((page - 1) * limit)
-      .populate('items.productId', 'productName productImg price');
+      .populate({
+        path: 'items.productId',
+        select: 'category'
+      });
 
     const total = await Order.countDocuments({ userId });
-
-    // Fetch 응답 로그
-    // console.log('[FETCH] 주문 목록 조회 완료:', {
-    //   foundOrders: orders.length,
-    //   totalOrders: total,
-    //   timestamp: new Date().toISOString()
-    // });
 
     res.json({
       orders: orders.map(order => ({
         _id: order._id,
         orderNumber: order.orderNumber,
-        items: order.items,
+        items: order.items.map(item => ({
+          productId: item.productId ? item.productId._id : null,
+          productName: item.productName,
+          productImg: item.productImg,
+          price: item.price,
+          quantity: item.quantity,
+          subtotal: item.subtotal,
+          category: item.productId ? item.productId.category : null
+        })),
         totalPrice: order.totalPrice,
         paymentMethod: order.paymentMethod,
         createdAt: order.createdAt
@@ -193,7 +191,7 @@ export const getMyOrders = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('[FETCH ERROR] 주문 목록 조회 오류:', {
+    console.error('[ERROR] 주문 목록 조회 오류:', {
       error: error.message,
       timestamp: new Date().toISOString()
     });
@@ -204,77 +202,3 @@ export const getMyOrders = async (req, res) => {
   }
 };
 
-// 주문 상세 조회
-export const getOrder = async (req, res) => {
-  try {
-    const { orderId } = req.params;
-
-    if (!mongoose.Types.ObjectId.isValid(orderId)) {
-      return res.status(400).json({ message: '유효하지 않은 주문 ID입니다.' });
-    }
-
-    // 관리자인지 일반 사용자인지 확인
-    const isAdmin = req.admin;
-    const userId = req.user?._id;  // .id → ._id로 수정
-
-    // Fetch 요청 로그
-    console.log('[FETCH] 주문 상세 조회 요청:', {
-      method: req.method,
-      url: req.originalUrl,
-      orderId: orderId,
-      userId: userId,
-      isAdmin: isAdmin,
-      userAgent: req.get('User-Agent'),
-      timestamp: new Date().toISOString()
-    });
-
-    let query = { _id: orderId };
-
-    if (!isAdmin) {
-      // 일반 사용자: 자신의 주문만 조회
-      if (!userId) {
-        return res.status(401).json({ message: '인증이 필요합니다.' });
-      }
-      query.userId = userId;
-    }
-
-    const order = await Order.findOne(query)
-      .populate('userId', 'name email')  // 사용자 정보 포함
-      .populate('items.productId', 'productName productImg price category');
-
-    if (!order) {
-      return res.status(404).json({ message: '주문을 찾을 수 없습니다.' });
-    }
-
-    // Fetch 응답 로그
-    console.log('[FETCH] 주문 상세 조회 완료:', {
-      orderNumber: order.orderNumber,
-      totalPrice: order.totalPrice,
-      timestamp: new Date().toISOString()
-    });
-
-    res.json({
-      order: {
-        _id: order._id,
-        orderNumber: order.orderNumber,
-        userId: isAdmin ? {
-          _id: order.userId._id,
-          name: order.userId.name,
-          email: order.userId.email
-        } : undefined,
-        items: order.items,
-        totalPrice: order.totalPrice,
-        paymentMethod: order.paymentMethod,
-        createdAt: order.createdAt,
-        updatedAt: order.updatedAt
-      }
-    });
-
-  } catch (error) {
-    console.error('[FETCH ERROR] 주문 상세 조회 오류:', {
-      error: error.message,
-      timestamp: new Date().toISOString()
-    });
-    res.status(500).json({ message: '서버 오류가 발생했습니다.' });
-  }
-};

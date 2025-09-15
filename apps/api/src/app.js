@@ -35,12 +35,13 @@ app.use(cors({
 
 // -- Helmet 설정
 app.use(helmet()); 
+// -- cookie parser
 app.use(cookieParser()); 
 
 // Middleware 설정
 // -- Body Parser
-app.use(express.json());  // JSON 형식으로 된 요청 본문을 파싱해 req.body 객체에 담아줍니다.
-app.use(express.urlencoded({ extended: true })); // Form-data 처리
+app.use(express.json());                         // Content-Type: application/json 형식의 요청 본문을 파싱해 req.body 객체에 담아줌.
+app.use(express.urlencoded({ extended: true })); // Content-Type: application/x-www-form-urlencoded 형식(주로 HTML 폼 제출)의 요청 본문을 파싱
 
 // Route 설정
 app.use("/", routes);

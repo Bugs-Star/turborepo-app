@@ -1,3 +1,12 @@
+/* ------------------------------------------------------------
+ * File      : /src/controllers/cartController.js
+ * Brief     : 카트 관련 컨트롤러
+ * Author    : 송용훈
+ * Date      : 2025-08-15
+ * Version   : 
+ * History
+ * ------------------------------------------------------------*/
+
 import User from "../models/User.js";
 import Product from "../models/Product.js";
 import mongoose from "mongoose";
