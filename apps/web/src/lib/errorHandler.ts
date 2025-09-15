@@ -17,6 +17,9 @@
 
 import { logger } from "./logger";
 
+// 에러 로그 중복 방지를 위한 Map
+const errorLogTracker = new Map<string, number>();
+
 // 에러 분류 타입
 export interface ErrorClassification {
   type:
@@ -53,9 +56,28 @@ export interface ErrorContext {
  * 에러 분류 시스템
  * 정말 중요한 에러만 즉시 전송하도록 엄격하게 분류
  */
-const classifyError = (error: any): ErrorClassification => {
+// 타입 가드 함수들
+interface AxiosErrorLike {
+  response?: {
+    status: number;
+    data?: { message?: string };
+  };
+  config?: {
+    url?: string;
+    data?: unknown;
+  };
+  request?: unknown;
+  message?: string;
+  name?: string;
+}
+
+const isAxiosError = (error: unknown): error is AxiosErrorLike => {
+  return typeof error === "object" && error !== null;
+};
+
+const classifyError = (error: unknown): ErrorClassification => {
   // HTTP 상태 코드별 분류
-  if (error.response?.status >= 500) {
+  if (isAxiosError(error) && error.response && error.response.status >= 500) {
     return {
       type: "server_error",
       isCritical: true,
@@ -65,7 +87,7 @@ const classifyError = (error: any): ErrorClassification => {
     };
   }
 
-  if (error.response?.status === 401) {
+  if (isAxiosError(error) && error.response && error.response.status === 401) {
     return {
       type: "authentication_error",
       isCritical: true,
@@ -74,7 +96,7 @@ const classifyError = (error: any): ErrorClassification => {
     };
   }
 
-  if (error.response?.status === 403) {
+  if (isAxiosError(error) && error.response && error.response.status === 403) {
     return {
       type: "authorization_error",
       isCritical: true,
@@ -84,7 +106,12 @@ const classifyError = (error: any): ErrorClassification => {
   }
 
   // 4xx 에러들은 모두 배치 전송 (중요하지 않음)
-  if (error.response?.status >= 400 && error.response?.status < 500) {
+  if (
+    isAxiosError(error) &&
+    error.response &&
+    error.response.status >= 400 &&
+    error.response.status < 500
+  ) {
     // 서버에서 반환한 구체적인 에러 메시지 확인
     const serverMessage = error.response?.data?.message;
 
@@ -108,7 +135,7 @@ const classifyError = (error: any): ErrorClassification => {
   }
 
   // 네트워크 에러는 배치 전송 (일시적 문제)
-  if (error.request && !error.response) {
+  if (isAxiosError(error) && error.request && !error.response) {
     return {
       type: "network_error",
       isCritical: false,
@@ -118,14 +145,22 @@ const classifyError = (error: any): ErrorClassification => {
   }
 
   // 비즈니스 로직별 분류 (더 엄격하게)
-  const errorMessage = error.message?.toLowerCase() || "";
-  const context = error.config?.url || "";
+  const errorMessage = isAxiosError(error)
+    ? error.message?.toLowerCase() || ""
+    : "";
+  const context = isAxiosError(error) ? error.config?.url || "" : "";
 
   // 결제 관련 에러만 즉시 전송 (금융 보안)
   if (
     (errorMessage.includes("payment") && errorMessage.includes("fail")) ||
-    (context.includes("payment") && error.response?.status >= 400) ||
-    (context.includes("order") && error.response?.status >= 400)
+    (context.includes("payment") &&
+      isAxiosError(error) &&
+      error.response &&
+      error.response.status >= 400) ||
+    (context.includes("order") &&
+      isAxiosError(error) &&
+      error.response &&
+      error.response.status >= 400)
   ) {
     return {
       type: "payment_error",
@@ -139,7 +174,10 @@ const classifyError = (error: any): ErrorClassification => {
   // 인증 관련 에러만 즉시 전송 (보안)
   if (
     (errorMessage.includes("login") && errorMessage.includes("fail")) ||
-    (errorMessage.includes("auth") && error.response?.status >= 400)
+    (errorMessage.includes("auth") &&
+      isAxiosError(error) &&
+      error.response &&
+      error.response.status >= 400)
   ) {
     return {
       type: "authentication_error",
@@ -161,8 +199,11 @@ const classifyError = (error: any): ErrorClassification => {
 /**
  * 민감한 정보 필터링
  */
-const sanitizeErrorData = (error: any): any => {
-  const sanitized = { ...error };
+const sanitizeErrorData = (error: unknown): unknown => {
+  if (typeof error !== "object" || error === null) {
+    return error;
+  }
+  const sanitized = { ...error } as Record<string, unknown>;
 
   // 민감한 정보 제거
   delete sanitized.password;
@@ -171,29 +212,40 @@ const sanitizeErrorData = (error: any): any => {
   delete sanitized.token;
 
   // 요청/응답 데이터에서 민감 정보 제거
-  if (sanitized.config?.data) {
+  if (
+    sanitized.config &&
+    typeof sanitized.config === "object" &&
+    "data" in sanitized.config
+  ) {
     try {
+      const configData = sanitized.config.data;
       const data =
-        typeof sanitized.config.data === "string"
-          ? JSON.parse(sanitized.config.data)
-          : sanitized.config.data;
+        typeof configData === "string" ? JSON.parse(configData) : configData;
 
-      delete data.password;
-      delete data.accessToken;
-      delete data.refreshToken;
+      if (typeof data === "object" && data !== null) {
+        delete (data as Record<string, unknown>).password;
+        delete (data as Record<string, unknown>).accessToken;
+        delete (data as Record<string, unknown>).refreshToken;
+      }
 
-      sanitized.config.data = data;
+      (sanitized.config as Record<string, unknown>).data = data;
     } catch {
       // JSON 파싱 실패 시 원본 유지
     }
   }
 
-  if (sanitized.response?.data) {
-    const responseData = { ...sanitized.response.data };
+  if (
+    sanitized.response &&
+    typeof sanitized.response === "object" &&
+    "data" in sanitized.response
+  ) {
+    const responseData = {
+      ...(sanitized.response.data as Record<string, unknown>),
+    };
     delete responseData.password;
     delete responseData.accessToken;
     delete responseData.refreshToken;
-    sanitized.response.data = responseData;
+    (sanitized.response as Record<string, unknown>).data = responseData;
   }
 
   return sanitized;
@@ -202,13 +254,15 @@ const sanitizeErrorData = (error: any): any => {
 /**
  * 에러 컨텍스트 정보 수집
  */
-const collectErrorContext = (error: any, context: string): ErrorContext => {
+const collectErrorContext = (error: unknown, context: string): ErrorContext => {
   const sanitizedError = sanitizeErrorData(error);
 
   return {
-    errorMessage: error.message || "Unknown error",
-    error_code: error.response?.status,
-    error_type: error.name || "Error",
+    errorMessage: isAxiosError(error)
+      ? error.message || "Unknown error"
+      : "Unknown error",
+    error_code: isAxiosError(error) ? error.response?.status : undefined,
+    error_type: isAxiosError(error) ? error.name || "Error" : "Error",
     context: context,
     component: getCurrentComponent(),
     page: typeof window !== "undefined" ? window.location.pathname : "",
@@ -216,9 +270,13 @@ const collectErrorContext = (error: any, context: string): ErrorContext => {
     session_id: getSessionId(),
     browser: typeof navigator !== "undefined" ? navigator.userAgent : "",
     timestamp: new Date().toISOString(),
-    endpoint: error.config?.url,
-    request_data: sanitizedError.config?.data,
-    response_data: sanitizedError.response?.data,
+    endpoint: isAxiosError(error) ? error.config?.url : undefined,
+    request_data: isAxiosError(sanitizedError)
+      ? sanitizedError.config?.data
+      : undefined,
+    response_data: isAxiosError(sanitizedError)
+      ? sanitizedError.response?.data
+      : undefined,
   };
 };
 
@@ -272,13 +330,13 @@ const getSessionId = (): string => {
 /**
  * 사용자 알림 처리
  */
-const notifyUser = (error: any, classification: ErrorClassification) => {
+const notifyUser = (error: unknown, classification: ErrorClassification) => {
   // 개발 환경에서는 콘솔에도 출력
   if (process.env.NODE_ENV === "development") {
     console.error(`[${classification.type.toUpperCase()}]`, {
-      message: error.message,
-      status: error.response?.status,
-      url: error.config?.url,
+      message: isAxiosError(error) ? error.message : "Unknown error",
+      status: isAxiosError(error) ? error.response?.status : undefined,
+      url: isAxiosError(error) ? error.config?.url : undefined,
       classification: classification,
     });
   }
@@ -294,7 +352,7 @@ export class ErrorHandler {
   /**
    * 에러 처리 메인 함수
    */
-  static handle(error: any, context: string) {
+  static handle(error: unknown, context: string) {
     try {
       // 1. 에러 분류
       const classification = classifyError(error);
@@ -305,7 +363,29 @@ export class ErrorHandler {
       // 3. 에러 컨텍스트 수집
       const errorContext = collectErrorContext(error, context);
 
-      // 4. 로깅 (중요도에 따라)
+      // 4. 로깅 (중요도에 따라, 중복 방지)
+      const errorKey = `${errorContext.context}_${errorContext.component}_${errorContext.error_type}`;
+      const now = Date.now();
+      const lastLogTime = errorLogTracker.get(errorKey) || 0;
+
+      // 같은 에러에 대해 5초 이내 중복 로그 방지
+      if (now - lastLogTime < 5000) {
+        console.log(
+          `🔄 에러 로그 중복 방지: ${errorKey} (${now - lastLogTime}ms 전에 로그됨)`
+        );
+        return;
+      }
+
+      errorLogTracker.set(errorKey, now);
+
+      // Map 크기 제한 (메모리 누수 방지)
+      if (errorLogTracker.size > 100) {
+        const oldestKey = errorLogTracker.keys().next().value;
+        if (oldestKey) {
+          errorLogTracker.delete(oldestKey);
+        }
+      }
+
       if (classification.isCritical) {
         // 즉시 전송 (중요한 에러)
         logger.log("clickInteraction", {
@@ -318,10 +398,15 @@ export class ErrorHandler {
           userFriendlyMessage: classification.userFriendlyMessage,
         });
       } else {
-        // 배치 전송 (일반적인 에러) - 일반 로그로 처리
-        logger.log("viewScreen", {
-          screenName: "error_page",
-          previousScreenName: errorContext.page,
+        // 배치 전송 (일반적인 에러) - 임시로 criticalError 사용
+        logger.log("clickInteraction", {
+          interactionType: "criticalError",
+          targetId: "error_handler",
+          targetName: "일반 오류",
+          sourceComponent: "error_handler",
+          ...errorContext,
+          priority: classification.priority,
+          userFriendlyMessage: classification.userFriendlyMessage,
         });
       }
 
@@ -339,7 +424,7 @@ export class ErrorHandler {
           targetName: "에러 핸들러 실패",
           sourceComponent: "error_handler",
           errorMessage: "Error handler failed",
-          originalError: error.message,
+          originalError: isAxiosError(error) ? error.message : "Unknown error",
           handlerError:
             handlerError instanceof Error
               ? handlerError.message
@@ -361,7 +446,7 @@ export class ErrorHandler {
    * 분석 데이터 수집 (향후 확장용)
    */
   private static collectAnalytics(
-    error: any,
+    error: unknown,
     context: string,
     classification: ErrorClassification
   ) {
@@ -381,7 +466,7 @@ export class ErrorHandler {
   /**
    * 특정 에러 타입만 처리
    */
-  static handleCritical(error: any, context: string) {
+  static handleCritical(error: unknown, context: string) {
     const classification = classifyError(error);
     if (classification.isCritical) {
       this.handle(error, context);
@@ -391,7 +476,7 @@ export class ErrorHandler {
   /**
    * 사용자 친화적 메시지만 반환
    */
-  static getUserFriendlyMessage(error: any): string {
+  static getUserFriendlyMessage(error: unknown): string {
     const classification = classifyError(error);
     return classification.userFriendlyMessage;
   }
@@ -399,7 +484,7 @@ export class ErrorHandler {
   /**
    * 에러가 중요한지 확인
    */
-  static isCritical(error: any): boolean {
+  static isCritical(error: unknown): boolean {
     const classification = classifyError(error);
     return classification.isCritical;
   }
