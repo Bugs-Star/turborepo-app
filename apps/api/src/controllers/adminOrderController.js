@@ -1,3 +1,12 @@
+/* ------------------------------------------------------------
+ * File      : /src/controllers/adminOrderController.js
+ * Brief     : 주문 관련 컨트롤러
+ * Author    : 송용훈
+ * Date      : 2025-08-15
+ * Version   : 
+ * History
+ * ------------------------------------------------------------*/
+
 import Order from '../models/Order.js';
 import User from '../models/User.js';
 import mongoose from 'mongoose';

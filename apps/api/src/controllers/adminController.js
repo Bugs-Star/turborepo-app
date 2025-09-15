@@ -1,3 +1,12 @@
+/* ------------------------------------------------------------
+ * File      : /src/controllers/adminController.js
+ * Brief     : Admin 관련 컨트롤러
+ * Author    : 송용훈
+ * Date      : 2025-08-15
+ * Version   : 
+ * History
+ * ------------------------------------------------------------*/
+
 import Admin from '../models/Admin.js';
 import { addToBlacklist } from '../utils/jwtBlacklist.js';
 import { generateAccessToken } from '../utils/accessTokenUtils.js';
