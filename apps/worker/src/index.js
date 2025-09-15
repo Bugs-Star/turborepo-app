@@ -84,34 +84,24 @@ async function runAllAggregations() {
   try {
     console.log("[Worker] Aggregation started");
 
-    await aggregateSummaryStats("daily");
     await aggregateSummaryStats("weekly");
     await aggregateSummaryStats("monthly");
-    await aggregateSummaryStats("yearly");
 
-    await aggregateBestSellers("daily");
     await aggregateBestSellers("weekly");
     await aggregateBestSellers("monthly");
-    await aggregateBestSellers("yearly");
 
-    await aggregateGoldenPath("daily");
     await aggregateGoldenPath("weekly");
     await aggregateGoldenPath("monthly");
-    await aggregateGoldenPath("yearly");
     
-    await aggregatePurchaseGoldenPath("daily");
     await aggregatePurchaseGoldenPath("weekly");
     await aggregatePurchaseGoldenPath("monthly");
-    await aggregatePurchaseGoldenPath("yearly");
 
     console.log(
       "[Worker] Individual aggregations completed. Starting RAG unified aggregation..."
     );
 
-    await aggregateRagUnifiedSummary("daily");
     await aggregateRagUnifiedSummary("weekly");
     await aggregateRagUnifiedSummary("monthly");
-    await aggregateRagUnifiedSummary("yearly");
 
     console.log("[Worker] All aggregations completed successfully");
   } catch (err) {
