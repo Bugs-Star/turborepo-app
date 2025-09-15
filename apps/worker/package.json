@@ -5,7 +5,8 @@
   "description": "",
   "main": "index.js",
    "scripts": {
-    "dev": "concurrently \"nodemon src/index.js\" \"nodemon src/immediateWorker.js\""
+    "dev": "concurrently \"nodemon src/index.js\" \"nodemon src/immediateWorker.js\"",
+    "start": "node src/index.js & node src/immediateWorker.js"
   },
   "keywords": [],
   "author": "",
