@@ -29,11 +29,7 @@ export const REDIS_CONSUMER_NAME = `worker_${Math.random()
 export const CLICKHOUSE_CONFIG = {
   // url: "http://default:1234@localhost:8123", // HTTP URL 형식
   // debug: true,
-  url: process.env.CLICKHOUSE_HOST,
-  basicAuth: {
-    username: process.env.CLICKHOUSE_USERNAME,
-    password: process.env.CLICKHOUSE_PASSWORD,
-  },
+  url: `https://${process.env.CLICKHOUSE_USERNAME}:${process.env.CLICKHOUSE_PASSWORD}@${process.env.CLICKHOUSE_HOST.replace('https://', '')}`,
   debug: false,
 };
 

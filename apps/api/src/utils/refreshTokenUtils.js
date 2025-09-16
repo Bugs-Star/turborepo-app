@@ -28,6 +28,19 @@ export const verifyRefreshToken = (token) => {
   }
 };
 
+// Refresh Token 토큰 만료 시간 확인
+export const isRefreshTokenExpired = (token) => {
+  try {
+    const decoded = jwt.decode(token);
+    if (!decoded || !decoded.exp) return true;
+    
+    const currentTime = Math.floor(Date.now() / 1000);
+    return decoded.exp < currentTime;
+  } catch (error) {
+    return true;
+  }
+};
+
 // Refresh Token에서 페이로드 추출 (검증 없이)
 export const decodeRefreshToken = (token) => {
   return jwt.decode(token);

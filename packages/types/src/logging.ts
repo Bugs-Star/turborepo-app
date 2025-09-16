@@ -73,6 +73,8 @@ export type InteractionType =
   | "loginFailure"
   | "signupFailure"
   | "criticalError"
+  // 일반 에러 (배치 전송)
+  | "generalError"
   // 상품 탐색 및 발견
   | "productCard"
   | "categoryLink"
