@@ -224,6 +224,9 @@ importers:
       dotenv:
         specifier: ^17.2.1
         version: 17.2.1
+      ioredis:
+        specifier: ^5.4.1
+        version: 5.7.0
       node-fetch:
         specifier: ^3.3.2
         version: 3.3.2
