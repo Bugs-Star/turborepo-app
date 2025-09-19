@@ -1,0 +1,87 @@
+version: '3.9'
+
+x-airflow-common: &airflow-common
+  image: apache/airflow:2.9.2-python3.9
+  restart: always
+  environment:
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
+  depends_on:
+    postgres:
+      condition: service_healthy
+
+services:
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U airflow -d airflow"]
+      interval: 10s
+      retries: 5
+      start_period: 5s
+      timeout: 5s
+
+  airflow-init:
+    <<: *airflow-common
+    command: ["airflow", "db", "init"]
+
+  airflow-webserver:
+    <<: *airflow-common
+    ports:
+      - "8090:8080"
+    command: ["airflow", "webserver"]
+
+  airflow-scheduler:
+    <<: *airflow-common
+    command: ["airflow", "scheduler"]
+
+
+  spark-master:
+    image: bitnami/spark:3.5.1
+    environment:
+      SPARK_MODE: master
+    ports:
+      - "7077:7077"
+      - "8082:8080"
+
+  spark-worker:
+    image: bitnami/spark:3.5.1
+    environment:
+      SPARK_MODE: worker
+      SPARK_MASTER_URL: spark://spark-master:7077
+    depends_on:
+      - spark-master
+
+  milvus:
+    image: milvusdb/milvus:v2.3.9
+    container_name: milvus_standalone
+    ports:
+      - "19530:19530"
+      - "9091:9091"
+    volumes:
+      - ./milvus_data:/milvus/data
+
+volumes:
+  postgres_data:
+
+
+  # clickhouse-server:
+  #   image: clickhouse/clickhouse-server:24.3
+  #   container_name: clickhouse_server
+  #   ports:
+  #     - "8123:8123"
+  #     - "9000:9000"
+  #   volumes:
+  #     - clickhouse_data:/var/lib/clickhouse
+  #   ulimits:
+  #     nofile:
+  #       soft: 262144
+  #       hard: 262144
+

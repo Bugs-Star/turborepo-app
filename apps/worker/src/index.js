@@ -1,12 +1,11 @@
 // index.js
 
-import { aggregateSummaryStats } from "./aggregators/summaryStats.js";
 import { aggregateBestSellers } from "./aggregators/bestSellers.js";
 import { aggregateGoldenPath } from "./aggregators/goldenPath.js";
 import { aggregatePurchaseGoldenPath } from "./aggregators/purchaseGoldenPathStats.js";
 import { aggregateRagUnifiedSummary } from "./aggregators/ragUnifiedSummary.js";
 
-import schedule from "node-schedule"; // cron 스타일 스케줄링
+import schedule from "node-schedule";
 
 import { REDIS_CONSUMER_NAME } from "./config/config.js";
 
@@ -14,35 +13,33 @@ import {
   ensureConsumerGroup,
   readMessages,
   ackMessages,
+  deleteMessages,  // 새로 추가: 메시지 삭제
+  trimStream       // 새로 추가: 스트림 길이 제한
 } from "./redis/redisClient.js";
 
 import { processMessages } from "./processor.js";
 import * as logger from "./logger.js";
 
-// --- 추가된 부분 시작 ---
-// ClickHouse 클라이언트에서 데이터베이스 초기화 함수를 가져옵니다.
 import { initializeDatabase } from "./clickhouse/clickhouseClient.js";
-// --- 추가된 부분 끝 ---
+import { aggregateSalesSummary } from "./aggregators/salesSummary.js";
+import { aggregateVisitorSummary } from "./aggregators/visitorSummary.js";
+import { aggregateKpiSummary } from "./aggregators/kpiSummary.js";
 
+// 스트림 최대 길이
+const STREAM_MAX_LEN = 1000;
 
 /**
  * 메인 애플리케이션을 시작하는 함수
  */
 async function startApp() {
-  // --- 추가된 부분 시작 ---
-  // 1. 다른 모든 로직보다 먼저 데이터베이스 스키마를 초기화합니다.
-  // 이렇게 하면 워커나 집계 작업이 테이블이 없는 상태에서 실행되는 것을 방지할 수 있습니다.
   await initializeDatabase();
-  // --- 추가된 부분 끝 ---
 
-  // 2. 데이터베이스가 준비되면, 메시지를 처리하는 워커 루프를 시작합니다.
   workerLoop().catch((err) => {
     logger.error("Worker fatal error:", err);
-    process.exit(1); // 비정상 종료
+    process.exit(1);
   });
 
-  // 3. 스케줄러를 설정하고, 서버 시작 시에도 집계를 한 번 실행합니다.
-  // 매일 새벽 3시에 실행
+  // 매일 새벽 3시 스케줄링
   schedule.scheduleJob("0 3 * * *", () => {
     console.log("[Scheduler] Running scheduled aggregation");
     runAllAggregations();
@@ -52,8 +49,9 @@ async function startApp() {
   runAllAggregations();
 }
 
-
-// 비동기 루프 함수: 메시지를 계속해서 처리하는 역할
+/**
+ * 워커 루프: 메시지를 계속해서 처리
+ */
 async function workerLoop() {
   await ensureConsumerGroup();
 
@@ -63,13 +61,24 @@ async function workerLoop() {
 
       if (messages.length === 0) {
         logger.info("No new messages. Waiting...");
+        await new Promise(r => setTimeout(r, 1000));
         continue;
       }
 
       await processMessages(messages);
 
       const ids = messages.map((m) => m[0]);
+
+      // ACK 처리
       await ackMessages(ids);
+
+      // 처리한 메시지 삭제
+      await deleteMessages(ids);
+
+      // 스트림 길이 제한
+      await trimStream(STREAM_MAX_LEN);
+
+      console.log(`[Worker] 처리 및 삭제 완료: ${ids.length}건`);
     } catch (err) {
       logger.error("Worker error:", err);
       await new Promise((r) => setTimeout(r, 3000));
@@ -78,40 +87,21 @@ async function workerLoop() {
 }
 
 /**
- * 모든 사전 집계 함수를 실행
+ * 모든 사전 집계 실행
  */
 async function runAllAggregations() {
   try {
     console.log("[Worker] Aggregation started");
 
-    await aggregateSummaryStats("daily");
-    await aggregateSummaryStats("weekly");
-    await aggregateSummaryStats("monthly");
-    await aggregateSummaryStats("yearly");
-
-    await aggregateBestSellers("daily");
-    await aggregateBestSellers("weekly");
-    await aggregateBestSellers("monthly");
-    await aggregateBestSellers("yearly");
-
-    await aggregateGoldenPath("daily");
-    await aggregateGoldenPath("weekly");
-    await aggregateGoldenPath("monthly");
-    await aggregateGoldenPath("yearly");
-    
-    await aggregatePurchaseGoldenPath("daily");
-    await aggregatePurchaseGoldenPath("weekly");
-    await aggregatePurchaseGoldenPath("monthly");
-    await aggregatePurchaseGoldenPath("yearly");
-
-    console.log(
-      "[Worker] Individual aggregations completed. Starting RAG unified aggregation..."
-    );
-
-    await aggregateRagUnifiedSummary("daily");
-    await aggregateRagUnifiedSummary("weekly");
-    await aggregateRagUnifiedSummary("monthly");
-    await aggregateRagUnifiedSummary("yearly");
+    for (const period of ["daily", "weekly", "monthly", "yearly"]) {
+      await aggregateSalesSummary(period);
+      await aggregateVisitorSummary(period);
+      await aggregateBestSellers(period);
+      await aggregateGoldenPath(period);
+      await aggregatePurchaseGoldenPath(period);
+      await aggregateRagUnifiedSummary(period);
+      await aggregateKpiSummary(period);
+    }
 
     console.log("[Worker] All aggregations completed successfully");
   } catch (err) {
@@ -119,11 +109,12 @@ async function runAllAggregations() {
   }
 }
 
-// --- 애플리케이션 시작 ---
+// 애플리케이션 시작
 startApp().catch((err) => {
   console.error("Failed to start the application:", err);
   process.exit(1);
 });
+
 
 // // index.js
 
@@ -131,76 +122,78 @@ startApp().catch((err) => {
 // import { aggregateBestSellers } from "./aggregators/bestSellers.js";
 // import { aggregateGoldenPath } from "./aggregators/goldenPath.js";
 // import { aggregatePurchaseGoldenPath } from "./aggregators/purchaseGoldenPathStats.js";
-// // 새로 만든 RAG 집계 함수를 import
 // import { aggregateRagUnifiedSummary } from "./aggregators/ragUnifiedSummary.js";
 
 // import schedule from "node-schedule"; // cron 스타일 스케줄링
 
-// // 설정 파일에서 이 워커의 고유 이름을 가져옵니다.
-// // 각 워커는 고유한 이름을 가지며, 같은 Redis Consumer Group 안에서 중복 없이 메시지를 처리합니다.
 // import { REDIS_CONSUMER_NAME } from "./config/config.js";
 
-// // Redis 스트림을 읽고 쓰는 데 필요한 기능들을 가져옵니다.
-// // - ensureConsumerGroup: 소비자 그룹이 없으면 생성
-// // - readMessages: 메시지 읽기
-// // - ackMessages: 메시지 처리 완료 후 확인(ACK)
 // import {
 //   ensureConsumerGroup,
 //   readMessages,
 //   ackMessages,
 // } from "./redis/redisClient.js";
 
-// // 메시지를 실제로 처리하는 비즈니스 로직이 들어있는 모듈입니다.
-// // 예: ClickHouse에 저장, 로그 집계 등
 // import { processMessages } from "./processor.js";
-
-// // 콘솔이나 파일에 로그를 남기기 위한 로거 모듈입니다.
-// // logger.info(), logger.error() 등의 함수로 로그를 기록할 수 있습니다.
 // import * as logger from "./logger.js";
+
+// // --- 추가된 부분 시작 ---
+// // ClickHouse 클라이언트에서 데이터베이스 초기화 함수를 가져옵니다.
+// import { initializeDatabase } from "./clickhouse/clickhouseClient.js";
+// // --- 추가된 부분 끝 ---
+
+
+// /**
+//  * 메인 애플리케이션을 시작하는 함수
+//  */
+// async function startApp() {
+//   // --- 추가된 부분 시작 ---
+//   // 1. 다른 모든 로직보다 먼저 데이터베이스 스키마를 초기화합니다.
+//   // 이렇게 하면 워커나 집계 작업이 테이블이 없는 상태에서 실행되는 것을 방지할 수 있습니다.
+//   await initializeDatabase();
+//   // --- 추가된 부분 끝 ---
+
+//   // 2. 데이터베이스가 준비되면, 메시지를 처리하는 워커 루프를 시작합니다.
+//   workerLoop().catch((err) => {
+//     logger.error("Worker fatal error:", err);
+//     process.exit(1); // 비정상 종료
+//   });
+
+//   // 3. 스케줄러를 설정하고, 서버 시작 시에도 집계를 한 번 실행합니다.
+//   // 매일 새벽 3시에 실행
+//   schedule.scheduleJob("0 3 * * *", () => {
+//     console.log("[Scheduler] Running scheduled aggregation");
+//     runAllAggregations();
+//   });
+
+//   // 서버 시작 시 즉시 한 번 실행
+//   runAllAggregations();
+// }
+
 
 // // 비동기 루프 함수: 메시지를 계속해서 처리하는 역할
 // async function workerLoop() {
-//   // 시작 전에, Redis 스트림에 이 워커가 속할 소비자 그룹이 존재하는지 확인하고,
-//   // 없다면 새로 생성합니다.
 //   await ensureConsumerGroup();
 
-//   // 무한 루프를 통해 계속 메시지를 수신하고 처리함
 //   while (true) {
 //     try {
-//       // 현재 워커 이름으로 Redis 스트림에서 새 메시지를 읽어옵니다.
 //       const messages = await readMessages(REDIS_CONSUMER_NAME);
 
-//       // 읽어온 메시지가 없다면 대기 상태로 전환
 //       if (messages.length === 0) {
 //         logger.info("No new messages. Waiting...");
-//         continue; // 메시지가 없으므로 루프 반복
+//         continue;
 //       }
 
-//       // 메시지가 있다면 실제 처리 로직으로 넘깁니다.
-//       // 이 함수는 각 메시지를 순회하며 비즈니스 로직 수행합니다.
 //       await processMessages(messages);
 
-//       // 처리한 메시지들에 대해 ACK(확인)를 Redis에 보냅니다.
-//       // 이는 메시지가 성공적으로 처리됐음을 Redis에게 알려주는 역할로,
-//       // 다시 같은 메시지를 처리하지 않도록 보장합니다.
-//       const ids = messages.map((m) => m[0]); // 메시지 ID 목록 추출
+//       const ids = messages.map((m) => m[0]);
 //       await ackMessages(ids);
 //     } catch (err) {
-//       // 예외가 발생했다면 에러 로그를 찍고, 3초 대기 후 루프 재시작
 //       logger.error("Worker error:", err);
 //       await new Promise((r) => setTimeout(r, 3000));
 //     }
 //   }
 // }
-
-// // 루프를 시작합니다.
-// // 혹시라도 시작부터 에러가 발생하면, 치명적 에러로 간주하고 프로세스를 종료합니다.
-// workerLoop().catch((err) => {
-//   logger.error("Worker fatal error:", err);
-//   process.exit(1); // 비정상 종료
-// });
-
-// // ---------------- 밑은 사전집계
 
 // /**
 //  * 모든 사전 집계 함수를 실행
@@ -209,26 +202,34 @@ startApp().catch((err) => {
 //   try {
 //     console.log("[Worker] Aggregation started");
 
-//     // 1. 개별 사전 집계 테이블들을 먼저 생성합니다.
+//     await aggregateSummaryStats("daily");
 //     await aggregateSummaryStats("weekly");
 //     await aggregateSummaryStats("monthly");
+//     await aggregateSummaryStats("yearly");
 
+//     await aggregateBestSellers("daily");
 //     await aggregateBestSellers("weekly");
 //     await aggregateBestSellers("monthly");
+//     await aggregateBestSellers("yearly");
 
+//     await aggregateGoldenPath("daily");
 //     await aggregateGoldenPath("weekly");
 //     await aggregateGoldenPath("monthly");
-
+//     await aggregateGoldenPath("yearly");
+    
+//     await aggregatePurchaseGoldenPath("daily");
+//     await aggregatePurchaseGoldenPath("weekly");
 //     await aggregatePurchaseGoldenPath("monthly");
-//     await aggregatePurchaseGoldenPath("monthly");
+//     await aggregatePurchaseGoldenPath("yearly");
 
 //     console.log(
 //       "[Worker] Individual aggregations completed. Starting RAG unified aggregation..."
 //     );
 
-//     // 2. 위 테이블들을 기반으로 최종 RAG 통합 테이블을 생성합니다.
+//     await aggregateRagUnifiedSummary("daily");
 //     await aggregateRagUnifiedSummary("weekly");
 //     await aggregateRagUnifiedSummary("monthly");
+//     await aggregateRagUnifiedSummary("yearly");
 
 //     console.log("[Worker] All aggregations completed successfully");
 //   } catch (err) {
@@ -236,14 +237,131 @@ startApp().catch((err) => {
 //   }
 // }
 
-// /**
-//  * 스케줄러 설정
-//  * 매일 새벽 3시에 실행
-//  */
-// schedule.scheduleJob("0 3 * * *", () => {
-//   console.log("[Scheduler] Running scheduled aggregation");
-//   runAllAggregations();
+// // --- 애플리케이션 시작 ---
+// startApp().catch((err) => {
+//   console.error("Failed to start the application:", err);
+//   process.exit(1);
 // });
 
-// // 서버 시작 시 한 번 실행
-// runAllAggregations();
+// // // index.js
+
+// // import { aggregateSummaryStats } from "./aggregators/summaryStats.js";
+// // import { aggregateBestSellers } from "./aggregators/bestSellers.js";
+// // import { aggregateGoldenPath } from "./aggregators/goldenPath.js";
+// // import { aggregatePurchaseGoldenPath } from "./aggregators/purchaseGoldenPathStats.js";
+// // // 새로 만든 RAG 집계 함수를 import
+// // import { aggregateRagUnifiedSummary } from "./aggregators/ragUnifiedSummary.js";
+
+// // import schedule from "node-schedule"; // cron 스타일 스케줄링
+
+// // // 설정 파일에서 이 워커의 고유 이름을 가져옵니다.
+// // // 각 워커는 고유한 이름을 가지며, 같은 Redis Consumer Group 안에서 중복 없이 메시지를 처리합니다.
+// // import { REDIS_CONSUMER_NAME } from "./config/config.js";
+
+// // // Redis 스트림을 읽고 쓰는 데 필요한 기능들을 가져옵니다.
+// // // - ensureConsumerGroup: 소비자 그룹이 없으면 생성
+// // // - readMessages: 메시지 읽기
+// // // - ackMessages: 메시지 처리 완료 후 확인(ACK)
+// // import {
+// //   ensureConsumerGroup,
+// //   readMessages,
+// //   ackMessages,
+// // } from "./redis/redisClient.js";
+
+// // // 메시지를 실제로 처리하는 비즈니스 로직이 들어있는 모듈입니다.
+// // // 예: ClickHouse에 저장, 로그 집계 등
+// // import { processMessages } from "./processor.js";
+
+// // // 콘솔이나 파일에 로그를 남기기 위한 로거 모듈입니다.
+// // // logger.info(), logger.error() 등의 함수로 로그를 기록할 수 있습니다.
+// // import * as logger from "./logger.js";
+
+// // // 비동기 루프 함수: 메시지를 계속해서 처리하는 역할
+// // async function workerLoop() {
+// //   // 시작 전에, Redis 스트림에 이 워커가 속할 소비자 그룹이 존재하는지 확인하고,
+// //   // 없다면 새로 생성합니다.
+// //   await ensureConsumerGroup();
+
+// //   // 무한 루프를 통해 계속 메시지를 수신하고 처리함
+// //   while (true) {
+// //     try {
+// //       // 현재 워커 이름으로 Redis 스트림에서 새 메시지를 읽어옵니다.
+// //       const messages = await readMessages(REDIS_CONSUMER_NAME);
+
+// //       // 읽어온 메시지가 없다면 대기 상태로 전환
+// //       if (messages.length === 0) {
+// //         logger.info("No new messages. Waiting...");
+// //         continue; // 메시지가 없으므로 루프 반복
+// //       }
+
+// //       // 메시지가 있다면 실제 처리 로직으로 넘깁니다.
+// //       // 이 함수는 각 메시지를 순회하며 비즈니스 로직 수행합니다.
+// //       await processMessages(messages);
+
+// //       // 처리한 메시지들에 대해 ACK(확인)를 Redis에 보냅니다.
+// //       // 이는 메시지가 성공적으로 처리됐음을 Redis에게 알려주는 역할로,
+// //       // 다시 같은 메시지를 처리하지 않도록 보장합니다.
+// //       const ids = messages.map((m) => m[0]); // 메시지 ID 목록 추출
+// //       await ackMessages(ids);
+// //     } catch (err) {
+// //       // 예외가 발생했다면 에러 로그를 찍고, 3초 대기 후 루프 재시작
+// //       logger.error("Worker error:", err);
+// //       await new Promise((r) => setTimeout(r, 3000));
+// //     }
+// //   }
+// // }
+
+// // // 루프를 시작합니다.
+// // // 혹시라도 시작부터 에러가 발생하면, 치명적 에러로 간주하고 프로세스를 종료합니다.
+// // workerLoop().catch((err) => {
+// //   logger.error("Worker fatal error:", err);
+// //   process.exit(1); // 비정상 종료
+// // });
+
+// // // ---------------- 밑은 사전집계
+
+// // /**
+// //  * 모든 사전 집계 함수를 실행
+// //  */
+// // async function runAllAggregations() {
+// //   try {
+// //     console.log("[Worker] Aggregation started");
+
+// //     // 1. 개별 사전 집계 테이블들을 먼저 생성합니다.
+// //     await aggregateSummaryStats("weekly");
+// //     await aggregateSummaryStats("monthly");
+
+// //     await aggregateBestSellers("weekly");
+// //     await aggregateBestSellers("monthly");
+
+// //     await aggregateGoldenPath("weekly");
+// //     await aggregateGoldenPath("monthly");
+
+// //     await aggregatePurchaseGoldenPath("monthly");
+// //     await aggregatePurchaseGoldenPath("monthly");
+
+// //     console.log(
+// //       "[Worker] Individual aggregations completed. Starting RAG unified aggregation..."
+// //     );
+
+// //     // 2. 위 테이블들을 기반으로 최종 RAG 통합 테이블을 생성합니다.
+// //     await aggregateRagUnifiedSummary("weekly");
+// //     await aggregateRagUnifiedSummary("monthly");
+
+// //     console.log("[Worker] All aggregations completed successfully");
+// //   } catch (err) {
+// //     console.error("[Worker] Aggregation error:", err);
+// //   }
+// // }
+
+// // /**
+// //  * 스케줄러 설정
+// //  * 매일 새벽 3시에 실행
+// //  */
+// // schedule.scheduleJob("0 3 * * *", () => {
+// //   console.log("[Scheduler] Running scheduled aggregation");
+// //   runAllAggregations();
+// // });
+
+// // // 서버 시작 시 한 번 실행
+// // runAllAggregations();
