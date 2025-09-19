@@ -47,6 +47,8 @@ export async function processMessages(messages) {
               session_id: logData.sessionId,
               store_id: orderPayload.store_id || null,
               menu_id: product.productCode,
+              menu_name: product.productName,
+              category: product.category,
               quantity: String(product.quantity),
               price_per_item: String(product.unitPrice || product.price),
               total_price: String(product.quantity * parseInt(String(product.unitPrice || product.price))),

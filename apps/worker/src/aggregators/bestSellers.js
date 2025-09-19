@@ -42,6 +42,8 @@ export async function aggregateBestSellers(periodType = "monthly", topN = 5) {
         ${dateFunc}(ordered_at) AS period_start,
         store_id,
         menu_id,
+        menu_name,
+        category,
         SUM(quantity) AS order_count,
         SUM(total_price) AS total_revenue,
         row_number() OVER (
@@ -51,7 +53,7 @@ export async function aggregateBestSellers(periodType = "monthly", topN = 5) {
         ) AS rank
       FROM orders
       WHERE ordered_at >= today() - INTERVAL ${intervalDays} DAY
-      GROUP BY store_id, menu_id, period_start
+      GROUP BY store_id, menu_id, menu_name, category, period_start
     )
     WHERE rank <= ${topN}
   `;

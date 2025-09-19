@@ -2,10 +2,10 @@
 import clickhouse from "../clickhouse/clickhouseClient.js";
 
 /**
- * summary_stats_by_period 사전 집계 (일/주/월/년 지원)
+ * sales_summary_by_period 사전 집계 (일/주/월/년 지원)
  * @param {'daily'|'weekly'|'monthly'|'yearly'} periodType
  */
-export async function aggregateSummaryStats(periodType = "monthly") {
+export async function aggregateSalesSummary(periodType = "monthly") {
   let dateFunc;
   let intervalDays;
 
@@ -34,7 +34,7 @@ export async function aggregateSummaryStats(periodType = "monthly") {
 
   // 2️⃣ 새로운 집계 삽입 (ReplacingMergeTree 엔진이 중복을 자동 처리)
   const insertQuery = `
-    INSERT INTO summary_stats_by_period
+    INSERT INTO sales_summary_by_period
     SELECT
       '${periodType}' AS period_type,
       ${dateFunc}(ordered_at) AS period_start,
@@ -42,7 +42,8 @@ export async function aggregateSummaryStats(periodType = "monthly") {
       SUM(total_price) AS total_sales,
       COUNT(*) AS total_orders,
       AVG(total_price) AS avg_order_value,
-      COUNT(DISTINCT user_id) AS unique_visitors,
+      COUNT(DISTINCT user_id) AS unique_customers,
+      COUNT(DISTINCT session_id) AS total_customers,
       now() AS created_at
     FROM orders
     WHERE ordered_at >= today() - INTERVAL ${intervalDays} DAY
@@ -57,7 +58,7 @@ export async function aggregateSummaryStats(periodType = "monthly") {
 // import clickhouse from "../clickhouse/clickhouseClient.js";
 
 // /**
-//  * summary_stats_by_period 사전 집계
+//  * sales_summary_by_period 사전 집계
 //  * @param {'weekly'|'monthly'} periodType
 //  */
 // export async function aggregateSummaryStats(periodType = "monthly") {
@@ -67,7 +68,7 @@ export async function aggregateSummaryStats(periodType = "monthly") {
 
 //   // 1️⃣ 기존 동일 기간/매장 집계 삭제
 //   const deleteQuery = `
-//     ALTER TABLE summary_stats_by_period
+//     ALTER TABLE sales_summary_by_period
 //     DELETE WHERE period_type = '${periodType}'
 //       AND period_start >= today() - INTERVAL ${intervalDays} DAY
 //   `;
@@ -75,7 +76,7 @@ export async function aggregateSummaryStats(periodType = "monthly") {
 
 //   // 2️⃣ 새로운 집계 삽입
 //   const insertQuery = `
-//     INSERT INTO summary_stats_by_period
+//     INSERT INTO sales_summary_by_period
 //     SELECT
 //       '${periodType}' AS period_type,
 //       ${dateFunc}(ordered_at) AS period_start,
@@ -83,7 +84,7 @@ export async function aggregateSummaryStats(periodType = "monthly") {
 //       SUM(total_price) AS total_sales,
 //       COUNT(*) AS total_orders,
 //       AVG(total_price) AS avg_order_value,
-//       COUNT(DISTINCT user_id) AS unique_visitors,
+//       COUNT(DISTINCT user_id) AS unique_customers,
 //       now() AS created_at
 //     FROM orders
 //     WHERE ordered_at >= today() - INTERVAL ${intervalDays} DAY
