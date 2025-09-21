@@ -140,7 +140,7 @@ const DraggableList = <T extends BaseItem>({
                           <button
                             type="button"
                             onClick={() => onEdit(item.id)}
-                            className="text-sm px-3 py-1 rounded-xl cursor-pointer border border-border bg-edit text-card-foreground hover:opacity-90 transition"
+                            className="text-sm px-3 py-1 rounded-xl cursor-pointer border border-border bg-edit text-white hover:opacity-90 transition"
                           >
                             수정
                           </button>
@@ -149,7 +149,7 @@ const DraggableList = <T extends BaseItem>({
                           <button
                             type="button"
                             onClick={() => onDelete(item.id)}
-                            className="text-sm px-3 py-1 rounded-xl cursor-pointer bg-danger text-foreground hover:opacity-90 transition"
+                            className="text-sm px-3 py-1 rounded-xl cursor-pointer bg-danger text-white hover:opacity-90 transition"
                           >
                             삭제
                           </button>

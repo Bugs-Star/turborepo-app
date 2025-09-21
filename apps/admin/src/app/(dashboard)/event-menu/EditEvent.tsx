@@ -1,4 +1,3 @@
-// app/(dashboard)/event-menu/EditEvent.tsx
 "use client";
 
 import BaseForm from "@/components/BaseForm";
@@ -92,6 +91,20 @@ const EditEvent = ({ eventId, initialData, onClose }: EditEventProps) => {
     });
   };
 
+  const toLocalInputValue = (iso?: string): string | undefined => {
+    if (!iso) return undefined;
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return undefined;
+
+    const pad = (n: number) => String(n).padStart(2, "0");
+
+    const yyyy = d.getFullYear();
+    const mm = pad(d.getMonth() + 1);
+    const dd = pad(d.getDate());
+
+    return `${yyyy}-${mm}-${dd}`;
+  };
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/70"
@@ -117,7 +130,85 @@ const EditEvent = ({ eventId, initialData, onClose }: EditEventProps) => {
           onImageChange={setImage}
           onSubmit={handleSubmit}
         >
-          {/* 폼 필드 동일 */}
+          {/* 제목 */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              제목
+            </label>
+            <input
+              type="text"
+              name="title"
+              defaultValue={initialData?.title}
+              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring focus:border-[#005C14]"
+            />
+          </div>
+
+          {/* 설명 */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              설명
+            </label>
+            <textarea
+              name="description"
+              defaultValue={initialData?.description}
+              className="w-full border border-gray-300 rounded-lg px-4 py-2 min-h-[100px] focus:outline-none focus:ring focus:border-[#005C14]"
+            />
+          </div>
+
+          {/* 기간 */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                시작일시
+              </label>
+              <input
+                type="date"
+                name="startDate"
+                defaultValue={toLocalInputValue(initialData?.startDate)}
+                className="w-full text-sm border border-gray-300 rounded-lg px-2 py-2"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                종료일시
+              </label>
+              <input
+                type="date"
+                name="endDate"
+                defaultValue={toLocalInputValue(initialData?.endDate)}
+                className="w-full text-sm border border-gray-300 rounded-lg px-2 py-2"
+              />
+            </div>
+          </div>
+
+          {/* 활성/표시순서 */}
+          <div className="grid grid-cols-2 gap-4">
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                name="isActive"
+                defaultChecked={!!initialData?.isActive}
+                className="h-4 w-4"
+              />
+              <span className="text-sm text-gray-700">노출(활성)</span>
+            </label>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                표시순서(작을수록 위)
+              </label>
+              <input
+                type="number"
+                name="eventOrder"
+                defaultValue={
+                  typeof initialData?.eventOrder === "number"
+                    ? initialData.eventOrder
+                    : undefined
+                }
+                className="w-full border border-gray-300 rounded-lg px-4 py-2"
+              />
+            </div>
+          </div>
         </BaseForm>
       </div>
     </div>

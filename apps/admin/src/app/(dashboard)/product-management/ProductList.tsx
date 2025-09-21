@@ -249,13 +249,13 @@ const ProductList = () => {
       render: (r) => (
         <div className="flex items-center gap-2">
           <button
-            className="px-2 py-1 rounded-xl bg-edit text-sm cursor-pointer"
+            className="px-2 py-1 rounded-xl bg-edit text-sm text-white cursor-pointer"
             onClick={() => handleEdit(r)}
           >
             수정
           </button>
           <button
-            className="px-2 py-1 rounded-xl bg-danger text-sm cursor-pointer"
+            className="px-2 py-1 rounded-xl bg-danger text-sm text-white cursor-pointer"
             onClick={() => handleDelete(r)}
             disabled={isDeleting}
           >
