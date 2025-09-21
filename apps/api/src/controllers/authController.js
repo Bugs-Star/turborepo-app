@@ -105,16 +105,44 @@ export const login = async (req, res) => {
 export const refresh = async (req, res) => {
   try {
     const { refreshToken } = req.cookies; // body가 아닌 cookies에서 '리프레시 토큰' 을 가져옵니다.
+
+    if (!refreshToken) {
+      return res.status(400).json({ message: 'Refresh Token이 필요합니다.' });
+    }
+
+    // Refresh Token 만료 사전 확인
+    const { isRefreshTokenExpired } = await import('../utils/refreshTokenUtils.js');
+    if (isRefreshTokenExpired(refreshToken)) {
+      return res.status(401).json({ 
+        message: 'Refresh Token이 만료되었습니다. 다시 로그인해주세요.',
+        code: 'REFRESH_TOKEN_EXPIRED'
+      });
+    }
+
     const result = await refreshAccessToken(refreshToken); // Refresh Token을 사용하여 새로운 Access Token 생성
     res.json(result);
   } catch (error) {
     console.error("토큰 갱신 오류:", error);
 
+    if (error.name === 'TokenExpiredError') {
+      return res.status(401).json({ 
+        message: 'Refresh Token이 만료되었습니다. 다시 로그인해주세요.',
+        code: 'REFRESH_TOKEN_EXPIRED'
+      });
+    }
+
     if (error.message === "Refresh Token이 필요합니다.") {
       return res.status(400).json({ message: error.message });
     }
 
-    res.status(401).json({ message: "토큰 갱신에 실패했습니다." });
+    if (error.message.includes('만료')) {
+      return res.status(401).json({ 
+        message: '로그인 세션이 만료되었습니다. 다시 로그인해주세요.',
+        code: 'REFRESH_TOKEN_EXPIRED'
+      });
+    }
+
+    res.status(401).json({ message: error.message || "토큰 갱신에 실패했습니다." });
   }
 };
 

@@ -57,6 +57,15 @@ export const adminRefresh = async (req, res) => {
       return res.status(400).json({ message: 'Refresh Token이 필요합니다.' });
     }
 
+    // Refresh Token 만료 사전 확인
+    const { isRefreshTokenExpired } = await import('../utils/refreshTokenUtils.js');
+    if (isRefreshTokenExpired(refreshToken)) {
+      return res.status(401).json({ 
+        message: 'Refresh Token이 만료되었습니다. 다시 로그인해주세요.',
+        code: 'REFRESH_TOKEN_EXPIRED'
+      });
+    }
+
     // Refresh Token 검증
     const decoded = verifyRefreshToken(refreshToken);
     
@@ -75,8 +84,12 @@ export const adminRefresh = async (req, res) => {
     });
   } catch (error) {
     if (error.name === 'TokenExpiredError') {
-      return res.status(401).json({ message: 'Refresh Token이 만료되었습니다. 다시 로그인해주세요.' });
+      return res.status(401).json({ 
+        message: 'Refresh Token이 만료되었습니다. 다시 로그인해주세요.',
+        code: 'REFRESH_TOKEN_EXPIRED'
+      });
     }
+    console.error('Admin token refresh error:', error);
     res.status(500).json({ message: '서버 오류가 발생했습니다.' });
   }
 };

@@ -27,7 +27,7 @@ const tableSchemas = [
     query: `
       CREATE TABLE IF NOT EXISTS orders (
         order_id UUID, user_id String, session_id String, store_id String,
-        menu_id String, quantity UInt8, price_per_item UInt32, total_price UInt32,
+        menu_id String, menu_name String, category String, quantity UInt8, price_per_item UInt32, total_price UInt32,
         status Enum8('paid' = 1, 'canceled' = 2, 'refunded' = 3, 'initiated' = 4),
         ordered_at DateTime, updated_at DateTime
       ) ENGINE = MergeTree()
@@ -37,23 +37,78 @@ const tableSchemas = [
 
   // --- 사전 집계 테이블 (ReplacingMergeTree로 모두 변경) ---
   {
-    tableName: "summary_stats_by_period",
+    tableName: "sales_summary_by_period",
     query: `
-      CREATE TABLE IF NOT EXISTS summary_stats_by_period (
+      CREATE TABLE IF NOT EXISTS sales_summary_by_period (
         period_type String, period_start Date, store_id String,
         total_sales Float64, total_orders UInt32, avg_order_value Float64,
-        unique_visitors UInt32, created_at DateTime
+        unique_customers UInt32, total_customers UInt32, created_at DateTime
       ) ENGINE = ReplacingMergeTree() -- 수정: ReplacingMergeTree로 변경
       PARTITION BY period_type
       ORDER BY (period_start, store_id); -- 이 키가 고유 식별자이므로 유지
     `,
   },
   {
+    tableName: "visitor_summary_by_period",
+    query: `
+      CREATE TABLE IF NOT EXISTS visitor_summary_by_period (
+        -- Dimensions
+        period_type Enum8('daily' = 1, 'weekly' = 2, 'monthly' = 3, 'yearly' = 4),
+        period_start Date,
+        store_id String,
+
+        -- Metrics
+        total_unique_visitors UInt64,
+        engaged_visitors UInt64,
+        page_views UInt64,
+        total_sessions UInt64,
+        bounced_sessions UInt64,
+        bounce_rate Float32,
+        avg_session_duration_seconds Float64,
+
+        -- Meta
+        updated_at DateTime
+      ) ENGINE = ReplacingMergeTree(updated_at)
+      PARTITION BY toYYYYMM(period_start)
+      ORDER BY (period_type, store_id, period_start);
+    `,
+  },
+  {
+    tableName: "kpi_summary_by_period",
+    query: `
+      CREATE TABLE IF NOT EXISTS kpi_summary_by_period (
+        -- Dimensions (데이터를 구분하는 기준)
+        period_type Enum8('daily' = 1, 'weekly' = 2, 'monthly' = 3, 'yearly' = 4),
+        period_start Date,
+        store_id String,
+
+        -- Visitor Metrics (방문자 관련 지표)
+        total_unique_visitors UInt64,
+        engaged_visitors UInt64,
+        bounce_rate Float32,
+
+        -- Sales Metrics (매출 관련 지표)
+        unique_customers UInt64,
+        total_sales UInt64,
+        total_orders UInt64,
+
+        -- Combined KPIs (통합 핵심 성과 지표)
+        conversion_rate Float32,
+        revenue_per_visitor Float64,
+
+        -- Meta (데이터 관리용)
+        updated_at DateTime
+      ) ENGINE = ReplacingMergeTree(updated_at)
+      PARTITION BY toYYYYMM(period_start)
+      ORDER BY (period_type, store_id, period_start);
+    `,
+  },
+  {
     tableName: "best_selling_menu_items",
     query: `
       CREATE TABLE IF NOT EXISTS best_selling_menu_items (
-        period_type String, period_start Date, store_id String, menu_id String,
-        order_count UInt32, total_revenue Float64, rank UInt8
+        period_type String, period_start Date, store_id String, menu_id String, menu_name String,
+        category String, order_count UInt32, total_revenue Float64, rank UInt8
       ) ENGINE = ReplacingMergeTree() -- 수정: ReplacingMergeTree로 변경
       PARTITION BY period_type
       -- 수정: rank 대신 menu_id를 키에 추가하여 고유 메뉴를 식별하도록 변경
@@ -89,7 +144,7 @@ const tableSchemas = [
     query: `
       CREATE TABLE IF NOT EXISTS rag_unified_store_summary (
         period_type String, period_start Date, store_id String, total_sales Float64,
-        total_orders UInt32, avg_order_value Float64, unique_visitors UInt32,
+        total_orders UInt32, avg_order_value Float64, unique_customers UInt32,
         top_1_menu_id String, top_1_order_count UInt32, top_2_menu_id String,
         top_2_order_count UInt32, top_3_menu_id String, top_3_order_count UInt32,
         top_1_path Array(String), top_1_path_users UInt32, top_2_path Array(String),

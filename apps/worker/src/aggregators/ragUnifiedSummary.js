@@ -31,7 +31,7 @@ export async function aggregateRagUnifiedSummary(periodType = "monthly") {
   // 3️⃣ 세 개의 사전 집계 테이블을 JOIN하여 새로운 집계 삽입
   const insertQuery = `
     INSERT INTO rag_unified_store_summary (
-        period_type, period_start, store_id, total_sales, total_orders, avg_order_value, unique_visitors,
+        period_type, period_start, store_id, total_sales, total_orders, avg_order_value, unique_customers,
         top_1_menu_id, top_1_order_count, top_2_menu_id, top_2_order_count, top_3_menu_id, top_3_order_count,
         top_1_path, top_1_path_users, top_2_path, top_2_path_users
     )
@@ -63,11 +63,11 @@ export async function aggregateRagUnifiedSummary(periodType = "monthly") {
         GROUP BY period_type, period_start, store_id
     )
     SELECT
-        s.period_type, s.period_start, s.store_id, s.total_sales, s.total_orders, s.avg_order_value, s.unique_visitors,
+        s.period_type, s.period_start, s.store_id, s.total_sales, s.total_orders, s.avg_order_value, s.unique_customers,
         m.top_1_menu_id, m.top_1_order_count, m.top_2_menu_id, m.top_2_order_count, m.top_3_menu_id, m.top_3_order_count,
         p.top_1_path, p.top_1_path_users, p.top_2_path, p.top_2_path_users
     -- ✅ 수정: 서브쿼리로 감싸서 안정성 확보
-    FROM (SELECT * FROM summary_stats_by_period FINAL) AS s
+    FROM (SELECT * FROM sales_summary_by_period FINAL) AS s
     LEFT JOIN best_menus_pivot AS m ON s.period_type = m.period_type AND s.period_start = m.period_start AND s.store_id = m.store_id
     LEFT JOIN golden_paths_pivot AS p ON s.period_type = p.period_type AND s.period_start = p.period_start AND s.store_id = p.store_id
     WHERE s.period_type = '${periodType}' AND s.period_start >= today() - INTERVAL ${intervalDays} DAY
@@ -97,7 +97,7 @@ export async function aggregateRagUnifiedSummary(periodType = "monthly") {
 //   // 2️⃣ 세 개의 사전 집계 테이블을 JOIN하여 새로운 집계 삽입
 //   const insertQuery = `
 //     INSERT INTO rag_unified_store_summary (
-//         period_type, period_start, store_id, total_sales, total_orders, avg_order_value, unique_visitors,
+//         period_type, period_start, store_id, total_sales, total_orders, avg_order_value, unique_customers,
 //         top_1_menu_id, top_1_order_count, top_2_menu_id, top_2_order_count, top_3_menu_id, top_3_order_count,
 //         top_1_path, top_1_path_users, top_2_path, top_2_path_users
 //     )
@@ -145,7 +145,7 @@ export async function aggregateRagUnifiedSummary(periodType = "monthly") {
 //         s.total_sales,
 //         s.total_orders,
 //         s.avg_order_value,
-//         s.unique_visitors,
+//         s.unique_customers,
 //         m.top_1_menu_id,
 //         m.top_1_order_count,
 //         m.top_2_menu_id,
@@ -156,7 +156,7 @@ export async function aggregateRagUnifiedSummary(periodType = "monthly") {
 //         p.top_1_path_users,
 //         p.top_2_path,
 //         p.top_2_path_users
-//     FROM summary_stats_by_period AS s
+//     FROM sales_summary_by_period AS s
 //     LEFT JOIN best_menus_pivot AS m ON s.period_type = m.period_type AND s.period_start = m.period_start AND s.store_id = m.store_id
 //     LEFT JOIN golden_paths_pivot AS p ON s.period_type = p.period_type AND s.period_start = p.period_start AND s.store_id = p.store_id
 //     WHERE s.period_type = '${periodType}' AND s.period_start >= today() - INTERVAL ${intervalDays} DAY
