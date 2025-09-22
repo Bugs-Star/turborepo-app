@@ -11,8 +11,8 @@ import { queryDatabase } from '../config/clickhouse.js';
 import { validateReportRequest } from '../services/reportQueryValidator.js';
 
 // 매출 요약 데이터 조회 함수
-const fetchSalesSummary = async (periodType, year, month, week) => {
-  let query = `SELECT * FROM sales_summary_by_period WHERE period_type = {periodType:String}`;
+const fetchStateData = async (tableName, periodType, year, month, week) => {
+  let query = `SELECT * FROM ${tableName} FINAL WHERE period_type = {periodType:String}`;
   const query_params = { periodType };
 
   switch (periodType) {
@@ -52,6 +52,7 @@ const fetchSalesSummary = async (periodType, year, month, week) => {
   return await queryDatabase(query, query_params);
 };
 
+
 // reports(보고서) 조회
 export const getReports = async (req, res) => {
   try {
@@ -63,15 +64,40 @@ export const getReports = async (req, res) => {
 
     const { periodType, year, month, week } = validation.validatedData;
 
-    // 매출 요약 데이터 조회
-    const stats = await fetchSalesSummary(periodType, year, month, week);
+    // 1. 요약 데이터 조회
+    const stats = await fetchStateData("sales_summary_by_period", periodType, year, month, week);
 
+    // 2. 베스트셀러 메뉴 항목 조회
+    const bestsellers = await fetchStateData("best_selling_menu_items", periodType, year, month, week);
+
+    // 3. 데이터 존재 여부 확인
     if (!stats || stats.length === 0) {
-      return res.status(404).json({ message: '해당 기간의 데이터를 찾을 수 없습니다.' });
+      return res.status(404).json({ message: '해당 기간의 sales_summary_by_period 데이터를 찾을 수 없습니다.' });
     }
 
-    console.log(stats);
-    res.status(200).json(stats);
+    if (!bestsellers || bestsellers.length === 0) {
+      return res.status(404).json({ message: '해당 기간의 best_selling_menu_items 데이터를 찾을 수 없습니다.' });
+    }
+
+    // 4. 통합 응답 데이터 구성
+    const responseData = {
+      summary: stats,
+      bestsellers: bestsellers,
+      meta: {
+        periodType,
+        year,
+        month,
+        week,
+        generatedAt: new Date().toISOString()
+      }
+    };
+
+    console.log('Report data:', { 
+      summaryCount: stats.length, 
+      bestsellersCount: bestsellers.length 
+    });
+
+    res.status(200).json(responseData);
   } catch (error) {
     console.error('Error fetching reports:', error);
     res.status(500).json({ message: 'Error fetching reports', error: error.message });
