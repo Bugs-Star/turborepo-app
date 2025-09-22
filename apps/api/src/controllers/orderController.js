@@ -11,7 +11,7 @@ import User from '../models/User.js';
 import Product from '../models/Product.js';
 import Order from '../models/Order.js';
 import mongoose from 'mongoose';
-import { generateOrderNumber } from '../utils/generateOrderNumber.js';
+import { generateOrderNumber } from '../services/orderNumberGenerator.js';
 
 // 주문 생성 (결제)
 export const createOrder = async (req, res) => {

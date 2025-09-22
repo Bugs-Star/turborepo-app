@@ -1,6 +1,6 @@
 /* ------------------------------------------------------------
- * File      : /src/utils/logValidator.js
- * Brief     : 로그 검증 함수
+ * File      : /src/services/logDataValidator.js
+ * Brief     : 로그 데이터 검증 서비스
  * Author    : 송용훈
  * Date      : 2025-09-01
  * Version   : 

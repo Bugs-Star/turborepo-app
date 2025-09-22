@@ -9,7 +9,7 @@
 
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
-import { isBlacklisted } from '../utils/jwtBlacklist.js';
+import { isBlacklisted } from '../utils/jwtBlacklistUtil.js';
 
 // express.Router()
 export const auth = async (req, res, next) => {

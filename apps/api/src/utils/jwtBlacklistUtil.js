@@ -1,11 +1,12 @@
 /* ------------------------------------------------------------
- * File      : /utils/jwtBlacklist.js
- * Brief     : JWT 토큰 블랙리스트 추가 및 확인
+ * File      : /utils/jwtBlacklistUtil.js
+ * Brief     : JWT 토큰 블랙리스트 관리 유틸리티
  * Author    : 송용훈
  * Date      : 2025-09-09
  * Version   : 
  * History
  *   - 2025-09-09: /config/redis.js 에 있던 함수를 따로 분리
+ *   - 2025-09-22: jwtBlacklist.js → jwtBlacklistUtil.js로 이름 변경
  * ------------------------------------------------------------*/
 
 import redisClient  from '../config/redis.js';

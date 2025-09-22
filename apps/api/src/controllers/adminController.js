@@ -8,7 +8,7 @@
  * ------------------------------------------------------------*/
 
 import Admin from '../models/Admin.js';
-import { addToBlacklist } from '../utils/jwtBlacklist.js';
+import { addToBlacklist } from '../utils/jwtBlacklistUtil.js';
 import { generateAccessToken } from '../utils/accessTokenUtils.js';
 import { generateRefreshToken, decodeRefreshToken, verifyRefreshToken } from '../utils/refreshTokenUtils.js';
 

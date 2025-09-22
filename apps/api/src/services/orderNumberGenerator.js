@@ -1,13 +1,13 @@
 /* ------------------------------------------------------------
- * File      : /src/utils/generateOrderNumber.js
- * Brief     : 주문 번호 생성 함수
+ * File      : /src/services/orderNumberGenerator.js
+ * Brief     : 주문 번호 생성 서비스
  * Author    : 송용훈
  * Date      : 2025-08-14
  * Version   : 
  * History
  * ------------------------------------------------------------*/
 
-import { getNextSequenceValue } from './sequenceUtil.js';
+import { getNextSequenceValue } from '../utils/sequenceUtil.js';
 
 /**
  * 'YYYYMMDD-XXXXX' 형식의 새로운 주문 번호를 생성합니다.

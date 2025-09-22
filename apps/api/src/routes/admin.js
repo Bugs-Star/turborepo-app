@@ -51,7 +51,7 @@ router.post('/promotions/reorder', adminAuth, reorderPromotions);          // �
 router.get('/users', adminAuth, getUsers);                  // 일반 유저 목록 조회
 router.get('/order/:userId', adminAuth, getUserOrders);     // 특정 사용자 주문 목록 조회
 
-// 리포트 조회 라우트
+// 리포트 조회 라우트 (Summary + Chart 통합)
 router.get('/reports/:periodType', adminAuth, getReports);
 
 export default router;

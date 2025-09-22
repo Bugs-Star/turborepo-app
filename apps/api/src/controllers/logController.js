@@ -7,7 +7,7 @@
  * History
  * ------------------------------------------------------------*/
 
-import { validateLogs } from "../utils/logValidator.js";
+import { validateLogs } from "../services/logDataValidator.js";
 import Redis from "ioredis";
 const redisClient = new Redis(process.env.REDIS_URL);
 
