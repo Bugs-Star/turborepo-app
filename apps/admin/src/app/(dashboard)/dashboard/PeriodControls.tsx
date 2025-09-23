@@ -81,9 +81,8 @@ const PeriodControls = ({ value, onChange, className = "" }: Props) => {
       <div className="flex flex-wrap items-center gap-2">
         {/* 연도 */}
         <label className="text-sm text-gray-600">
-          <span className="sr-only">연도 선택</span>
           <select
-            className="px-3 py-2 border rounded-lg text-sm"
+            className="px-3 py-2 border rounded-lg text-sm cursor-pointer"
             value={value.year}
             onChange={(e) => setYear(Number(e.target.value))}
           >
@@ -98,9 +97,8 @@ const PeriodControls = ({ value, onChange, className = "" }: Props) => {
         {/* 월: yearly가 아닐 때만 */}
         {value.periodType !== "yearly" && (
           <label className="text-sm text-gray-600">
-            <span className="sr-only">월 선택</span>
             <select
-              className="px-3 py-2 border rounded-lg text-sm"
+              className="px-3 py-2 border rounded-lg text-sm cursor-pointer"
               value={value.month}
               onChange={(e) => setMonth(Number(e.target.value))}
             >
@@ -116,9 +114,8 @@ const PeriodControls = ({ value, onChange, className = "" }: Props) => {
         {/* 주: weekly일 때만 */}
         {value.periodType === "weekly" && (
           <label className="text-sm text-gray-600">
-            <span className="sr-only">주 선택</span>
             <select
-              className="px-3 py-2 border rounded-lg text-sm"
+              className="px-3 py-2 border rounded-lg text-sm cursor-pointer"
               value={value.week}
               onChange={(e) => setWeek(Number(e.target.value))}
             >

@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import { useGetPeriodicalAnalysis } from "@/hooks/dashboard/useGetPeriodicalAnalysis";
 import { summarize } from "@/lib/api/dashboard";
 import StatCard from "@/components/StatCard";
+import { isAxiosError } from "axios";
 
 const KRW = new Intl.NumberFormat("ko-KR", {
   style: "currency",
@@ -25,18 +26,20 @@ export default function PeriodicalAnalysis({
 }: {
   params: PeriodParams;
 }) {
-  const { data, isLoading, isFetching, isError, error } =
-    useGetPeriodicalAnalysis({
-      periodType: params.periodType,
-      year: params.year,
-      month: params.periodType !== "yearly" ? params.month : undefined,
-      week: params.periodType === "weekly" ? params.week : undefined,
-    });
+  const { data, isLoading, isError, error } = useGetPeriodicalAnalysis({
+    periodType: params.periodType,
+    year: params.year,
+    month: params.periodType !== "yearly" ? params.month : undefined,
+    week: params.periodType === "weekly" ? params.week : undefined,
+  });
 
   const sum = useMemo(() => summarize(data ?? []), [data]);
-  const errorMsg =
-    (error as any)?.response?.data?.message ||
-    (isError ? "데이터를 불러오지 못했습니다." : "");
+
+  const errorMsg = isAxiosError<{ message?: string }>(error)
+    ? (error.response?.data?.message ?? "데이터를 불러오지 못했습니다.")
+    : isError
+      ? "데이터를 불러오지 못했습니다."
+      : "";
 
   const titlePrefix =
     params.periodType === "yearly"

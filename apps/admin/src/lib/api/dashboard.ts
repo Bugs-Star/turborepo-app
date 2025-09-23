@@ -11,7 +11,7 @@ export interface ReportItem {
   total_orders: number;
   avg_order_value: number;
   unique_visitors?: number;
-  unique_customers?: number; // 서버가 이렇게 줄 수도 있어 대비
+  unique_customers?: number;
   total_customers?: number;
   created_at: string;
 }
@@ -35,8 +35,30 @@ export interface BestSellerItem {
   rank: number;
 }
 
-function buildParams(p: PeriodicalParams) {
-  const params: Record<string, any> = { year: p.year };
+/** 응답 형태 유니온 */
+type ReportsResponse =
+  | ReportItem[]
+  | { summary: ReportItem[]; bestsellers?: BestSellerItem[] };
+
+type BestsellersResponse =
+  | BestSellerItem[]
+  | { bestsellers?: BestSellerItem[] };
+
+/** 타입가드 */
+function hasSummary(
+  d: ReportsResponse
+): d is { summary: ReportItem[]; bestsellers?: BestSellerItem[] } {
+  return typeof d === "object" && !Array.isArray(d) && Array.isArray(d.summary);
+}
+function hasBestsellers(
+  d: BestsellersResponse
+): d is { bestsellers?: BestSellerItem[] } {
+  return typeof d === "object" && !Array.isArray(d);
+}
+
+/** 쿼리 파라미터 빌더 (숫자만) */
+function buildParams(p: PeriodicalParams): Record<string, number> {
+  const params: Record<string, number> = { year: p.year };
   if (p.periodType !== "yearly") {
     if (p.month == null) throw new Error("month가 필요합니다.");
     params.month = p.month;
@@ -53,13 +75,13 @@ export const DashboardApi = {
     const { periodType } = p;
     const params = buildParams(p);
 
-    const { data } = await axiosInstance.get<
-      ReportItem[] | { summary: ReportItem[] }
-    >(`/admin/reports/${periodType}`, { params });
+    const { data } = await axiosInstance.get<ReportsResponse>(
+      `/admin/reports/${periodType}`,
+      { params }
+    );
 
     if (Array.isArray(data)) return data;
-    if (data && Array.isArray((data as any).summary))
-      return (data as any).summary;
+    if (hasSummary(data)) return data.summary;
     return [];
   },
 
@@ -67,12 +89,16 @@ export const DashboardApi = {
     const { periodType } = p;
     const params = buildParams(p);
 
-    const { data } = await axiosInstance.get<
-      { bestsellers?: BestSellerItem[] } | BestSellerItem[]
-    >(`/admin/reports/${periodType}`, { params });
+    const { data } = await axiosInstance.get<BestsellersResponse>(
+      `/admin/reports/${periodType}`,
+      { params }
+    );
 
-    if (Array.isArray(data)) return [] as BestSellerItem[];
-    return (data as any)?.bestsellers ?? [];
+    if (Array.isArray(data)) return []; // 구형: bestsellers 없음
+    if (hasBestsellers(data) && Array.isArray(data.bestsellers)) {
+      return data.bestsellers;
+    }
+    return [];
   },
 };
 
@@ -85,5 +111,6 @@ export function summarize(items: ReportItem[]) {
   );
   const avg_order_value =
     total_orders > 0 ? Math.round(total_sales / total_orders) : 0;
+
   return { total_sales, total_orders, avg_order_value, unique_visitors };
 }

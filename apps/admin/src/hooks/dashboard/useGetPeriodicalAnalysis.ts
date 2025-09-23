@@ -6,6 +6,7 @@ import {
   type PeriodicalParams,
   type ReportItem,
 } from "@/lib/api/dashboard";
+import { AxiosError } from "axios";
 
 const key = (p: PeriodicalParams) =>
   [
@@ -28,9 +29,10 @@ export function useGetPeriodicalAnalysis(params: PeriodicalParams) {
     queryKey: key(params),
     queryFn: () => DashboardApi.getPeriodicalReports(params),
     enabled,
-    retry: (count, err: any) => {
-      const status = err?.response?.status;
-      if ([400, 401, 404].includes(status)) return false;
+    retry: (count, err: unknown) => {
+      const axiosError = err as AxiosError<{ message?: string }>;
+      const status = axiosError.response?.status;
+      if (status && [400, 401, 404].includes(status)) return false;
       return count < 2;
     },
   });
