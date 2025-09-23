@@ -1,4 +1,3 @@
-// components/reports/PeriodControls.tsx
 "use client";
 
 type PeriodType = "yearly" | "monthly" | "weekly";
@@ -24,13 +23,14 @@ const years = (() => {
 const months = Array.from({ length: 12 }, (_, i) => i + 1);
 const weeks = [1, 2, 3, 4, 5];
 
-export default function PeriodControls({ value, onChange, className = "" }: Props) {
+const PeriodControls = ({ value, onChange, className = "" }: Props) => {
   const setType = (t: PeriodType) => {
     onChange({
       periodType: t,
       year: value.year,
-      month: t !== "yearly" ? value.month ?? new Date().getMonth() + 1 : undefined,
-      week: t === "weekly" ? value.week ?? 1 : undefined,
+      month:
+        t !== "yearly" ? (value.month ?? new Date().getMonth() + 1) : undefined,
+      week: t === "weekly" ? (value.week ?? 1) : undefined,
     });
   };
 
@@ -39,7 +39,9 @@ export default function PeriodControls({ value, onChange, className = "" }: Prop
   const setWeek = (w: number) => onChange({ ...value, week: w });
 
   return (
-    <div className={`flex flex-col md:flex-row md:items-center md:justify-between gap-4 ${className}`}>
+    <div
+      className={`flex flex-col md:flex-row md:items-center md:justify-between gap-4 ${className}`}
+    >
       {/* 라디오 토글 */}
       <fieldset className="flex items-center gap-4">
         <legend className="sr-only">기간 선택</legend>
@@ -131,4 +133,6 @@ export default function PeriodControls({ value, onChange, className = "" }: Prop
       </div>
     </div>
   );
-}
+};
+
+export default PeriodControls;
