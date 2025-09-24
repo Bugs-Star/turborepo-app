@@ -1,58 +1,62 @@
 import axiosInstance from "./axios";
 import { AuthService } from "./auth";
+import type {
+  AxiosError,
+  AxiosResponse,
+  InternalAxiosRequestConfig,
+  AxiosRequestHeaders,
+} from "axios";
 
-export function setupInterceptors() {
-  // **요청 인터셉터**
+// _retry 플래그를 안전하게 추가
+type RetriableConfig = InternalAxiosRequestConfig & { _retry?: boolean };
+
+export function setupInterceptors(): void {
+  // 요청 인터셉터
   axiosInstance.interceptors.request.use(
-    (config) => {
+    (config: InternalAxiosRequestConfig): InternalAxiosRequestConfig => {
       if (typeof window !== "undefined") {
         const accessToken = localStorage.getItem("accessToken");
         if (accessToken) {
-          config.headers?.set("Authorization", `Bearer ${accessToken}`);
+          // headers를 타입 안전하게 업데이트
+          const headers = (config.headers ?? {}) as AxiosRequestHeaders;
+          headers.Authorization = `Bearer ${accessToken}`;
+          config.headers = headers;
         }
       }
       return config;
     },
-    (error) => Promise.reject(error)
+    (error: AxiosError): Promise<never> => Promise.reject(error)
   );
 
-  // **응답 인터셉터**
+  // 응답 인터셉터
   axiosInstance.interceptors.response.use(
-    (response) => response,
-    async (error) => {
-      const originalRequest = error.config;
+    (response: AxiosResponse): AxiosResponse => response,
+    async (error: AxiosError): Promise<never | AxiosResponse> => {
+      const status = error.response?.status;
+      const original = error.config as RetriableConfig | undefined;
 
-      // 401 처리 + 무한 루프 방지
-      if (error.response?.status === 401 && !originalRequest._retry) {
-        originalRequest._retry = true;
+      // 401 & 아직 재시도 안했으면 → 리프레시
+      if (status === 401 && original && !original._retry) {
+        original._retry = true;
 
         try {
-          const refreshToken = localStorage.getItem("refreshToken");
-          if (!refreshToken) throw new Error("No refresh token available");
-
-          // 새 accessToken 발급
-          const { accessToken: newAccessToken } =
-            await AuthService.refreshAccessToken(refreshToken);
-
-          // 로컬스토리지 갱신
+          const newAccessToken = await AuthService.refreshAccessToken();
           localStorage.setItem("accessToken", newAccessToken);
 
-          // 원래 요청에 새로운 토큰 설정 후 재요청
-          originalRequest.headers = {
-            ...originalRequest.headers,
-            Authorization: `Bearer ${newAccessToken}`,
-          };
+          // 원 요청 헤더 갱신
+          const headers = (original.headers ?? {}) as AxiosRequestHeaders;
+          headers.Authorization = `Bearer ${newAccessToken}`;
+          original.headers = headers;
 
-          return axiosInstance(originalRequest);
-        } catch (refreshError) {
-          console.error("Token refresh failed:", refreshError);
-
-          // 토큰 갱신 실패 → 세션 초기화 및 로그인 페이지 이동
+          return axiosInstance(original);
+        } catch (refreshErr) {
+          // 리프레시 실패 → 세션 정리
           localStorage.removeItem("accessToken");
-          localStorage.removeItem("refreshToken");
-          window.location.href = "/login";
-
-          return Promise.reject(refreshError);
+          // (리프레시는 쿠키라 지울 필요 없음; 서버가 /logout에서 쿠키 제거)
+          if (typeof window !== "undefined") {
+            window.location.href = "/login";
+          }
+          return Promise.reject(refreshErr);
         }
       }
 

@@ -19,18 +19,18 @@ export const AuthService = {
     return response.data;
   },
 
-  logout: async (refreshToken: string, accessToken: string) => {
+  logout: async (accessToken: string) => {
     await axiosInstance.post(
       "/admin/logout",
-      { refreshToken },
+      {},
       { headers: { Authorization: `Bearer ${accessToken}` } }
     );
   },
 
-  refreshAccessToken: async (refreshToken: string) => {
-    const response = await axiosInstance.post("/admin/refresh", {
-      refreshToken,
-    });
-    return response.data;
+  refreshAccessToken: async (): Promise<string> => {
+    const { data } = await axiosInstance.post<{ accessToken: string }>(
+      "/admin/refresh"
+    );
+    return data.accessToken;
   },
 };
