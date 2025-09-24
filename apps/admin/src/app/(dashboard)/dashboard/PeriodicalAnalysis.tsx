@@ -51,9 +51,11 @@ export default function PeriodicalAnalysis({
           : "";
 
   return (
-    <div className="max-w-6xl mx-auto">
-      {isLoading && <div className="text-sm text-gray-500">불러오는 중...</div>}
-      {isError && <div className="text-sm text-red-600">{errorMsg}</div>}
+    <div className="max-w-6xl mx-auto text-foreground">
+      {isLoading && (
+        <div className="text-sm text-muted-foreground">불러오는 중...</div>
+      )}
+      {isError && <div className="text-sm text-danger">{errorMsg}</div>}
 
       {!isLoading && !isError && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

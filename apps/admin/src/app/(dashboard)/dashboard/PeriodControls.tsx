@@ -38,6 +38,10 @@ const PeriodControls = ({ value, onChange, className = "" }: Props) => {
   const setMonth = (m: number) => onChange({ ...value, month: m });
   const setWeek = (w: number) => onChange({ ...value, week: w });
 
+  const baseSelect =
+    "px-3 py-2 border border-border rounded-lg text-sm cursor-pointer " +
+    "bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand";
+
   return (
     <div
       className={`flex flex-col md:flex-row md:items-center md:justify-between gap-4 ${className}`}
@@ -46,30 +50,30 @@ const PeriodControls = ({ value, onChange, className = "" }: Props) => {
       <fieldset className="flex items-center gap-4">
         <legend className="sr-only">기간 선택</legend>
 
-        <label className="inline-flex items-center gap-2 cursor-pointer">
+        <label className="inline-flex items-center gap-2 cursor-pointer text-foreground">
           <input
             type="radio"
-            className="accent-[#005C14]"
+            className="accent-brand"
             checked={value.periodType === "yearly"}
             onChange={() => setType("yearly")}
           />
           <span className="text-sm">연 통계(간편분석)</span>
         </label>
 
-        <label className="inline-flex items-center gap-2 cursor-pointer">
+        <label className="inline-flex items-center gap-2 cursor-pointer text-foreground">
           <input
             type="radio"
-            className="accent-[#005C14]"
+            className="accent-brand"
             checked={value.periodType === "monthly"}
             onChange={() => setType("monthly")}
           />
           <span className="text-sm">월 통계(주간분석)</span>
         </label>
 
-        <label className="inline-flex items-center gap-2 cursor-pointer">
+        <label className="inline-flex items-center gap-2 cursor-pointer text-foreground">
           <input
             type="radio"
-            className="accent-[#005C14]"
+            className="accent-brand"
             checked={value.periodType === "weekly"}
             onChange={() => setType("weekly")}
           />
@@ -80,9 +84,9 @@ const PeriodControls = ({ value, onChange, className = "" }: Props) => {
       {/* 선택 드롭다운 */}
       <div className="flex flex-wrap items-center gap-2">
         {/* 연도 */}
-        <label className="text-sm text-gray-600">
+        <label className="text-sm text-muted-foreground">
           <select
-            className="px-3 py-2 border rounded-lg text-sm cursor-pointer"
+            className={baseSelect}
             value={value.year}
             onChange={(e) => setYear(Number(e.target.value))}
           >
@@ -96,9 +100,9 @@ const PeriodControls = ({ value, onChange, className = "" }: Props) => {
 
         {/* 월: yearly가 아닐 때만 */}
         {value.periodType !== "yearly" && (
-          <label className="text-sm text-gray-600">
+          <label className="text-sm text-muted-foreground">
             <select
-              className="px-3 py-2 border rounded-lg text-sm cursor-pointer"
+              className={baseSelect}
               value={value.month}
               onChange={(e) => setMonth(Number(e.target.value))}
             >
@@ -113,9 +117,9 @@ const PeriodControls = ({ value, onChange, className = "" }: Props) => {
 
         {/* 주: weekly일 때만 */}
         {value.periodType === "weekly" && (
-          <label className="text-sm text-gray-600">
+          <label className="text-sm text-muted-foreground">
             <select
-              className="px-3 py-2 border rounded-lg text-sm cursor-pointer"
+              className={baseSelect}
               value={value.week}
               onChange={(e) => setWeek(Number(e.target.value))}
             >
