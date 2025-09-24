@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import { useGetBestSeller } from "@/hooks/dashboard/useGetBestSeller";
 import type { PeriodType } from "@/lib/api/dashboard";
+import { isAxiosError } from "axios";
 
 const KRW = new Intl.NumberFormat("ko-KR", {
   style: "currency",
@@ -65,9 +66,11 @@ export default function BestSeller({
           ? `${params.month}월 ${params.week}주`
           : "";
 
-  const errMsg =
-    (error as any)?.response?.data?.message ||
-    (isError ? "베스트셀러 데이터를 불러오지 못했습니다." : "");
+  const errorMsg = isAxiosError<{ message?: string }>(error)
+    ? (error.response?.data?.message ?? "데이터를 불러오지 못했습니다.")
+    : isError
+      ? "데이터를 불러오지 못했습니다."
+      : "";
 
   return (
     <div
@@ -91,7 +94,7 @@ export default function BestSeller({
           ))}
         </div>
       )}
-      {isError && <div className="text-sm text-red-600">{errMsg}</div>}
+      {isError && <div className="text-sm text-red-600">{errorMsg}</div>}
 
       {/* 표 */}
       {!isLoading && !isError && (
