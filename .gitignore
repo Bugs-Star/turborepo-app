@@ -26,6 +26,7 @@ coverage
 # Build Outputs
 .next/
 out/
+out.zip
 build
 dist
 
