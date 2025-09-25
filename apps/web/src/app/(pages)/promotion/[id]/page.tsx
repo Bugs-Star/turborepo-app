@@ -58,7 +58,8 @@ export default function PromotionDetailPage({
           screenName,
           durationSeconds,
           screenStartTime.current,
-          endTime
+          endTime,
+          promotion._id
         );
       }
     };
