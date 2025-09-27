@@ -1,6 +1,6 @@
 /* ------------------------------------------------------------
- * File      : /src/services/salesTrendDataService.js
- * Brief     : 판매 추세 데이터 조회 서비스
+ * File      : /src/services/visitorTrendDataService.js
+ * Brief     : 사용자 활동 추세 데이터 조회 서비스
  * Author    : 송용훈
  * Date      : 2025-09-25
  * Version   : 
@@ -10,14 +10,14 @@
 import { queryDatabase } from "../config/clickhouse.js";
 
 /**
- * 판매 추세 데이터 조회 함수
+ * 사용자 활동 추세 데이터 조회 함수
  * @param {string} periodType - 기간 타입 (yearly, monthly, weekly)
  * @param {number} year - 연도
  * @param {number} month - 월 (monthly, weekly에서 사용)
  * @param {number} week - 주 (weekly에서 사용)
- * @returns {Promise<Array>} 판매 추세 데이터 [{name, sales}, ...]
+ * @returns {Promise<Array>} 사용자 활동 추세 데이터 [{name, totalVisitors, uniqueVisitors, activeVisitors, bounce}, ...]
  */
-export const fetchSalesTrendData = async (periodType, year, month, week) => {
+export const fetchVisitorTrendData = async (periodType, year, month, week) => {
   let query, query_params, chartPeriodType;
 
   switch (periodType) {
@@ -26,8 +26,11 @@ export const fetchSalesTrendData = async (periodType, year, month, week) => {
       chartPeriodType = "monthly";
       query = `SELECT 
                  toMonth(period_start) as period_label,
-                 SUM(total_sales) as total_sales
-               FROM sales_summary_by_period FINAL 
+                 SUM(total_sessions) as total_sessions,
+                 SUM(total_unique_visitors) as total_unique_visitors,
+                 SUM(engaged_visitors) as engaged_visitors,
+                 SUM(bounced_sessions) as bounced_sessions
+               FROM visitor_summary_by_period FINAL 
                WHERE period_type = {chartPeriodType:String}
                AND toYear(period_start) = {year:UInt16}
                GROUP BY toMonth(period_start)
@@ -40,8 +43,11 @@ export const fetchSalesTrendData = async (periodType, year, month, week) => {
       chartPeriodType = "weekly";
       query = `SELECT 
                  ceil(toDayOfMonth(period_start) / 7.0) as period_label,
-                 SUM(total_sales) as total_sales
-               FROM sales_summary_by_period FINAL 
+                 SUM(total_sessions) as total_sessions,
+                 SUM(total_unique_visitors) as total_unique_visitors,
+                 SUM(engaged_visitors) as engaged_visitors,
+                 SUM(bounced_sessions) as bounced_sessions
+               FROM visitor_summary_by_period FINAL 
                WHERE period_type = {chartPeriodType:String}
                AND toYear(period_start) = {year:UInt16}
                AND toMonth(period_start) = {month:UInt8}
@@ -69,8 +75,11 @@ export const fetchSalesTrendData = async (periodType, year, month, week) => {
 
       query = `SELECT 
                  toDayOfMonth(period_start) as period_label,
-                 SUM(total_sales) as total_sales
-               FROM sales_summary_by_period FINAL 
+                 SUM(total_sessions) as total_sessions,
+                 SUM(total_unique_visitors) as total_unique_visitors,
+                 SUM(engaged_visitors) as engaged_visitors,
+                 SUM(bounced_sessions) as bounced_sessions
+               FROM visitor_summary_by_period FINAL 
                WHERE period_type = {chartPeriodType:String}
                AND period_start >= {weekStart:String}
                AND period_start <= {weekEnd:String}
@@ -85,7 +94,7 @@ export const fetchSalesTrendData = async (periodType, year, month, week) => {
 
   const results = await queryDatabase(query, query_params);
   
-  // Recharts용 판매 추세 데이터 포맷팅
+  // Recharts용 데이터 포맷팅
   return results.map(row => {
     // period_label을 name으로 변환
     let name;
@@ -105,11 +114,10 @@ export const fetchSalesTrendData = async (periodType, year, month, week) => {
 
     return {
       name: name,
-      sales: row.total_sales
+      totalVisitors: row.total_sessions,
+      uniqueVisitors: row.total_unique_visitors,
+      activeVisitors: row.engaged_visitors,
+      bounce: row.bounced_sessions
     };
   });
 };
-
-// 기존 함수명 호환성을 위한 alias (deprecated)
-export const fetchTrendData = fetchSalesTrendData;
-export const fetchChartData = fetchSalesTrendData;

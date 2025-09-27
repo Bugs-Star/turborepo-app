@@ -10,6 +10,7 @@
 import { queryDatabase } from "../config/clickhouse.js";
 import { validateReportRequest } from "../services/reportQueryValidator.js";
 import { fetchSalesTrendData } from "../services/salesTrendDataService.js";
+import { fetchVisitorTrendData } from "../services/visitorTrendDataService.js";
 
 // 매출 요약 데이터 조회 함수
 const fetchStateData = async (tableName, periodType, year, month, week) => {
@@ -85,6 +86,9 @@ export const getReports = async (req, res) => {
     // 3. 판매 추세 데이터 조회
     const salesTrendData = await fetchSalesTrendData(periodType, year, month, week);
 
+    // 4. 사용자 활동 추세 데이터 조회
+    const visitorTrendData = await fetchVisitorTrendData(periodType, year, month, week);
+
     // 데이터 존재 여부 확인
     if (!stats || stats.length === 0) {
       return res.status(404).json({
@@ -104,6 +108,7 @@ export const getReports = async (req, res) => {
       summary: stats,
       bestsellers: bestsellers,
       trendData: salesTrendData,
+      visitorTrendData: visitorTrendData,
       meta: {
         periodType,
         year,
@@ -117,6 +122,7 @@ export const getReports = async (req, res) => {
       summaryCount: stats.length,
       bestsellersCount: bestsellers.length,
       salesTrendDataCount: salesTrendData.length,
+      visitorTrendDataCount: visitorTrendData.length,
     });
 
     res.status(200).json(responseData);
