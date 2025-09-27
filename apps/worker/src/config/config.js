@@ -33,6 +33,33 @@ export const CLICKHOUSE_CONFIG = {
   debug: false,
 };
 
+// // --- ClickHouse 관련 설정 (핵심 수정 부분) ---
+// export const CLICKHOUSE_CONFIG = {
+//   // host: URL 형식이 아닌, 개별 속성으로 명확하게 전달하는 것이 안정적입니다.
+//   // .env 파일에 CLICKHOUSE_HOST와 CLICKHOUSE_PORT가 분리되어 있어야 합니다.
+//   host: process.env.CLICKHOUSE_HOST,
+//   port: Number(process.env.CLICKHOUSE_PORT), // .env 값은 문자열이므로 숫자로 변환합니다.
+
+//   username: process.env.CLICKHOUSE_USERNAME,
+//   password: process.env.CLICKHOUSE_PASSWORD,
+//   database: process.env.CLICKHOUSE_DATABASE || 'default',
+
+//   // -- ✨ 핵심 수정 사항: 커넥션 유지를 위한 설정 --
+//   // 유휴 상태의 커넥션이 네트워크 방화벽 등에 의해 끊어지는 것을 방지합니다.
+//   keep_alive: {
+//     // Keep-Alive 기능을 활성화합니다.
+//     enabled: true,
+//     // 소켓이 처음 유휴 상태가 된 후 30초 뒤에 첫 확인 신호를 보냅니다.
+//     // 방화벽의 유휴 타임아웃(보통 60초 이상)보다 짧게 설정하는 것이 중요합니다.
+//     socket_initial_delay: 30_000,
+//   },
+
+//   // 긴 집계 쿼리가 타임아웃되는 것을 방지하기 위해 요청 타임아웃을 늘립니다. (60초)
+//   request_timeout: 60_000,
+
+//   debug: false,
+// };
+
 // 개념 정리
 // Redis 스트림
 // Redis는 키-값 저장소지만, 스트림 기능은 메시지 큐 역할을 합니다.
