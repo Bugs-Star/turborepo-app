@@ -1,0 +1,13 @@
+{
+  "name": "user_rag",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "dev": "concurrently \"nodemon --exec python3 app/main.py\"",
+    "start": "python3 app/main.py"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "nodemon": "^3.1.10"
+  }
+}

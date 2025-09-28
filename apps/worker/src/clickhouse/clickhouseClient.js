@@ -10,13 +10,61 @@ const clickhouse = createClient(CLICKHOUSE_CONFIG);
  * 각 객체는 테이블 이름과 생성 쿼리를 포함합니다.
  */
 const tableSchemas = [
-  // --- 원본 데이터 테이블 (변경 없음) ---
+  {
+    tableName: "promotion_summary_by_period",
+    query: `
+      CREATE TABLE IF NOT EXISTS promotion_summary_by_period (
+      -- 집계 주기 (daily, weekly, monthly, yearly)
+      period_type String,
+
+      -- 집계 시작일 (해당 주의 월요일, 해당 월의 1일 등)
+      period_start Date,
+
+      -- 프로모션 ID
+      promotion_id String,
+
+      -- 프로모션 이름
+      promotion_name String,
+
+      -- 총 조회수
+      total_views UInt64,
+
+      -- 총 시청 시간 (초)
+      total_view_duration_seconds UInt64,
+
+      -- 순 방문자 수 (조회 기준)
+      unique_viewers UInt64,
+
+      -- 총 클릭 수
+      total_clicks UInt64,
+
+      -- 순 클릭 유저 수
+      unique_clickers UInt64,
+
+      -- 집계된 시간 (ReplacingMergeTree 버전 관리를 위함)
+      updated_at DateTime
+
+      ) ENGINE = ReplacingMergeTree(updated_at)
+      PARTITION BY toYYYYMM(period_start)
+      ORDER BY (period_type, period_start, promotion_id);
+      `,
+  },
   {
     tableName: "events",
     query: `
       CREATE TABLE IF NOT EXISTS events (
-        event_id UUID, user_id String, session_id String, event_type String,
-        event_time DateTime, store_id String, metadata JSON
+      event_id UUID,
+      user_id String,
+      session_id String,
+      event_type String,
+      event_time DateTime,
+      store_id String,
+      metadata JSON,
+
+      -- 광고 분석을 위해 추가된 컬럼
+      promotion_id String,
+      duration_seconds UInt32
+
       ) ENGINE = MergeTree()
       PARTITION BY toYYYYMM(event_time)
       ORDER BY (user_id, session_id, event_time);
@@ -26,12 +74,25 @@ const tableSchemas = [
     tableName: "orders",
     query: `
       CREATE TABLE IF NOT EXISTS orders (
-        order_id UUID, user_id String, session_id String, store_id String,
-        menu_id String, menu_name String, category String, quantity UInt8, price_per_item UInt32, total_price UInt32,
-        status Enum8('paid' = 1, 'canceled' = 2, 'refunded' = 3, 'initiated' = 4),
-        ordered_at DateTime, updated_at DateTime
-      ) ENGINE = MergeTree()
-      ORDER BY (store_id, ordered_at); -- 수정: store_id를 정렬 키에 추가하여 조회 성능 향상
+    order_id UUID,
+    user_id String,
+    session_id String,
+    store_id String,
+    menu_id String,
+    menu_name String,
+    category String,
+    quantity UInt8,
+    price_per_item UInt32,
+    total_price UInt32,
+    status Enum8('paid' = 1, 'canceled' = 2, 'refunded' = 3, 'initiated' = 4),
+    ordered_at DateTime,
+    updated_at DateTime,
+
+    -- 광고 성과 분석을 위해 추가된 컬럼
+    promotion_id String
+
+    ) ENGINE = MergeTree()
+    ORDER BY (store_id, ordered_at);
     `,
   },
 

@@ -1,524 +1,116 @@
 [
   {
-    "userId": "",
-    "itemId": "GREENTEA_FRAPPUCCINO",
-    "eventType": "clickInteraction",
-    "textContent": "녹차 프라푸치노 beverage 대한민국 대표 녹차 산지인 전남 보성에서 재배된 신선한 녹차로 만든 프라푸치노입니다. 진한 녹차의 풍미와 시원한 부드러움이 조화를 이루어 깔끔하고 건강한 맛을 즐길 수 있습니다."
-  },
-  {
-    "userId": "",
-    "itemId": "ICE_AMERICANO",
-    "eventType": "clickInteraction",
-    "textContent": "아이스 아메리카노 beverage 진한 에스프레소의 깊이와 시원한 얼음의 청량함이 어우러져, 마시는 순간 머리까지 맑아지는 아이스 아메리카노. 바쁜 하루 속, 잠시 멈춰 서서 리프레시하세요."
-  },
-  {
-    "userId": "",
-    "itemId": "ICE_AMERICANO",
-    "eventType": "clickInteraction",
-    "textContent": "아이스 아메리카노 beverage 진한 에스프레소의 깊이와 시원한 얼음의 청량함이 어우러져, 마시는 순간 머리까지 맑아지는 아이스 아메리카노. 바쁜 하루 속, 잠시 멈춰 서서 리프레시하세요."
-  },
-  {
-    "userId": "",
-    "itemId": "ICE_AMERICANO",
-    "eventType": "clickInteraction",
-    "textContent": "아이스 아메리카노 beverage 진한 에스프레소의 깊이와 시원한 얼음의 청량함이 어우러져, 마시는 순간 머리까지 맑아지는 아이스 아메리카노. 바쁜 하루 속, 잠시 멈춰 서서 리프레시하세요."
-  },
-  {
-    "userId": "",
-    "itemId": "SIPJEON_DAEBO_TANG",
-    "eventType": "clickInteraction",
-    "textContent": "십전대보탕 beverage 어느 카페에서나 파는 몸과 마음을 따뜻하게 채워주는 전통 한방 보양탕.\r\n열 가지 한약재가 조화롭게 어우러져 기운을 돋우고, 피로 회복과 건강 관리에 도움을 줍니다.\r\n깊고 풍부한 한방 향과 은은한 달콤함이 특징으로, 속을 편안하게 달래주는 힐링 음료 또는 건강식으로 즐기기 좋습니다."
-  },
-  {
-    "userId": "",
-    "itemId": "SAYAK",
-    "eventType": "clickInteraction",
-    "textContent": "사약 beverage 한 모금에 정신이 번쩍 드는 강렬한 맛!\r\n묘하게 중독적인 쓴맛과 달콤함이 뒤섞여, 마시는 순간 “이게 사약인가?” 싶은 농담이 절로 나오는 유니크한 메뉴입니다.\r\n\r\n※ 소복 입고 석고대죄 시 음료 30% 할인 적용"
-  },
-  {
-    "userId": "",
-    "itemId": "SAYAK",
-    "eventType": "clickInteraction",
-    "textContent": "사약 beverage 한 모금에 정신이 번쩍 드는 강렬한 맛!\r\n묘하게 중독적인 쓴맛과 달콤함이 뒤섞여, 마시는 순간 “이게 사약인가?” 싶은 농담이 절로 나오는 유니크한 메뉴입니다.\r\n\r\n※ 소복 입고 석고대죄 시 음료 30% 할인 적용"
-  },
-  {
-    "userId": "",
-    "itemId": "SPORTS_CAR",
-    "eventType": "clickInteraction",
-    "textContent": "벅스스타 GTX-80 goods 훼라리 2번째 콜라보!! 강력한 엔진과 세련된 디자인이 돋보이는 GTX=80 모델의 고성능 차량.\r\n빠른 가속력과 민첩한 핸들링으로 드라이빙의 즐거움을 극대화하며, 스포티한 외관과 내부 인테리어가 운전자의 개성을 한층 돋보이게 합니다.\r\n도로 위에서도 시선을 사로잡는 존재감 있는 차량입니다."
-  },
-  {
-    "userId": "",
-    "itemId": "CREAM_CASTELLA",
-    "eventType": "clickInteraction",
-    "textContent": "크림 카스테라 food 폭신폭신한 카스테라 속에 부드럽고 달콤한 크림이 가득 들어간 디저트.\r\n한 입 베어 물면 카스테라의 촉촉함과 크림의 부드러움이 어우러져 입안에서 달콤함이 퍼집니다.\r\n커피나 차와 함께 즐기면 디저트 타임을 한층 풍성하게 만들어줍니다."
-  },
-  {
-    "userId": "",
-    "itemId": "SPORTS_CAR",
-    "eventType": "clickInteraction",
-    "textContent": "벅스스타 GTX-80 goods 훼라리 2번째 콜라보!! 강력한 엔진과 세련된 디자인이 돋보이는 GTX=80 모델의 고성능 차량.\r\n빠른 가속력과 민첩한 핸들링으로 드라이빙의 즐거움을 극대화하며, 스포티한 외관과 내부 인테리어가 운전자의 개성을 한층 돋보이게 합니다.\r\n도로 위에서도 시선을 사로잡는 존재감 있는 차량입니다."
-  },
-  {
-    "userId": "",
-    "itemId": "CHOCOLATE_CAKE",
-    "eventType": "clickInteraction",
-    "textContent": "초코 케이크 food 초콜릿의 진한 향과 촉촉한 케이크 시트가 만나 한 조각만으로도 기분 좋은 달콤함을 느낄 수 있는 특별한 디저트입니다."
-  },
-  {
-    "userId": "",
-    "itemId": "CARAMEL_MACCHIATO",
-    "eventType": "clickInteraction",
-    "textContent": "카라멜 마끼아또 beverage 향긋한 에스프레소에 부드러운 스팀 밀크, 그리고 달콤한 카라멜 시럽을 더해 완성된 음료.\r\n진한 커피향과 달콤함이 어우러져 누구나 즐기기 좋은 스테디셀러 메뉴입니다."
-  },
-  {
-    "userId": "",
-    "itemId": "HOT_AMERICANO",
-    "eventType": "clickInteraction",
-    "textContent": "핫 아메리카노 beverage 깊고 담백한 커피 본연의 맛, 따뜻하게 즐기는 클래식 아메리카노."
-  },
-  {
-    "userId": "",
-    "itemId": "SAYAK",
-    "eventType": "clickInteraction",
-    "textContent": "사약 beverage 한 모금에 정신이 번쩍 드는 강렬한 맛!\r\n묘하게 중독적인 쓴맛과 달콤함이 뒤섞여, 마시는 순간 “이게 사약인가?” 싶은 농담이 절로 나오는 유니크한 메뉴입니다.\r\n\r\n※ 소복 입고 석고대죄 시 음료 30% 할인 적용"
-  },
-  {
-    "userId": "",
-    "itemId": "BIG_THERMOS",
-    "eventType": "clickInteraction",
-    "textContent": "벅스스타 빅사이즈 보온병 goods 대용량으로 음료를 오래 따뜻하게 혹은 차갑게 보관할 수 있는 실용적인 보온병.\r\n스테인리스 소재로 제작되어 내구성이 뛰어나고, 진공 단열 구조로 음료 온도를 오랜 시간 유지합니다.\r\n등산, 여행, 사무실 등 다양한 장소에서 넉넉한 용량으로 편리하게 사용할 수 있습니다."
-  },
-  {
-    "userId": "",
-    "itemId": "CARAMEL_MACCHIATO",
-    "eventType": "clickInteraction",
-    "textContent": "카라멜 마끼아또 beverage 향긋한 에스프레소에 부드러운 스팀 밀크, 그리고 달콤한 카라멜 시럽을 더해 완성된 음료.\r\n진한 커피향과 달콤함이 어우러져 누구나 즐기기 좋은 스테디셀러 메뉴입니다."
-  },
-  {
-    "userId": "",
-    "itemId": "MANGO_YOGURT",
-    "eventType": "clickInteraction",
-    "textContent": "망고 요거트 beverage 부드러운 요거트에 달콤하고 향긋한 망고 퓌레가 어우러진 음료.\r\n한 모금 마시면 요거트의 산미가 먼저 느껴지고, 이어 달콤한 망고 맛이 입안을 가득 채워 상큼함과 부드러움을 동시에 즐길 수 있습니다.\r\n아침 식사 대용이나 간식으로도 부담 없이 즐길 수 있는 건강한 선택이에요."
-  },
-  {
-    "userId": "",
-    "itemId": "SAYAK",
-    "eventType": "clickInteraction",
-    "textContent": "사약 beverage 한 모금에 정신이 번쩍 드는 강렬한 맛!\r\n묘하게 중독적인 쓴맛과 달콤함이 뒤섞여, 마시는 순간 “이게 사약인가?” 싶은 농담이 절로 나오는 유니크한 메뉴입니다.\r\n\r\n※ 소복 입고 석고대죄 시 음료 30% 할인 적용"
-  },
-  {
-    "userId": "",
-    "itemId": "CHEESE_CAKE",
-    "eventType": "clickInteraction",
-    "textContent": "치즈 케이크 food 부드럽고 진한 치즈 풍미가 입안을 가득 채우는 디저트.\r\n겉은 살짝 단단하게, 속은 촉촉하고 크리미하게 구워져 한 입 먹는 순간 풍부한 맛과 질감의 조화를 느낄 수 있습니다.\r\n커피, 티와 함께 즐기면 더욱 완벽한 디저트 타임이 됩니다."
-  },
-  {
-    "userId": "",
-    "itemId": "MELON_CAKE",
-    "eventType": "clickInteraction",
-    "textContent": "메론 케이크 food 촉촉한 케이크 시트 위에 달콤하고 상큼한 메론 크림과 신선한 메론 조각을 올린 디저트.\r\n한 입 먹으면 메론의 은은한 향과 달콤함이 입안을 가득 채워, 보기에도 예쁘고 맛도 즐거운 한 조각입니다.\r\n커피, 차와 함께 즐기면 상큼함과 달콤함의 조화를 느낄 수 있습니다."
-  },
-  {
-    "userId": "",
-    "itemId": "GREENTEA_FRAPPUCCINO",
-    "eventType": "clickInteraction",
-    "textContent": "녹차 프라푸치노 beverage 대한민국 대표 녹차 산지인 전남 보성에서 재배된 신선한 녹차로 만든 프라푸치노입니다. 진한 녹차의 풍미와 시원한 부드러움이 조화를 이루어 깔끔하고 건강한 맛을 즐길 수 있습니다."
-  },
-  {
-    "userId": "",
-    "itemId": "SAYAK",
-    "eventType": "clickInteraction",
-    "textContent": "사약 beverage 한 모금에 정신이 번쩍 드는 강렬한 맛!\r\n묘하게 중독적인 쓴맛과 달콤함이 뒤섞여, 마시는 순간 “이게 사약인가?” 싶은 농담이 절로 나오는 유니크한 메뉴입니다.\r\n\r\n※ 소복 입고 석고대죄 시 음료 30% 할인 적용"
-  },
-  {
-    "userId": "",
-    "itemId": "CARAMEL_MACCHIATO",
-    "eventType": "clickInteraction",
-    "textContent": "카라멜 마끼아또 beverage 향긋한 에스프레소에 부드러운 스팀 밀크, 그리고 달콤한 카라멜 시럽을 더해 완성된 음료.\r\n진한 커피향과 달콤함이 어우러져 누구나 즐기기 좋은 스테디셀러 메뉴입니다."
-  },
-  {
-    "userId": "",
-    "itemId": "SAYAK",
-    "eventType": "clickInteraction",
-    "textContent": "사약 beverage 한 모금에 정신이 번쩍 드는 강렬한 맛!\r\n묘하게 중독적인 쓴맛과 달콤함이 뒤섞여, 마시는 순간 “이게 사약인가?” 싶은 농담이 절로 나오는 유니크한 메뉴입니다.\r\n\r\n※ 소복 입고 석고대죄 시 음료 30% 할인 적용"
-  },
-  {
-    "userId": "",
-    "itemId": "CARP_JJIM",
-    "eventType": "clickInteraction",
-    "textContent": "잉어찜 food 어느 카페에서나 제공하는 신선한 잉어를 간장과 한방 양념으로 푹 졸여 만든 전통 요리.\r\n살이 부드럽고 양념이 잘 배어 있어 깊은 감칠맛과 풍미를 느낄 수 있으며, 매콤달콤한 맛이 입맛을 돋웁니다.\r\n따뜻한 커피와 함께 즐기면 든든한 한 끼 식사로 좋습니다."
-  },
-  {
-    "userId": "",
-    "itemId": "SPORTS_CAR",
-    "eventType": "clickInteraction",
-    "textContent": "벅스스타 GTX-80 goods 훼라리 2번째 콜라보!! 강력한 엔진과 세련된 디자인이 돋보이는 GTX=80 모델의 고성능 차량.\r\n빠른 가속력과 민첩한 핸들링으로 드라이빙의 즐거움을 극대화하며, 스포티한 외관과 내부 인테리어가 운전자의 개성을 한층 돋보이게 합니다.\r\n도로 위에서도 시선을 사로잡는 존재감 있는 차량입니다."
-  },
-  {
-    "userId": "",
-    "itemId": "BIG_THERMOS",
-    "eventType": "clickInteraction",
-    "textContent": "벅스스타 빅사이즈 보온병 goods 대용량으로 음료를 오래 따뜻하게 혹은 차갑게 보관할 수 있는 실용적인 보온병.\r\n스테인리스 소재로 제작되어 내구성이 뛰어나고, 진공 단열 구조로 음료 온도를 오랜 시간 유지합니다.\r\n등산, 여행, 사무실 등 다양한 장소에서 넉넉한 용량으로 편리하게 사용할 수 있습니다."
-  },
-  {
-    "userId": "",
-    "itemId": "SPORTS_CAR",
-    "eventType": "clickInteraction",
-    "textContent": "벅스스타 GTX-80 goods 훼라리 2번째 콜라보!! 강력한 엔진과 세련된 디자인이 돋보이는 GTX=80 모델의 고성능 차량.\r\n빠른 가속력과 민첩한 핸들링으로 드라이빙의 즐거움을 극대화하며, 스포티한 외관과 내부 인테리어가 운전자의 개성을 한층 돋보이게 합니다.\r\n도로 위에서도 시선을 사로잡는 존재감 있는 차량입니다."
-  },
-  {
-    "userId": "",
-    "itemId": "SPORTS_CAR",
-    "eventType": "clickInteraction",
-    "textContent": "벅스스타 GTX-80 goods 훼라리 2번째 콜라보!! 강력한 엔진과 세련된 디자인이 돋보이는 GTX=80 모델의 고성능 차량.\r\n빠른 가속력과 민첩한 핸들링으로 드라이빙의 즐거움을 극대화하며, 스포티한 외관과 내부 인테리어가 운전자의 개성을 한층 돋보이게 합니다.\r\n도로 위에서도 시선을 사로잡는 존재감 있는 차량입니다."
-  },
-  {
-    "userId": "",
-    "itemId": "SAYAK",
-    "eventType": "clickInteraction",
-    "textContent": "사약 beverage 한 모금에 정신이 번쩍 드는 강렬한 맛!\r\n묘하게 중독적인 쓴맛과 달콤함이 뒤섞여, 마시는 순간 “이게 사약인가?” 싶은 농담이 절로 나오는 유니크한 메뉴입니다.\r\n\r\n※ 소복 입고 석고대죄 시 음료 30% 할인 적용"
-  },
-  {
-    "userId": "",
-    "itemId": "ICE_AMERICANO",
-    "eventType": "clickInteraction",
-    "textContent": "아이스 아메리카노 beverage 진한 에스프레소의 깊이와 시원한 얼음의 청량함이 어우러져, 마시는 순간 머리까지 맑아지는 아이스 아메리카노. 바쁜 하루 속, 잠시 멈춰 서서 리프레시하세요."
-  },
-  {
-    "userId": "",
-    "itemId": "MELON_CAKE",
-    "eventType": "clickInteraction",
-    "textContent": "메론 케이크 food 촉촉한 케이크 시트 위에 달콤하고 상큼한 메론 크림과 신선한 메론 조각을 올린 디저트.\r\n한 입 먹으면 메론의 은은한 향과 달콤함이 입안을 가득 채워, 보기에도 예쁘고 맛도 즐거운 한 조각입니다.\r\n커피, 차와 함께 즐기면 상큼함과 달콤함의 조화를 느낄 수 있습니다."
-  },
-  {
-    "userId": "",
-    "itemId": "SANGHWA_TANG",
-    "eventType": "clickInteraction",
-    "textContent": "쌍화탕 beverage 전통 한방차로, 꽃과 약재가 어우러져 은은한 향과 부드러운 맛을 즐길 수 있는 음료입니다.\r\n몸을 따뜻하게 하고 기운을 돋우며, 스트레스 완화와 피로 회복에 도움을 주는 힐링 차로 추천합니다.\r\n부드럽고 깔끔한 끝맛이 특징으로, 하루의 여유로운 순간에 즐기기 좋습니다."
-  },
-  {
-    "userId": "",
-    "itemId": "SIPJEON_DAEBO_TANG",
-    "eventType": "clickInteraction",
-    "textContent": "십전대보탕 beverage 어느 카페에서나 파는 몸과 마음을 따뜻하게 채워주는 전통 한방 보양탕.\r\n열 가지 한약재가 조화롭게 어우러져 기운을 돋우고, 피로 회복과 건강 관리에 도움을 줍니다.\r\n깊고 풍부한 한방 향과 은은한 달콤함이 특징으로, 속을 편안하게 달래주는 힐링 음료 또는 건강식으로 즐기기 좋습니다."
-  },
-  {
-    "userId": "",
-    "itemId": "SAYAK",
-    "eventType": "clickInteraction",
-    "textContent": "사약 beverage 한 모금에 정신이 번쩍 드는 강렬한 맛!\r\n묘하게 중독적인 쓴맛과 달콤함이 뒤섞여, 마시는 순간 “이게 사약인가?” 싶은 농담이 절로 나오는 유니크한 메뉴입니다.\r\n\r\n※ 소복 입고 석고대죄 시 음료 30% 할인 적용"
-  },
-  {
-    "userId": "",
-    "itemId": "SANGHWA_TANG",
-    "eventType": "clickInteraction",
-    "textContent": "쌍화탕 beverage 전통 한방차로, 꽃과 약재가 어우러져 은은한 향과 부드러운 맛을 즐길 수 있는 음료입니다.\r\n몸을 따뜻하게 하고 기운을 돋우며, 스트레스 완화와 피로 회복에 도움을 주는 힐링 차로 추천합니다.\r\n부드럽고 깔끔한 끝맛이 특징으로, 하루의 여유로운 순간에 즐기기 좋습니다."
-  },
-  {
-    "userId": "",
-    "itemId": "TOFFEENUT_LATTE",
-    "eventType": "clickInteraction",
-    "textContent": "토피넛 라떼 beverage 고소한 견과류 향과 달콤한 토피 시럽이 어우러진 라떼로, 부드러운 우유와 에스프레소의 풍미가 조화를 이루어 따뜻하고 달콤한 휴식을 선사합니다."
-  },
-  {
-    "userId": "",
-    "itemId": "VANILLA_MACARON",
-    "eventType": "clickInteraction",
-    "textContent": "바닐라 마카롱 food 겉은 바삭하고 속은 부드럽게 녹아드는 클래식 바닐라 마카롱.\r\n부드러운 바닐라 크림 필링이 은은한 향과 달콤함을 선사해, 한 입 먹는 순간 부드러운 행복이 입안을 가득 채웁니다.\r\n커피, 차와 함께 즐기면 깔끔하고 고급스러운 디저트 타임을 완성할 수 있습니다."
-  },
-  {
-    "userId": "",
-    "itemId": "SANGHWA_TANG",
-    "eventType": "clickInteraction",
-    "textContent": "쌍화탕 beverage 전통 한방차로, 꽃과 약재가 어우러져 은은한 향과 부드러운 맛을 즐길 수 있는 음료입니다.\r\n몸을 따뜻하게 하고 기운을 돋우며, 스트레스 완화와 피로 회복에 도움을 주는 힐링 차로 추천합니다.\r\n부드럽고 깔끔한 끝맛이 특징으로, 하루의 여유로운 순간에 즐기기 좋습니다."
-  },
-  {
-    "userId": "",
-    "itemId": "CHOCOLATE_CAKE",
-    "eventType": "clickInteraction",
-    "textContent": "초코 케이크 food 초콜릿의 진한 향과 촉촉한 케이크 시트가 만나 한 조각만으로도 기분 좋은 달콤함을 느낄 수 있는 특별한 디저트입니다."
-  },
-  {
-    "userId": "",
-    "itemId": "SAYAK",
-    "eventType": "clickInteraction",
-    "textContent": "사약 beverage 한 모금에 정신이 번쩍 드는 강렬한 맛!\r\n묘하게 중독적인 쓴맛과 달콤함이 뒤섞여, 마시는 순간 “이게 사약인가?” 싶은 농담이 절로 나오는 유니크한 메뉴입니다.\r\n\r\n※ 소복 입고 석고대죄 시 음료 30% 할인 적용"
-  },
-  {
-    "userId": "",
-    "itemId": "SPORTS_CAR",
-    "eventType": "clickInteraction",
-    "textContent": "벅스스타 GTX-80 goods 훼라리 2번째 콜라보!! 강력한 엔진과 세련된 디자인이 돋보이는 GTX=80 모델의 고성능 차량.\r\n빠른 가속력과 민첩한 핸들링으로 드라이빙의 즐거움을 극대화하며, 스포티한 외관과 내부 인테리어가 운전자의 개성을 한층 돋보이게 합니다.\r\n도로 위에서도 시선을 사로잡는 존재감 있는 차량입니다."
-  },
-  {
-    "userId": "",
-    "itemId": "SPORTS_CAR",
-    "eventType": "clickInteraction",
-    "textContent": "벅스스타 GTX-80 goods 훼라리 2번째 콜라보!! 강력한 엔진과 세련된 디자인이 돋보이는 GTX=80 모델의 고성능 차량.\r\n빠른 가속력과 민첩한 핸들링으로 드라이빙의 즐거움을 극대화하며, 스포티한 외관과 내부 인테리어가 운전자의 개성을 한층 돋보이게 합니다.\r\n도로 위에서도 시선을 사로잡는 존재감 있는 차량입니다."
-  },
-  {
-    "userId": "",
-    "itemId": "MANGO_YOGURT",
-    "eventType": "clickInteraction",
-    "textContent": "망고 요거트 beverage 부드러운 요거트에 달콤하고 향긋한 망고 퓌레가 어우러진 음료.\r\n한 모금 마시면 요거트의 산미가 먼저 느껴지고, 이어 달콤한 망고 맛이 입안을 가득 채워 상큼함과 부드러움을 동시에 즐길 수 있습니다.\r\n아침 식사 대용이나 간식으로도 부담 없이 즐길 수 있는 건강한 선택이에요."
-  },
-  {
     "userId": "s@naver.com",
     "itemId": "ICE_AMERICANO",
-    "eventType": "clickInteraction",
-    "textContent": "아이스 아메리카노 beverage 진한 에스프레소의 깊이와 시원한 얼음의 청량함이 어우러져, 마시는 순간 머리까지 맑아지는 아이스 아메리카노. 바쁜 하루 속, 잠시 멈춰 서서 리프레시하세요."
-  },
-  {
-    "userId": "s@naver.com",
-    "itemId": "ICE_AMERICANO",
-    "eventType": "clickInteraction",
-    "textContent": "아이스 아메리카노 beverage 진한 에스프레소의 깊이와 시원한 얼음의 청량함이 어우러져, 마시는 순간 머리까지 맑아지는 아이스 아메리카노. 바쁜 하루 속, 잠시 멈춰 서서 리프레시하세요."
-  },
-  {
-    "userId": "s@naver.com",
-    "itemId": "ICE_AMERICANO",
-    "eventType": "clickInteraction",
-    "textContent": "아이스 아메리카노 beverage 진한 에스프레소의 깊이와 시원한 얼음의 청량함이 어우러져, 마시는 순간 머리까지 맑아지는 아이스 아메리카노. 바쁜 하루 속, 잠시 멈춰 서서 리프레시하세요."
-  },
-  {
-    "userId": "s@naver.com",
-    "itemId": "ICE_AMERICANO",
-    "eventType": "clickInteraction",
+    "eventType": "purchase",
     "textContent": "아이스 아메리카노 beverage 진한 에스프레소의 깊이와 시원한 얼음의 청량함이 어우러져, 마시는 순간 머리까지 맑아지는 아이스 아메리카노. 바쁜 하루 속, 잠시 멈춰 서서 리프레시하세요."
   },
   {
     "userId": "s@naver.com",
     "itemId": "CHOCOLATE_CAKE",
-    "eventType": "clickInteraction",
-    "textContent": "초코 케이크 food 초콜릿의 진한 향과 촉촉한 케이크 시트가 만나 한 조각만으로도 기분 좋은 달콤함을 느낄 수 있는 특별한 디저트입니다."
-  },
-  {
-    "userId": "s@naver.com",
-    "itemId": "CHOCOLATE_CAKE",
-    "eventType": "clickInteraction",
+    "eventType": "purchase",
     "textContent": "초코 케이크 food 초콜릿의 진한 향과 촉촉한 케이크 시트가 만나 한 조각만으로도 기분 좋은 달콤함을 느낄 수 있는 특별한 디저트입니다."
   },
   {
     "userId": "s@naver.com",
     "itemId": "CARAMEL_MACCHIATO",
-    "eventType": "clickInteraction",
+    "eventType": "purchase",
     "textContent": "카라멜 마끼아또 beverage 향긋한 에스프레소에 부드러운 스팀 밀크, 그리고 달콤한 카라멜 시럽을 더해 완성된 음료.\r\n진한 커피향과 달콤함이 어우러져 누구나 즐기기 좋은 스테디셀러 메뉴입니다."
   },
   {
     "userId": "s@naver.com",
     "itemId": "CARAMEL_MACCHIATO",
-    "eventType": "clickInteraction",
-    "textContent": "카라멜 마끼아또 beverage 향긋한 에스프레소에 부드러운 스팀 밀크, 그리고 달콤한 카라멜 시럽을 더해 완성된 음료.\r\n진한 커피향과 달콤함이 어우러져 누구나 즐기기 좋은 스테디셀러 메뉴입니다."
-  },
-  {
-    "userId": "s@naver.com",
-    "itemId": "CARAMEL_MACCHIATO",
-    "eventType": "clickInteraction",
-    "textContent": "카라멜 마끼아또 beverage 향긋한 에스프레소에 부드러운 스팀 밀크, 그리고 달콤한 카라멜 시럽을 더해 완성된 음료.\r\n진한 커피향과 달콤함이 어우러져 누구나 즐기기 좋은 스테디셀러 메뉴입니다."
-  },
-  {
-    "userId": "s@naver.com",
-    "itemId": "CARAMEL_MACCHIATO",
-    "eventType": "clickInteraction",
-    "textContent": "카라멜 마끼아또 beverage 향긋한 에스프레소에 부드러운 스팀 밀크, 그리고 달콤한 카라멜 시럽을 더해 완성된 음료.\r\n진한 커피향과 달콤함이 어우러져 누구나 즐기기 좋은 스테디셀러 메뉴입니다."
-  },
-  {
-    "userId": "s@naver.com",
-    "itemId": "CARAMEL_MACCHIATO",
-    "eventType": "clickInteraction",
+    "eventType": "purchase",
     "textContent": "카라멜 마끼아또 beverage 향긋한 에스프레소에 부드러운 스팀 밀크, 그리고 달콤한 카라멜 시럽을 더해 완성된 음료.\r\n진한 커피향과 달콤함이 어우러져 누구나 즐기기 좋은 스테디셀러 메뉴입니다."
   },
   {
     "userId": "s@naver.com",
     "itemId": "SAYAK",
-    "eventType": "clickInteraction",
-    "textContent": "사약 beverage 한 모금에 정신이 번쩍 드는 강렬한 맛!\r\n묘하게 중독적인 쓴맛과 달콤함이 뒤섞여, 마시는 순간 “이게 사약인가?” 싶은 농담이 절로 나오는 유니크한 메뉴입니다.\r\n\r\n※ 소복 입고 석고대죄 시 음료 30% 할인 적용"
-  },
-  {
-    "userId": "s@naver.com",
-    "itemId": "SAYAK",
-    "eventType": "clickInteraction",
+    "eventType": "purchase",
     "textContent": "사약 beverage 한 모금에 정신이 번쩍 드는 강렬한 맛!\r\n묘하게 중독적인 쓴맛과 달콤함이 뒤섞여, 마시는 순간 “이게 사약인가?” 싶은 농담이 절로 나오는 유니크한 메뉴입니다.\r\n\r\n※ 소복 입고 석고대죄 시 음료 30% 할인 적용"
   },
   {
     "userId": "s@naver.com",
     "itemId": "GREENTEA_FRAPPUCCINO",
-    "eventType": "clickInteraction",
-    "textContent": "녹차 프라푸치노 beverage 대한민국 대표 녹차 산지인 전남 보성에서 재배된 신선한 녹차로 만든 프라푸치노입니다. 진한 녹차의 풍미와 시원한 부드러움이 조화를 이루어 깔끔하고 건강한 맛을 즐길 수 있습니다."
-  },
-  {
-    "userId": "s@naver.com",
-    "itemId": "GREENTEA_FRAPPUCCINO",
-    "eventType": "clickInteraction",
+    "eventType": "purchase",
     "textContent": "녹차 프라푸치노 beverage 대한민국 대표 녹차 산지인 전남 보성에서 재배된 신선한 녹차로 만든 프라푸치노입니다. 진한 녹차의 풍미와 시원한 부드러움이 조화를 이루어 깔끔하고 건강한 맛을 즐길 수 있습니다."
   },
   {
     "userId": "s@naver.com",
     "itemId": "CARAMEL_MACCHIATO",
-    "eventType": "clickInteraction",
+    "eventType": "purchase",
     "textContent": "카라멜 마끼아또 beverage 향긋한 에스프레소에 부드러운 스팀 밀크, 그리고 달콤한 카라멜 시럽을 더해 완성된 음료.\r\n진한 커피향과 달콤함이 어우러져 누구나 즐기기 좋은 스테디셀러 메뉴입니다."
   },
   {
     "userId": "s@naver.com",
     "itemId": "CARAMEL_MACCHIATO",
-    "eventType": "clickInteraction",
-    "textContent": "카라멜 마끼아또 beverage 향긋한 에스프레소에 부드러운 스팀 밀크, 그리고 달콤한 카라멜 시럽을 더해 완성된 음료.\r\n진한 커피향과 달콤함이 어우러져 누구나 즐기기 좋은 스테디셀러 메뉴입니다."
-  },
-  {
-    "userId": "s@naver.com",
-    "itemId": "CARAMEL_MACCHIATO",
-    "eventType": "clickInteraction",
-    "textContent": "카라멜 마끼아또 beverage 향긋한 에스프레소에 부드러운 스팀 밀크, 그리고 달콤한 카라멜 시럽을 더해 완성된 음료.\r\n진한 커피향과 달콤함이 어우러져 누구나 즐기기 좋은 스테디셀러 메뉴입니다."
-  },
-  {
-    "userId": "s@naver.com",
-    "itemId": "CARAMEL_MACCHIATO",
-    "eventType": "clickInteraction",
+    "eventType": "purchase",
     "textContent": "카라멜 마끼아또 beverage 향긋한 에스프레소에 부드러운 스팀 밀크, 그리고 달콤한 카라멜 시럽을 더해 완성된 음료.\r\n진한 커피향과 달콤함이 어우러져 누구나 즐기기 좋은 스테디셀러 메뉴입니다."
   },
   {
     "userId": "s@naver.com",
     "itemId": "SAYAK",
-    "eventType": "clickInteraction",
-    "textContent": "사약 beverage 한 모금에 정신이 번쩍 드는 강렬한 맛!\r\n묘하게 중독적인 쓴맛과 달콤함이 뒤섞여, 마시는 순간 “이게 사약인가?” 싶은 농담이 절로 나오는 유니크한 메뉴입니다.\r\n\r\n※ 소복 입고 석고대죄 시 음료 30% 할인 적용"
-  },
-  {
-    "userId": "s@naver.com",
-    "itemId": "SAYAK",
-    "eventType": "clickInteraction",
+    "eventType": "purchase",
     "textContent": "사약 beverage 한 모금에 정신이 번쩍 드는 강렬한 맛!\r\n묘하게 중독적인 쓴맛과 달콤함이 뒤섞여, 마시는 순간 “이게 사약인가?” 싶은 농담이 절로 나오는 유니크한 메뉴입니다.\r\n\r\n※ 소복 입고 석고대죄 시 음료 30% 할인 적용"
   },
   {
     "userId": "yonghun16@naver.com",
     "itemId": "SPORTS_CAR",
-    "eventType": "clickInteraction",
-    "textContent": "벅스스타 GTX-80 goods 훼라리 2번째 콜라보!! 강력한 엔진과 세련된 디자인이 돋보이는 GTX=80 모델의 고성능 차량.\r\n빠른 가속력과 민첩한 핸들링으로 드라이빙의 즐거움을 극대화하며, 스포티한 외관과 내부 인테리어가 운전자의 개성을 한층 돋보이게 합니다.\r\n도로 위에서도 시선을 사로잡는 존재감 있는 차량입니다."
-  },
-  {
-    "userId": "yonghun16@naver.com",
-    "itemId": "SPORTS_CAR",
-    "eventType": "clickInteraction",
+    "eventType": "purchase",
     "textContent": "벅스스타 GTX-80 goods 훼라리 2번째 콜라보!! 강력한 엔진과 세련된 디자인이 돋보이는 GTX=80 모델의 고성능 차량.\r\n빠른 가속력과 민첩한 핸들링으로 드라이빙의 즐거움을 극대화하며, 스포티한 외관과 내부 인테리어가 운전자의 개성을 한층 돋보이게 합니다.\r\n도로 위에서도 시선을 사로잡는 존재감 있는 차량입니다."
   },
   {
     "userId": "yonghun16@naver.com",
     "itemId": "SIPJEON_DAEBO_TANG",
-    "eventType": "clickInteraction",
+    "eventType": "purchase",
     "textContent": "십전대보탕 beverage 어느 카페에서나 파는 몸과 마음을 따뜻하게 채워주는 전통 한방 보양탕.\r\n열 가지 한약재가 조화롭게 어우러져 기운을 돋우고, 피로 회복과 건강 관리에 도움을 줍니다.\r\n깊고 풍부한 한방 향과 은은한 달콤함이 특징으로, 속을 편안하게 달래주는 힐링 음료 또는 건강식으로 즐기기 좋습니다."
-  },
-  {
-    "userId": "yonghun16@naver.com",
-    "itemId": "SIPJEON_DAEBO_TANG",
-    "eventType": "clickInteraction",
-    "textContent": "십전대보탕 beverage 어느 카페에서나 파는 몸과 마음을 따뜻하게 채워주는 전통 한방 보양탕.\r\n열 가지 한약재가 조화롭게 어우러져 기운을 돋우고, 피로 회복과 건강 관리에 도움을 줍니다.\r\n깊고 풍부한 한방 향과 은은한 달콤함이 특징으로, 속을 편안하게 달래주는 힐링 음료 또는 건강식으로 즐기기 좋습니다."
-  },
-  {
-    "userId": "yonghun16@naver.com",
-    "itemId": "GREEN_GRAPE_SPARKLING",
-    "eventType": "clickInteraction",
-    "textContent": "청포도 스파클링 beverage 톡톡 터지는 스파클링 속에 청포도의 달콤하고 청량한 맛을 가득 담은 음료.\r\n입안 가득 퍼지는 은은한 단맛과 상큼함이 조화를 이루며, 뒷맛은 깔끔하게 떨어져 누구나 부담 없이 즐기기 좋습니다.\r\n무더운 날 시원하게 갈증을 해소할 때나 가볍게 기분 전환할 때 잘 어울리는 메뉴예요."
-  },
-  {
-    "userId": "yonghun16@naver.com",
-    "itemId": "ESPRESSO",
-    "eventType": "clickInteraction",
-    "textContent": "에소프레소 beverage 깊고 진한 커피 향을 그대로 담은 한 잔.\r\n최고의 원두를 고온·고압으로 추출해 농축된 풍미와 크레마를 느낄 수 있습니다.\r\n짧지만 강렬하게, 커피 본연의 맛을 즐기고 싶을 때 선택하세요."
   },
   {
     "userId": "yonghun16@naver.com",
     "itemId": "CARP_JJIM",
-    "eventType": "clickInteraction",
-    "textContent": "잉어찜 food 어느 카페에서나 제공하는 신선한 잉어를 간장과 한방 양념으로 푹 졸여 만든 전통 요리.\r\n살이 부드럽고 양념이 잘 배어 있어 깊은 감칠맛과 풍미를 느낄 수 있으며, 매콤달콤한 맛이 입맛을 돋웁니다.\r\n따뜻한 커피와 함께 즐기면 든든한 한 끼 식사로 좋습니다."
-  },
-  {
-    "userId": "yonghun16@naver.com",
-    "itemId": "CARP_JJIM",
-    "eventType": "clickInteraction",
+    "eventType": "purchase",
     "textContent": "잉어찜 food 어느 카페에서나 제공하는 신선한 잉어를 간장과 한방 양념으로 푹 졸여 만든 전통 요리.\r\n살이 부드럽고 양념이 잘 배어 있어 깊은 감칠맛과 풍미를 느낄 수 있으며, 매콤달콤한 맛이 입맛을 돋웁니다.\r\n따뜻한 커피와 함께 즐기면 든든한 한 끼 식사로 좋습니다."
   },
   {
     "userId": "yonghun16@naver.com",
     "itemId": "SAYAK",
-    "eventType": "clickInteraction",
-    "textContent": "사약 beverage 한 모금에 정신이 번쩍 드는 강렬한 맛!\r\n묘하게 중독적인 쓴맛과 달콤함이 뒤섞여, 마시는 순간 “이게 사약인가?” 싶은 농담이 절로 나오는 유니크한 메뉴입니다.\r\n\r\n※ 소복 입고 석고대죄 시 음료 30% 할인 적용"
-  },
-  {
-    "userId": "yonghun16@naver.com",
-    "itemId": "SAYAK",
-    "eventType": "clickInteraction",
+    "eventType": "purchase",
     "textContent": "사약 beverage 한 모금에 정신이 번쩍 드는 강렬한 맛!\r\n묘하게 중독적인 쓴맛과 달콤함이 뒤섞여, 마시는 순간 “이게 사약인가?” 싶은 농담이 절로 나오는 유니크한 메뉴입니다.\r\n\r\n※ 소복 입고 석고대죄 시 음료 30% 할인 적용"
   },
   {
     "userId": "yonghun16@naver.com",
     "itemId": "MANGO_YOGURT",
-    "eventType": "clickInteraction",
-    "textContent": "망고 요거트 beverage 부드러운 요거트에 달콤하고 향긋한 망고 퓌레가 어우러진 음료.\r\n한 모금 마시면 요거트의 산미가 먼저 느껴지고, 이어 달콤한 망고 맛이 입안을 가득 채워 상큼함과 부드러움을 동시에 즐길 수 있습니다.\r\n아침 식사 대용이나 간식으로도 부담 없이 즐길 수 있는 건강한 선택이에요."
-  },
-  {
-    "userId": "yonghun16@naver.com",
-    "itemId": "MANGO_YOGURT",
-    "eventType": "clickInteraction",
+    "eventType": "purchase",
     "textContent": "망고 요거트 beverage 부드러운 요거트에 달콤하고 향긋한 망고 퓌레가 어우러진 음료.\r\n한 모금 마시면 요거트의 산미가 먼저 느껴지고, 이어 달콤한 망고 맛이 입안을 가득 채워 상큼함과 부드러움을 동시에 즐길 수 있습니다.\r\n아침 식사 대용이나 간식으로도 부담 없이 즐길 수 있는 건강한 선택이에요."
   },
   {
     "userId": "yonghun16@naver.com",
     "itemId": "GREEN_GRAPE_SPARKLING",
-    "eventType": "clickInteraction",
-    "textContent": "청포도 스파클링 beverage 톡톡 터지는 스파클링 속에 청포도의 달콤하고 청량한 맛을 가득 담은 음료.\r\n입안 가득 퍼지는 은은한 단맛과 상큼함이 조화를 이루며, 뒷맛은 깔끔하게 떨어져 누구나 부담 없이 즐기기 좋습니다.\r\n무더운 날 시원하게 갈증을 해소할 때나 가볍게 기분 전환할 때 잘 어울리는 메뉴예요."
-  },
-  {
-    "userId": "yonghun16@naver.com",
-    "itemId": "GREEN_GRAPE_SPARKLING",
-    "eventType": "clickInteraction",
+    "eventType": "purchase",
     "textContent": "청포도 스파클링 beverage 톡톡 터지는 스파클링 속에 청포도의 달콤하고 청량한 맛을 가득 담은 음료.\r\n입안 가득 퍼지는 은은한 단맛과 상큼함이 조화를 이루며, 뒷맛은 깔끔하게 떨어져 누구나 부담 없이 즐기기 좋습니다.\r\n무더운 날 시원하게 갈증을 해소할 때나 가볍게 기분 전환할 때 잘 어울리는 메뉴예요."
   },
   {
     "userId": "yonghun16@naver.com",
     "itemId": "SIPJEON_DAEBO_TANG",
-    "eventType": "clickInteraction",
-    "textContent": "십전대보탕 beverage 어느 카페에서나 파는 몸과 마음을 따뜻하게 채워주는 전통 한방 보양탕.\r\n열 가지 한약재가 조화롭게 어우러져 기운을 돋우고, 피로 회복과 건강 관리에 도움을 줍니다.\r\n깊고 풍부한 한방 향과 은은한 달콤함이 특징으로, 속을 편안하게 달래주는 힐링 음료 또는 건강식으로 즐기기 좋습니다."
-  },
-  {
-    "userId": "yonghun16@naver.com",
-    "itemId": "SIPJEON_DAEBO_TANG",
-    "eventType": "clickInteraction",
+    "eventType": "purchase",
     "textContent": "십전대보탕 beverage 어느 카페에서나 파는 몸과 마음을 따뜻하게 채워주는 전통 한방 보양탕.\r\n열 가지 한약재가 조화롭게 어우러져 기운을 돋우고, 피로 회복과 건강 관리에 도움을 줍니다.\r\n깊고 풍부한 한방 향과 은은한 달콤함이 특징으로, 속을 편안하게 달래주는 힐링 음료 또는 건강식으로 즐기기 좋습니다."
   },
   {
     "userId": "yonghun16@naver.com",
     "itemId": "CARP_JJIM",
-    "eventType": "clickInteraction",
-    "textContent": "잉어찜 food 어느 카페에서나 제공하는 신선한 잉어를 간장과 한방 양념으로 푹 졸여 만든 전통 요리.\r\n살이 부드럽고 양념이 잘 배어 있어 깊은 감칠맛과 풍미를 느낄 수 있으며, 매콤달콤한 맛이 입맛을 돋웁니다.\r\n따뜻한 커피와 함께 즐기면 든든한 한 끼 식사로 좋습니다."
-  },
-  {
-    "userId": "yonghun16@naver.com",
-    "itemId": "CARP_JJIM",
-    "eventType": "clickInteraction",
+    "eventType": "purchase",
     "textContent": "잉어찜 food 어느 카페에서나 제공하는 신선한 잉어를 간장과 한방 양념으로 푹 졸여 만든 전통 요리.\r\n살이 부드럽고 양념이 잘 배어 있어 깊은 감칠맛과 풍미를 느낄 수 있으며, 매콤달콤한 맛이 입맛을 돋웁니다.\r\n따뜻한 커피와 함께 즐기면 든든한 한 끼 식사로 좋습니다."
   },
   {
     "userId": "yonghun16@naver.com",
     "itemId": "SAYAK",
-    "eventType": "clickInteraction",
-    "textContent": "사약 beverage 한 모금에 정신이 번쩍 드는 강렬한 맛!\r\n묘하게 중독적인 쓴맛과 달콤함이 뒤섞여, 마시는 순간 “이게 사약인가?” 싶은 농담이 절로 나오는 유니크한 메뉴입니다.\r\n\r\n※ 소복 입고 석고대죄 시 음료 30% 할인 적용"
-  },
-  {
-    "userId": "yonghun16@naver.com",
-    "itemId": "SAYAK",
-    "eventType": "clickInteraction",
+    "eventType": "purchase",
     "textContent": "사약 beverage 한 모금에 정신이 번쩍 드는 강렬한 맛!\r\n묘하게 중독적인 쓴맛과 달콤함이 뒤섞여, 마시는 순간 “이게 사약인가?” 싶은 농담이 절로 나오는 유니크한 메뉴입니다.\r\n\r\n※ 소복 입고 석고대죄 시 음료 30% 할인 적용"
   },
   {
     "userId": "yonghun16@naver.com",
     "itemId": "SPORTS_CAR",
-    "eventType": "clickInteraction",
-    "textContent": "벅스스타 GTX-80 goods 훼라리 2번째 콜라보!! 강력한 엔진과 세련된 디자인이 돋보이는 GTX=80 모델의 고성능 차량.\r\n빠른 가속력과 민첩한 핸들링으로 드라이빙의 즐거움을 극대화하며, 스포티한 외관과 내부 인테리어가 운전자의 개성을 한층 돋보이게 합니다.\r\n도로 위에서도 시선을 사로잡는 존재감 있는 차량입니다."
-  },
-  {
-    "userId": "yonghun16@naver.com",
-    "itemId": "SPORTS_CAR",
-    "eventType": "clickInteraction",
+    "eventType": "purchase",
     "textContent": "벅스스타 GTX-80 goods 훼라리 2번째 콜라보!! 강력한 엔진과 세련된 디자인이 돋보이는 GTX=80 모델의 고성능 차량.\r\n빠른 가속력과 민첩한 핸들링으로 드라이빙의 즐거움을 극대화하며, 스포티한 외관과 내부 인테리어가 운전자의 개성을 한층 돋보이게 합니다.\r\n도로 위에서도 시선을 사로잡는 존재감 있는 차량입니다."
   }
 ]
