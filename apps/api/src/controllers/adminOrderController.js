@@ -23,8 +23,17 @@ export const getUsers = async (req, res) => {
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
 
-    // 총 일반 유저 수
+    // 전달 기준 날짜 계산
+    const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999);
+
+    // 총 일반 유저 수 (현재)
     const totalUsers = await User.countDocuments();
+
+    // 전달 말 기준 총 유저 수
+    const totalUsersLastMonth = await User.countDocuments({
+      createdAt: { $lte: endOfLastMonth }
+    });
 
     // 이번 달 가입한 유저 수
     const newUsersThisMonth = await User.countDocuments({
@@ -33,6 +42,26 @@ export const getUsers = async (req, res) => {
         $lte: endOfMonth
       }
     });
+
+    // 전달 가입한 유저 수
+    const newUsersLastMonth = await User.countDocuments({
+      createdAt: {
+        $gte: startOfLastMonth,
+        $lte: endOfLastMonth
+      }
+    });
+
+    // 증감률 계산 함수
+    const calculateGrowthRate = (current, previous) => {
+      if (previous === 0) return current > 0 ? 100 : 0;
+      return Math.round(((current - previous) / previous) * 100 * 100) / 100; // 소수점 2자리
+    };
+
+    // 총 회원수 증감률 (전달 대비)
+    const totalUsersGrowthRate = calculateGrowthRate(totalUsers, totalUsersLastMonth);
+
+    // 신규 회원 증감률 (전달 대비)
+    const newUsersGrowthRate = calculateGrowthRate(newUsersThisMonth, newUsersLastMonth);
 
     // 유저 리스트 (이름, 이메일, 가입일)
     const users = await User.find()
@@ -45,7 +74,9 @@ export const getUsers = async (req, res) => {
     const response = {
       summary: {
         totalUsers,
-        newUsersThisMonth
+        totalUsersGrowthRate,
+        newUsersThisMonth,
+        newUsersGrowthRate
       },
       users: users.map(user => ({
         name: user.name,
