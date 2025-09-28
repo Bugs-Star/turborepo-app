@@ -16,7 +16,7 @@ import { createProduct, updateProduct, deleteProduct } from '../controllers/prod
 import { reorderRecommendedProducts } from '../controllers/reorder/productReorder.js';
 import { createEvent, updateEvent, deleteEvent } from '../controllers/eventController.js';
 import { reorderEvents } from '../controllers/reorder/eventReorder.js';
-import { createPromotion, updatePromotion, deletePromotion } from '../controllers/promotionController.js';
+import { createPromotion, updatePromotion, deletePromotion, getPromotionsWithTrends } from '../controllers/promotionController.js';
 import { reorderPromotions } from '../controllers/reorder/promotionReorder.js';
 import { getUsers, getUserOrders } from '../controllers/adminOrderController.js';
 import { getReports } from '../controllers/reportController.js';
@@ -42,6 +42,7 @@ router.delete('/events/:id', adminAuth, deleteEvent);                  // 이벤
 router.post('/events/reorder', adminAuth, reorderEvents);              // 이벤트 순서 변경
 
 // 프로모션 관리 라우트
+router.get('/promotions/monthly', adminAuth, getPromotionsWithTrends);     // 프로모션 통합 데이터 조회 (목록 + 추세)
 router.post('/promotions', adminAuth, uploadFields, createPromotion);      // 프로모션 등록
 router.put('/promotions/:id', adminAuth, uploadFields, updatePromotion);   // 프로모션 수정
 router.delete('/promotions/:id', adminAuth, deletePromotion);              // 프로모션 삭제

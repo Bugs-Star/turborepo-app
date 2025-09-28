@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import Promotion from '../models/Promotion.js';
 import { compressMulterFile } from '../utils/imageUtils.js';
+import { fetchPromotionTrendsData } from '../services/promotionTrendDataService.js';
 
 // 프로모션 등록
 export const createPromotion = async (req, res) => {
@@ -353,8 +354,67 @@ export const deletePromotion = async (req, res) => {
   }
 };
 
+// 관리자용 프로모션 통합 데이터 조회 (프로모션 목록 + 추세 데이터)
+export const getPromotionsWithTrends = async (req, res) => {
+  try {
+    const { year, month } = req.query;
 
+    // 파라미터 검증
+    if (!year || !month) {
+      return res.status(400).json({ 
+        message: 'year와 month 파라미터가 필요합니다.',
+        example: '/admin/promotions/monthly?year=2025&month=9'
+      });
+    }
 
+    const yearNum = parseInt(year);
+    const monthNum = parseInt(month);
 
+    if (isNaN(yearNum) || isNaN(monthNum) || monthNum < 1 || monthNum > 12) {
+      return res.status(400).json({ 
+        message: '유효하지 않은 year 또는 month 값입니다.',
+        received: { year, month }
+      });
+    }
+
+    console.log('프로모션 통합 데이터 조회 요청:', { year: yearNum, month: monthNum });
+
+    // 1. MongoDB에서 프로모션 목록 조회 (기존 getPromotions와 동일)
+    await Promotion.deactivateExpiredPromotions();
+    
+    const promotions = await Promotion.find()
+      .select('-adminId') // 관리자 정보 제외
+      .sort({ promotionOrder: 1, createdAt: -1 });
+
+    // 2. ClickHouse에서 추세 데이터 조회
+    const trendsData = await fetchPromotionTrendsData(yearNum, monthNum);
+
+    // 3. 통합 응답 데이터 구성
+    const responseData = {
+      promotions: promotions,
+      viewTrendData: trendsData.viewTrendData,
+      clickTrendData: trendsData.clickTrendData,
+      meta: {
+        year: yearNum,
+        month: monthNum,
+        generatedAt: new Date().toISOString(),
+      }
+    };
+
+    console.log('프로모션 통합 데이터 조회 완료:', {
+      promotionsCount: promotions.length,
+      viewTrendDataCount: trendsData.viewTrendData.length,
+      clickTrendDataCount: trendsData.clickTrendData.length,
+    });
+
+    res.status(200).json(responseData);
+  } catch (error) {
+    console.error('프로모션 통합 데이터 조회 오류:', error);
+    res.status(500).json({ 
+      message: '서버 오류가 발생했습니다.',
+      error: error.message
+    });
+  }
+};
 
 
