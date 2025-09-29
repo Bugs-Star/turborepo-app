@@ -75,4 +75,4 @@ async def process_query(request: QueryRequest):
 # 서버 실행 (개발용)
 if __name__ == "__main__":
     # ⭐️ uvicorn 실행 시 app 경로를 문자열로 지정
-    uvicorn.run("app.main:app", host="0.0.0.0", port=4001, reload=True)
+    uvicorn.run("app.main:app", host="0.0.0.0", port=8002, reload=True)
