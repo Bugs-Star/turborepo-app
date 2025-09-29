@@ -1,8 +1,8 @@
 import { pipeline } from '@xenova/transformers';
 import fs from 'fs/promises';
 
-const INPUT_FILE = './preprocessed_data.json';
-const OUTPUT_FILE = './item_vectors.json';
+const INPUT_FILE = '../preprocessed_data.json';
+const OUTPUT_FILE = '../item_vectors.json';
 // 다국어 지원이 뛰어난 모델을 사용하여 한국어 처리에 강점이 있습니다.
 const MODEL_NAME = 'Xenova/multilingual-e5-large';
 

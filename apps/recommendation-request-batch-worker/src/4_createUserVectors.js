@@ -1,8 +1,8 @@
 import fs from 'fs/promises';
 
-const PREPROCESSED_FILE = './preprocessed_data.json';
-const ITEM_VECTORS_FILE = './item_vectors.json';
-const OUTPUT_FILE = './user_vectors.json';
+const PREPROCESSED_FILE = '../preprocessed_data.json';
+const ITEM_VECTORS_FILE = '../item_vectors.json';
+const OUTPUT_FILE = '../user_vectors.json';
 
 // --- 벡터 정규화를 위한 헬퍼 함수 ---
 /**

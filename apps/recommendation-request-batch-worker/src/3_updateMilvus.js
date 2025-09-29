@@ -7,7 +7,7 @@ import { fileURLToPath } from 'url';
 // --- 경로 설정 로직 ---
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const INPUT_FILE = path.join(__dirname, 'item_vectors.json');
+const INPUT_FILE = path.join(__dirname, '../item_vectors.json');
 // --- 경로 설정 끝 ---
 
 const COLLECTION_NAME = "item_vectors";

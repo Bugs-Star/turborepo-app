@@ -63,8 +63,8 @@ async function runPreprocessing() {
     }).filter(Boolean);
     console.log(`[Batch-1] 총 ${processedData.length}개의 상호작용 데이터를 처리했습니다.`);
 
-    await fs.writeFile('./preprocessed_data.json', JSON.stringify(processedData, null, 2));
-    console.log(`[Batch-1] 전처리된 데이터를 ./preprocessed_data.json에 저장했습니다.`);
+    await fs.writeFile('../preprocessed_data.json', JSON.stringify(processedData, null, 2));
+    console.log(`[Batch-1] 전처리된 데이터를 ../preprocessed_data.json에 저장했습니다.`);
 
   } catch (error) {
     console.error('[Batch-1] 전처리 작업 중 오류가 발생했습니다:', error);
