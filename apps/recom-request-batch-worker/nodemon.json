@@ -1,0 +1,6 @@
+{
+  "watch": ["src/"],
+  "ext": "js,mjs,cjs",
+  "ignore": ["*.json"],
+  "exec": "node src/scheduler.js"
+}

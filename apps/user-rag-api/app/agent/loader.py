@@ -13,13 +13,13 @@ def load_documents_for_user(user_id: str) -> List[Document]:
         db = client[config.MONGO_DATABASE]
         
         # 1. 사용자 프로필 조회
-        user_profile = db.users.find_one({"name": user_id})
+        user_profile = db.users.find_one({"email": user_id})
         
         # 2. 사용자의 최근 주문 5개 조회
-        recent_orders = list(db.order.find({"name": user_id}).sort("ordered_at", -1).limit(5))
+        recent_orders = list(db.order.find({"email": user_id}).sort("ordered_at", -1).limit(5))
         
         if not user_profile:
-            print(f"경고: user_id '{user_id}'에 해당하는 사용자를 찾을 수 없습니다.")
+            print(f"경고: email '{user_id}'에 해당하는 사용자를 찾을 수 없습니다.")
             return []
 
         # 3. 조회된 정보를 AI가 이해하기 쉬운 하나의 텍스트로 조합
@@ -36,7 +36,7 @@ def load_documents_for_user(user_id: str) -> List[Document]:
         )
         
         # 메타데이터에는 user_id를 저장
-        metadata = {"user_id": user_id}
+        metadata = {"email": user_id}
         
         # 단 하나의 종합적인 Document를 생성하여 반환
         return [Document(page_content=page_content, metadata=metadata)]

@@ -42,21 +42,26 @@ export async function aggregateBestSellers(periodType = "monthly", topN = 5) {
         ${dateFunc}(ordered_at) AS period_start,
         store_id,
         menu_id,
-        menu_name,
-        category,
+        
+        -- ✅ any() 대신 argMax()를 사용해 가장 최신 데이터의 이름/카테고리를 선택
+        argMax(menu_name, ordered_at) AS menu_name,
+        argMax(category, ordered_at) AS category,
+        
         SUM(quantity) AS order_count,
         SUM(total_price) AS total_revenue,
         row_number() OVER (
+          -- ✅ 반드시 주석을 해제하여 매장별, 기간별 순위를 계산해야 함
           PARTITION BY store_id, ${dateFunc}(ordered_at)
-          -- ✅ 판매량 동일 시 매출액 기준으로 2차 정렬
           ORDER BY order_count DESC, total_revenue DESC
         ) AS rank
       FROM orders
       WHERE ordered_at >= today() - INTERVAL ${intervalDays} DAY
-      GROUP BY store_id, menu_id, menu_name, category, period_start
+      GROUP BY store_id, menu_id, period_start
     )
     WHERE rank <= ${topN}
   `;
+
+
 
   await clickhouse.exec({ query: insertQuery });
   console.log(`[Worker] ${periodType} best sellers aggregated (Top ${topN})`);

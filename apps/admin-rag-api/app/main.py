@@ -27,7 +27,7 @@ app = FastAPI(
 # ⭐️ [CORS] 허용할 출처(origin)를 정의합니다.
 # 여기서는 테스트 클라이언트가 실행되는 주소를 추가합니다.
 origins = [
-    "http://localhost:3000",
+    "http://localhost:3002",
 ]
 
 # ⭐️ [CORS] 앱에 CORS 미들웨어를 추가합니다.
@@ -75,4 +75,4 @@ async def process_query(request: QueryRequest):
 # 서버 실행 (개발용)
 if __name__ == "__main__":
     # ⭐️ uvicorn 실행 시 app 경로를 문자열로 지정
-    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("app.main:app", host="0.0.0.0", port=8002, reload=True)

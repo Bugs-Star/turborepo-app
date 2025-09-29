@@ -1,11 +1,13 @@
 # requirements.txt
 langchain
 langchain-core
+langchain-community
 langchain-google-genai
 python-dotenv
 faiss-cpu
 SQLAlchemy
 clickhouse-connect
+pymongo
 
 # API 서버 구축을 위해 추가된 라이브러리
 fastapi

@@ -3,7 +3,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 const app = express();
-const PORT = 3000;
+const PORT = 5000;
 
 // ES 모듈에서 __dirname을 사용하기 위한 설정
 const __filename = fileURLToPath(import.meta.url);
