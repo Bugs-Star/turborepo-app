@@ -4,6 +4,8 @@ import { useState } from "react";
 import PeriodControls from "./PeriodControls"; // ✅ 경로 수정
 import BestSeller from "./BestSeller";
 import PeriodicalAnalysis from "./PeriodicalAnalysis";
+import SalesTrend from "./SalesTrend";
+import UserActivityTrend from "./UserActivityTrend";
 
 type PeriodType = "yearly" | "monthly" | "weekly";
 
@@ -31,7 +33,11 @@ const Dashboard = () => {
       {/* 2) 같은 기간 파라미터를 공유 */}
       <div>
         <PeriodicalAnalysis params={params} />
-        <BestSeller params={params} limit={5} />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <SalesTrend params={params} />
+          <BestSeller params={params} limit={5} />
+        </div>
+        <UserActivityTrend params={params} />
       </div>
     </div>
   );

@@ -7,10 +7,6 @@ import { useEditEvent } from "@/hooks/event/useEditEvent";
 import { notify } from "@/lib/notify";
 import type { EditEventRequest } from "@/lib/api/events";
 
-const toLocalInputValue = (iso?: string) => {
-  /* 그대로 */
-};
-
 interface EditEventProps {
   eventId: string;
   initialData?: {

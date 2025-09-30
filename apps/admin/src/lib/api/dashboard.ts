@@ -35,7 +35,22 @@ export interface BestSellerItem {
   rank: number;
 }
 
-/** 응답 형태 유니온 */
+/** ------ Sales Trend Types ------ */
+export interface SalesTrendPoint {
+  name: string;
+  sales: number;
+  date?: string;
+}
+
+/** ------ [NEW] User Activity Trend Types ------ */
+export interface UserActivityPoint {
+  name: string; // "1주", "2주" ...
+  totalVisitors: number; // 총 방문자 수
+  uniqueVisitors: number; // 순 방문자 수
+  activeVisitors: number; // 활성 방문자 수(2페이지 이상)
+  bounce: number; // 이탈자 수(한 페이지만 본 사용자)
+}
+
 type ReportsResponse =
   | ReportItem[]
   | { summary: ReportItem[]; bestsellers?: BestSellerItem[] };
@@ -43,6 +58,17 @@ type ReportsResponse =
 type BestsellersResponse =
   | BestSellerItem[]
   | { bestsellers?: BestSellerItem[] };
+
+type SalesTrendResponse = SalesTrendPoint[] | { trendData?: SalesTrendPoint[] };
+
+/** [NEW] User Activity Trend Response Union */
+type UserActivityTrendResponse =
+  | UserActivityPoint[]
+  | {
+      visitorTrendData?: Array<
+        Partial<UserActivityPoint> & Record<string, string | number>
+      >;
+    };
 
 /** 타입가드 */
 function hasSummary(
@@ -53,6 +79,17 @@ function hasSummary(
 function hasBestsellers(
   d: BestsellersResponse
 ): d is { bestsellers?: BestSellerItem[] } {
+  return typeof d === "object" && !Array.isArray(d);
+}
+function hasTrend(
+  d: SalesTrendResponse
+): d is { trendData?: SalesTrendPoint[] } {
+  return typeof d === "object" && !Array.isArray(d);
+}
+/** [NEW] visitorTrendData 타입가드 */
+function hasVisitorTrend(
+  d: UserActivityTrendResponse
+): d is { visitorTrendData?: any[] } {
   return typeof d === "object" && !Array.isArray(d);
 }
 
@@ -94,9 +131,48 @@ export const DashboardApi = {
       { params }
     );
 
-    if (Array.isArray(data)) return []; // 구형: bestsellers 없음
+    if (Array.isArray(data)) return [];
     if (hasBestsellers(data) && Array.isArray(data.bestsellers)) {
       return data.bestsellers;
+    }
+    return [];
+  },
+
+  async getSalesTrend(p: PeriodicalParams) {
+    const { periodType } = p;
+    const params = buildParams(p);
+
+    const { data } = await axiosInstance.get<SalesTrendResponse>(
+      `/admin/reports/${periodType}`,
+      { params }
+    );
+
+    if (Array.isArray(data)) return data;
+    if (hasTrend(data) && Array.isArray(data.trendData)) return data.trendData;
+    return [];
+  },
+
+  async getUserActivityTrend(p: PeriodicalParams) {
+    const { periodType } = p;
+    const params = buildParams(p);
+
+    const { data } = await axiosInstance.get<UserActivityTrendResponse>(
+      `/admin/reports/${periodType}`,
+      { params }
+    );
+
+    const normalize = (rows: any[]): UserActivityPoint[] =>
+      (rows ?? []).map((r) => ({
+        name: String(r.name ?? ""),
+        totalVisitors: Number(r.totalVisitors ?? 0),
+        uniqueVisitors: Number(r.uniqueVisitors ?? 0),
+        activeVisitors: Number(r.activeVisitors ?? 0),
+        bounce: Number(r.bounce ?? 0),
+      }));
+
+    if (Array.isArray(data)) return normalize(data);
+    if (hasVisitorTrend(data) && Array.isArray(data.visitorTrendData)) {
+      return normalize(data.visitorTrendData);
     }
     return [];
   },

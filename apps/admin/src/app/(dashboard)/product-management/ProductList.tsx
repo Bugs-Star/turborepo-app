@@ -268,9 +268,7 @@ const ProductList = () => {
 
   if (isLoading) {
     return (
-      <div className="w-full p-6 bg-white rounded-2xl shadow-sm text-center text-gray-600">
-        불러오는 중…
-      </div>
+      <div className="text-center mt-5 text-muted-foreground">로딩 중...</div>
     );
   }
 

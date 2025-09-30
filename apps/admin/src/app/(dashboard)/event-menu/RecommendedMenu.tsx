@@ -92,16 +92,14 @@ const RecommendMenu = () => {
 
   if (isLoading) {
     return (
-      <div className="max-w-5xl mx-auto mt-5 bg-white p-6 rounded-lg">
-        <div className="text-center text-gray-600">로딩중…</div>
-      </div>
+      <div className="text-center mt-5 text-muted-foreground">로딩 중...</div>
     );
   }
 
   if (isError) {
     return (
-      <div className="max-w-5xl mx-auto mt-5 bg-white p-6 rounded-lg">
-        <div className="text-center text-red-500">추천 메뉴 로딩 실패</div>
+      <div className="text-center mt-5 text-muted-foreground">
+        추천 메뉴 로딩 실패
       </div>
     );
   }
