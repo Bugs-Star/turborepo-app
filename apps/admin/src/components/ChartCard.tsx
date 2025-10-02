@@ -25,7 +25,7 @@ const ChartCard = ({
   label,
 }: ChartCardProps) => {
   return (
-    <div className="bg-white rounded-2xl shadow-sm p-4 flex-1">
+    <div className="bg-card text-muted-foreground rounded-2xl shadow-sm p-4 flex-1">
       <h2 className="text-lg font-semibold">{title}</h2>
       <p className="text-sm text-gray-500 mb-4">{subtitle}</p>
       <ResponsiveContainer width="100%" height={250}>
