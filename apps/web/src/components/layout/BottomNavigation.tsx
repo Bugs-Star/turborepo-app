@@ -17,6 +17,11 @@ export default function BottomNavigation() {
   const { showWarning } = useToast();
   const { showScrollToTop, scrollToTop } = useScrollPosition(300);
 
+  // 페이지별 위치 설정을 위한 조건 확인
+  const isProductDetailPage =
+    pathname.startsWith("/menu/") && pathname !== "/menu";
+  const isCartPage = pathname === "/cart";
+
   const handleProfileClick = (e: React.MouseEvent) => {
     if (!isAuthenticated) {
       e.preventDefault();
@@ -38,7 +43,15 @@ export default function BottomNavigation() {
     <div className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-lg bg-white border-t border-gray-200 pt-3 pb-2 z-50">
       {/* 스크롤 투 탑 버튼 */}
       {showScrollToTop && (
-        <div className="absolute -top-12 right-4 z-10">
+        <div
+          className={`absolute z-10 ${
+            isProductDetailPage
+              ? "-top-50 right-4" // 상품상세페이지: 더 높게 위치
+              : isCartPage
+                ? "-top-38 right-4" // 장바구니 페이지: 중간 높이
+                : "-top-12 right-4" // 기본 위치
+          }`}
+        >
           <button
             onClick={scrollToTop}
             className="bg-green-800 text-white rounded-full p-2 shadow-lg hover:bg-green-700 transition-colors duration-200"
