@@ -3,7 +3,7 @@
 import { useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
-import { AuthService } from "@/lib/api/auth";
+import { AuthService, STORAGE_KEYS } from "@/lib/api/auth";
 import { notify } from "@/lib/notify";
 
 const useLogout = () => {
@@ -12,32 +12,38 @@ const useLogout = () => {
   const inFlight = useRef(false);
 
   const logout = useCallback(async (): Promise<void> => {
-    if (inFlight.current) return; // 중복 클릭 가드
+    if (inFlight.current) return;
     inFlight.current = true;
 
     try {
-      const accessToken =
+      const access =
         typeof window !== "undefined"
-          ? localStorage.getItem("accessToken")
-          : null;
+          ? (localStorage.getItem(STORAGE_KEYS.access) ?? "")
+          : "";
+      const refresh =
+        typeof window !== "undefined"
+          ? (localStorage.getItem(STORAGE_KEYS.refresh) ?? "")
+          : "";
 
-      if (accessToken) {
-        try {
-          await AuthService.logout(accessToken);
-          notify.success("로그아웃 되었습니다.");
-        } catch (e) {
-          // 서버 실패해도 클라이언트 정리는 계속
-          console.warn("Logout API failed:", e);
-          notify.info("세션 정리 중입니다.");
-        }
+      try {
+        await AuthService.logout();
+        notify.success("로그아웃 되었습니다.");
+      } catch (e) {
+        console.warn("Logout API failed:", e, { access, refresh });
+        notify.info("세션 정리 중입니다.");
       }
     } finally {
       if (typeof window !== "undefined") {
-        localStorage.removeItem("accessToken");
+        localStorage.removeItem(STORAGE_KEYS.access);
+        localStorage.removeItem(STORAGE_KEYS.refresh);
       }
 
+      try {
+        await queryClient.cancelQueries();
+      } catch {}
       queryClient.clear();
 
+      // 3) 로그인 페이지로 이동
       router.replace("/login");
 
       inFlight.current = false;

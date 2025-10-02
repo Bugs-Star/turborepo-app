@@ -1,5 +1,6 @@
+// apps/admin/src/lib/api/interceptors.ts
 import axiosInstance from "./axios";
-import { AuthService } from "./auth";
+import { AuthService, STORAGE_KEYS } from "./auth";
 import type {
   AxiosError,
   AxiosResponse,
@@ -7,17 +8,27 @@ import type {
   AxiosRequestHeaders,
 } from "axios";
 
-// _retry 플래그를 안전하게 추가
+// _retry 플래그 안전 추가
 type RetriableConfig = InternalAxiosRequestConfig & { _retry?: boolean };
 
+const LOGIN_URL = "/admin/login";
+const REFRESH_URL = "/admin/refresh";
+const LOGOUT_URL = "/admin/logout";
+
+const isNoAuth = (url?: string) =>
+  !!url &&
+  (url.endsWith(LOGIN_URL) ||
+    url.endsWith(REFRESH_URL) ||
+    url.endsWith(LOGOUT_URL));
+
 export function setupInterceptors(): void {
-  // 요청 인터셉터
+  // 요청 인터셉터: accessToken 자동 부착 (단, refresh/login/logout은 제외)
   axiosInstance.interceptors.request.use(
-    (config: InternalAxiosRequestConfig): InternalAxiosRequestConfig => {
-      if (typeof window !== "undefined") {
-        const accessToken = localStorage.getItem("accessToken");
+    (config) => {
+      if (!isNoAuth(config.url) && typeof window !== "undefined") {
+        const accessToken =
+          localStorage.getItem(STORAGE_KEYS.access) ?? undefined;
         if (accessToken) {
-          // headers를 타입 안전하게 업데이트
           const headers = (config.headers ?? {}) as AxiosRequestHeaders;
           headers.Authorization = `Bearer ${accessToken}`;
           config.headers = headers;
@@ -25,35 +36,52 @@ export function setupInterceptors(): void {
       }
       return config;
     },
-    (error: AxiosError): Promise<never> => Promise.reject(error)
+    (error: AxiosError) => Promise.reject(error)
   );
 
-  // 응답 인터셉터
+  // 응답 인터셉터: 401이면 1회에 한해 리프레시 → 원요청 재시도
   axiosInstance.interceptors.response.use(
-    (response: AxiosResponse): AxiosResponse => response,
-    async (error: AxiosError): Promise<never | AxiosResponse> => {
+    (response: AxiosResponse) => response,
+    async (error: AxiosError): Promise<AxiosResponse | never> => {
       const status = error.response?.status;
       const original = error.config as RetriableConfig | undefined;
+      const url = original?.url;
 
-      // 401 & 아직 재시도 안했으면 → 리프레시
+      // 리프레시 자체가 실패(만료)하면 바로 세션 종료
+      if (
+        (status === 401 || status === 403) &&
+        url &&
+        url.endsWith(REFRESH_URL)
+      ) {
+        if (typeof window !== "undefined") {
+          localStorage.removeItem(STORAGE_KEYS.access);
+          localStorage.removeItem(STORAGE_KEYS.refresh);
+          window.location.href = "/login";
+        }
+        return Promise.reject(error);
+      }
+
       if (status === 401 && original && !original._retry) {
+        // 로그인/리프레시/로그아웃 요청은 스킵
+        if (isNoAuth(url)) return Promise.reject(error);
+
         original._retry = true;
 
         try {
           const newAccessToken = await AuthService.refreshAccessToken();
-          localStorage.setItem("accessToken", newAccessToken);
+          if (typeof window !== "undefined") {
+            localStorage.setItem(STORAGE_KEYS.access, newAccessToken);
+          }
 
-          // 원 요청 헤더 갱신
           const headers = (original.headers ?? {}) as AxiosRequestHeaders;
           headers.Authorization = `Bearer ${newAccessToken}`;
           original.headers = headers;
 
           return axiosInstance(original);
         } catch (refreshErr) {
-          // 리프레시 실패 → 세션 정리
-          localStorage.removeItem("accessToken");
-          // (리프레시는 쿠키라 지울 필요 없음; 서버가 /logout에서 쿠키 제거)
           if (typeof window !== "undefined") {
+            localStorage.removeItem(STORAGE_KEYS.access);
+            localStorage.removeItem(STORAGE_KEYS.refresh);
             window.location.href = "/login";
           }
           return Promise.reject(refreshErr);
