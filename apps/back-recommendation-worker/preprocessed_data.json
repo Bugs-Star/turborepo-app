@@ -1,0 +1,44 @@
+[
+  {
+    "userId": "yonghun16@naver.com",
+    "itemId": "GREENTEA_FRAPPUCCINO",
+    "eventType": "purchase",
+    "textContent": "녹차 프라푸치노 beverage 대한민국 대표 녹차 산지인 전남 보성에서 재배된 신선한 녹차로 만든 프라푸치노입니다. 진한 녹차의 풍미와 시원한 부드러움이 조화를 이루어 깔끔하고 건강한 맛을 즐길 수 있습니다."
+  },
+  {
+    "userId": "qwer@qwer.com",
+    "itemId": "TOFFEENUT_LATTE",
+    "eventType": "purchase",
+    "textContent": "토피넛 라떼 beverage 고소한 견과류 향과 달콤한 토피 시럽이 어우러진 라떼로, 부드러운 우유와 에스프레소의 풍미가 조화를 이루어 따뜻하고 달콤한 휴식을 선사합니다."
+  },
+  {
+    "userId": "qwer@qwer.com",
+    "itemId": "SIPJEON_DAEBO_TANG",
+    "eventType": "purchase",
+    "textContent": "십전대보탕 beverage 어느 카페에서나 파는 몸과 마음을 따뜻하게 채워주는 전통 한방 보양탕.\r\n열 가지 한약재가 조화롭게 어우러져 기운을 돋우고, 피로 회복과 건강 관리에 도움을 줍니다.\r\n깊고 풍부한 한방 향과 은은한 달콤함이 특징으로, 속을 편안하게 달래주는 힐링 음료 또는 건강식으로 즐기기 좋습니다."
+  },
+  {
+    "userId": "qwer@qwer.com",
+    "itemId": "MANGO_YOGURT",
+    "eventType": "purchase",
+    "textContent": "망고 요거트 beverage 부드러운 요거트에 달콤하고 향긋한 망고 퓌레가 어우러진 음료.\r\n한 모금 마시면 요거트의 산미가 먼저 느껴지고, 이어 달콤한 망고 맛이 입안을 가득 채워 상큼함과 부드러움을 동시에 즐길 수 있습니다.\r\n아침 식사 대용이나 간식으로도 부담 없이 즐길 수 있는 건강한 선택이에요."
+  },
+  {
+    "userId": "qwer@qwer.com",
+    "itemId": "ESPRESSO",
+    "eventType": "purchase",
+    "textContent": "에소프레소 beverage 깊고 진한 커피 향을 그대로 담은 한 잔.\r\n최고의 원두를 고온·고압으로 추출해 농축된 풍미와 크레마를 느낄 수 있습니다.\r\n짧지만 강렬하게, 커피 본연의 맛을 즐기고 싶을 때 선택하세요."
+  },
+  {
+    "userId": "qwer@qwer.com",
+    "itemId": "SPORTS_CAR",
+    "eventType": "purchase",
+    "textContent": "벅스스타 GTX-80 goods 훼라리 2번째 콜라보!! 강력한 엔진과 세련된 디자인이 돋보이는 GTX=80 모델의 고성능 차량.\r\n빠른 가속력과 민첩한 핸들링으로 드라이빙의 즐거움을 극대화하며, 스포티한 외관과 내부 인테리어가 운전자의 개성을 한층 돋보이게 합니다.\r\n도로 위에서도 시선을 사로잡는 존재감 있는 차량입니다."
+  },
+  {
+    "userId": "yonghun16@naver.com",
+    "itemId": "SIPJEON_DAEBO_TANG",
+    "eventType": "purchase",
+    "textContent": "십전대보탕 beverage 어느 카페에서나 파는 몸과 마음을 따뜻하게 채워주는 전통 한방 보양탕.\r\n열 가지 한약재가 조화롭게 어우러져 기운을 돋우고, 피로 회복과 건강 관리에 도움을 줍니다.\r\n깊고 풍부한 한방 향과 은은한 달콤함이 특징으로, 속을 편안하게 달래주는 힐링 음료 또는 건강식으로 즐기기 좋습니다."
+  }
+]
