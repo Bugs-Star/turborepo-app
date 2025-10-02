@@ -1,4 +1,3 @@
-// apps/admin/src/lib/api/interceptors.ts
 import axiosInstance from "./axios";
 import { AuthService, STORAGE_KEYS } from "./auth";
 import type {

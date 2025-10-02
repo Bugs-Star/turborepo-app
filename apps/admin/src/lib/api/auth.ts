@@ -1,4 +1,3 @@
-// apps/admin/src/lib/api/auth.ts
 import axios from "axios";
 import axiosInstance from "./axios";
 

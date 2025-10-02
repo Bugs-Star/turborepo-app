@@ -160,44 +160,42 @@ const ProductList = () => {
     </div>
   );
 
-  // 컬럼 정의
-  // ...생략...
-
-  // ✅ 컬럼 정의
+  // ✅ 컬럼 정의 (이 블록만 교체하세요)
   const columns: Column<Row>[] = [
     {
-      kind: "data", // ← 추가
+      kind: "data",
       key: "image",
       label: "제품 이미지",
-      render: (r) => (
+      render: (_val, row) => (
         <img
-          src={r.image}
-          alt={r.name}
+          src={row.image}
+          alt={row.name}
           className="h-10 w-10 rounded-md object-cover"
         />
       ),
     },
-    { kind: "data", key: "name", label: "제품명" }, // ← 추가
-    { kind: "data", key: "code", label: "제품코드" }, // ← 추가
+    { kind: "data", key: "name", label: "제품명" },
+    { kind: "data", key: "code", label: "제품코드" },
     {
-      kind: "data", // ← 추가
+      kind: "data",
       key: "price",
       label: "가격",
-      render: (r) => `${r.price.toLocaleString("ko-KR")}`,
+      align: "right",
+      render: (val) => Number(val ?? 0).toLocaleString("ko-KR"),
     },
     {
-      kind: "data", // ← 추가
+      kind: "data",
       key: "category",
       label: "카테고리",
-      render: (r) => categoryLabel(r.category),
+      render: (val) => categoryLabel(val as Category),
     },
     {
-      kind: "data", // ← 추가
+      kind: "data",
       key: "currentStock",
       label: "재고 수량",
-      render: (r) => {
-        const max = Math.max(1, r.optimalStock ?? 0);
-        const ratio = Math.min(1, (r.currentStock ?? 0) / max);
+      render: (_val, row) => {
+        const max = Math.max(1, row.optimalStock ?? 0);
+        const ratio = Math.min(1, (row.currentStock ?? 0) / max);
         const pct = Math.round(ratio * 100);
         return (
           <div className="flex items-center gap-3 min-w-[160px]">
@@ -216,19 +214,19 @@ const ProductList = () => {
               />
             </div>
             <span className="text-xs text-gray-600">
-              {r.currentStock ?? 0} / {r.optimalStock ?? 0}개
+              {row.currentStock ?? 0} / {row.optimalStock ?? 0}개
             </span>
           </div>
         );
       },
     },
     {
-      kind: "data", // ← 추가
+      kind: "data",
       key: "statusText",
       label: "재고 상태",
-      render: (r) => {
-        const max = Math.max(1, r.optimalStock ?? 0);
-        const ratio = Math.min(1, (r.currentStock ?? 0) / max);
+      render: (_val, row) => {
+        const max = Math.max(1, row.optimalStock ?? 0);
+        const ratio = Math.min(1, (row.currentStock ?? 0) / max);
         const cls =
           ratio > 0.7
             ? "bg-green-100 text-green-700"
@@ -237,7 +235,7 @@ const ProductList = () => {
               : "bg-red-100 text-red-700";
         return (
           <span className={`px-2 py-1 rounded-full text-xs ${cls}`}>
-            {r.statusText}
+            {row.statusText}
           </span>
         );
       },
@@ -246,17 +244,17 @@ const ProductList = () => {
       kind: "action",
       key: "actions",
       label: "액션",
-      render: (r) => (
+      render: (row) => (
         <div className="flex items-center gap-2">
           <button
             className="px-2 py-1 rounded-xl bg-edit text-sm text-white cursor-pointer"
-            onClick={() => handleEdit(r)}
+            onClick={() => handleEdit(row)}
           >
             수정
           </button>
           <button
             className="px-2 py-1 rounded-xl bg-danger text-sm text-white cursor-pointer"
-            onClick={() => handleDelete(r)}
+            onClick={() => handleDelete(row)}
             disabled={isDeleting}
           >
             삭제
