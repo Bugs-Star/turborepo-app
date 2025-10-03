@@ -9,6 +9,8 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@clickhouse/client": "^1.12.1",
+    "@clickhouse/client-web": "^1.12.1",
     "@hello-pangea/dnd": "^18.0.1",
     "@tanstack/react-query": "^5.85.0",
     "axios": "^1.11.0",
