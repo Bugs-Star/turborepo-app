@@ -52,11 +52,12 @@ export async function aggregatePromotionSummary(periodType = "weekly") {
         WHERE
           event_time >= today() - INTERVAL ${intervalDays} DAY
           AND (
-            event_type = 'viewScreenDuration'
+            event_type = 'viewScreenDuration' OR 
             -- [최종 수정] JSON 타입은 점(.)으로 직접 접근합니다.
-            OR (event_type = 'clickInteraction' AND toString(metadata.interactionType) = 'promotionCard')
+            (event_type = 'clickInteraction' AND toString(metadata.interactionType) = 'promotionCard')
           )
-          AND promotion_id IS NOT NULL AND promotion_id != ''
+          -- events 테이블에 현재 프로모션 아이디가 존재하지 않으므로 제거.
+          -- AND promotion_id IS NOT NULL AND promotion_id != ''
         GROUP BY period_start, promotion_id
       ),
 
