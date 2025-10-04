@@ -40,6 +40,15 @@ const tableSchemas = [
 
       -- 순 클릭 유저 수
       unique_clickers UInt64,
+      
+      -- (추가) 총 주문 수
+      total_orders UInt64,
+
+      -- (추가) 총 매출액
+      total_revenue UInt64,
+
+      -- (추가) 전환율
+      conversion_rate Float64,
 
       -- 집계된 시간 (ReplacingMergeTree 버전 관리를 위함)
       updated_at DateTime
