@@ -6,7 +6,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const envPath = path.resolve(__dirname, '../../.env');
 dotenv.config({ path: envPath });
-const USER_VECTORS_FILE = path.resolve(__dirname, '../../batch-worker/user_vectors.json');
+const USER_VECTORS_FILE = path.resolve(__dirname, '../../back-recommendation-worker/user_vectors.json');
 // --- 모듈 import (이전과 동일) ---
 import { getMilvusClient } from "./clients/milvusClient.js";
 import { getRedisClient } from "./clients/redisClient.js";
