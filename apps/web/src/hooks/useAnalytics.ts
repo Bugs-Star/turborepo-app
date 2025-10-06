@@ -167,6 +167,7 @@ export const useAnalytics = () => {
       targetId: promotion._id,
       sourceComponent: "promotion_section",
       promotionName: promotion.title,
+      promotionId: promotion._id,
     });
   }, []);
 

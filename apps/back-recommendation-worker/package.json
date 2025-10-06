@@ -1,5 +1,5 @@
 {
-  "name": "recom-request-batch-worker",
+  "name": "back-recommendation-worker",
   "version": "1.0.0",
   "private": true,
   "type": "module",
