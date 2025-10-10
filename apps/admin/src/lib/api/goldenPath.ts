@@ -8,7 +8,7 @@ if (!VIEW) {
   );
 }
 
-type Period = "daily" | "weekly" | "monthly" | "yearly";
+type Period = "weekly" | "monthly" | "yearly";
 
 export async function getRawPathsFromClickHouse(params?: {
   /** 없으면 period 필터 없음 */

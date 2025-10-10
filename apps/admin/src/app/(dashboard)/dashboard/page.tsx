@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import PeriodControls from "./PeriodControls"; // ✅ 경로 수정
+import PeriodControls from "./PeriodControls";
 import BestSeller from "./BestSeller";
 import PeriodicalAnalysis from "./PeriodicalAnalysis";
 import SalesTrend from "./SalesTrend";
 import UserActivityTrend from "./UserActivityTrend";
+import GoldenPath from "./GoldenPath";
 
 type PeriodType = "yearly" | "monthly" | "weekly";
 
@@ -38,6 +39,7 @@ const Dashboard = () => {
           <BestSeller params={params} limit={5} />
         </div>
         <UserActivityTrend params={params} />
+        <GoldenPath params={params} />
       </div>
     </div>
   );

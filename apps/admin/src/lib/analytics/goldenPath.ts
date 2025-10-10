@@ -1,4 +1,3 @@
-// server-only
 import "server-only";
 
 /** ClickHouse 원본 1행 형태 */

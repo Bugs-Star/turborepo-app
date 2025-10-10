@@ -11,7 +11,6 @@ export async function GET(req: NextRequest) {
 
     // 데이터 로딩 필터 (모두 옵션)
     const period = searchParams.get("period") as
-      | "daily"
       | "weekly"
       | "monthly"
       | "yearly"
@@ -28,12 +27,17 @@ export async function GET(req: NextRequest) {
     const successRateAlwaysOne =
       searchParams.get("successRateAlwaysOne") === "true";
 
-    // 성공 엔드포인트 고정 기본값
+    // ✅ 가상 성공 토큰(sentinel)
+    const VIRTUAL_SUCCESS = "__SUCCESS__";
+
+    // 성공 엔드포인트 (요청이 없더라도 기본값 + 가상 토큰 포함)
     const successParams = searchParams.getAll("success");
-    const successEndpoints = successParams.length
+    const successEndpointsBase = successParams.length
       ? successParams
       : ["/payment-complete"];
+    const successEndpoints = [...successEndpointsBase, VIRTUAL_SUCCESS];
 
+    // ClickHouse에서 성공 세션만 받아온다고 가정
     const raw = await getRawPathsFromClickHouse({
       period: period || undefined,
       storeId: storeId || undefined,
@@ -42,14 +46,22 @@ export async function GET(req: NextRequest) {
       limit,
     });
 
-    const buckets = computeGoldenPaths(raw, {
-      successEndpoints,
+    // ✅ 모든 세션 path의 끝에 가상 성공 토큰 주입
+    const rawWithVirtualSuccess = raw.map((r) => ({
+      ...r,
+      path: r.path?.length ? [...r.path, VIRTUAL_SUCCESS] : [VIRTUAL_SUCCESS],
+    }));
+
+    // ✅ 기존 알고리즘 그대로 사용하되 성공 세션 전제 + 가상 토큰 포함
+    const buckets = computeGoldenPaths(rawWithVirtualSuccess, {
+      successEndpoints, // 가상 토큰 포함된 성공 집합
       ngramMax,
       minSupport,
       topK,
       dedupeConsecutive: true,
-      assumeAllSuccessful: true, // ✅ 전제 반영
-      successRateAlwaysOne, // 필요시 true로 사용
+      assumeAllSuccessful: true, // 성공 세션만 가져온 전제
+      successRateAlwaysOne, // 필요 시 true
+      // normalize: defaultNormalize (기본값)
     });
 
     return Response.json(
@@ -63,8 +75,12 @@ export async function GET(req: NextRequest) {
           ngramMax,
           minSupport,
           topK,
+          // 에코백은 실제로 사용된 성공 엔드포인트(가상 토큰 포함)를 보여주자
           successEndpoints,
           successRateAlwaysOne,
+          // 참고: 이 API는 가상 성공 토큰 주입을 사용 중
+          mode: "virtual-success-sentinel",
+          virtualSuccessToken: VIRTUAL_SUCCESS,
         },
         buckets,
         bucketsCount: buckets.length,

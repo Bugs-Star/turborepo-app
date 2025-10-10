@@ -9,7 +9,7 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
 
     // 모두 옵션: 없으면 필터 없음
-    const period = searchParams.get("period") as any | null; // "daily" | "weekly" | "monthly" | "yearly"
+    const period = searchParams.get("period") as any | null;
     const storeId = searchParams.get("storeId"); // 'all' 또는 미지정 → 필터 없음
     const from = searchParams.get("from");
     const to = searchParams.get("to");
