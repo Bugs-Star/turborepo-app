@@ -56,8 +56,7 @@ export async function aggregatePromotionSummary(periodType = "weekly") {
             -- [최종 수정] JSON 타입은 점(.)으로 직접 접근합니다.
             (event_type = 'clickInteraction' AND toString(metadata.interactionType) = 'promotionCard')
           )
-          -- events 테이블에 현재 프로모션 아이디가 존재하지 않으므로 제거.
-          -- AND promotion_id IS NOT NULL AND promotion_id != ''
+          AND promotion_id IS NOT NULL AND promotion_id != ''
         GROUP BY period_start, promotion_id
       ),
 
