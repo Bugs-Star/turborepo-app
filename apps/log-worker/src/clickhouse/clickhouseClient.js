@@ -40,6 +40,15 @@ const tableSchemas = [
 
       -- 순 클릭 유저 수
       unique_clickers UInt64,
+      
+      -- (추가) 총 주문 수
+      total_orders UInt64,
+
+      -- (추가) 총 매출액
+      total_revenue UInt64,
+
+      -- (추가) 전환율
+      conversion_rate Float64,
 
       -- 집계된 시간 (ReplacingMergeTree 버전 관리를 위함)
       updated_at DateTime
@@ -192,8 +201,13 @@ const tableSchemas = [
     tableName: "purchase_golden_path_stats",
     query: `
       CREATE TABLE IF NOT EXISTS purchase_golden_path_stats (
-        period_type String, period_start Date, store_id String, path Array(String),
-        user_count UInt32, total_sessions UInt32
+        period_type String, 
+        period_start Date, 
+        store_id String, 
+        path Array(String),
+        purchased_items Array(String), 
+        user_count UInt32, 
+        total_sessions UInt32
       ) ENGINE = ReplacingMergeTree() -- 수정: ReplacingMergeTree로 변경
       PARTITION BY period_type
       -- 수정: user_count 대신 path를 키에 추가하여 고유 경로를 식별하도록 변경
