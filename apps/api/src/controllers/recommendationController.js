@@ -9,7 +9,7 @@
 
 import redisClient from '../config/redis.js';
 import Product from '../models/Product.js';
-import { v4 as uuidv4 } from 'uuid';
+import crypto from 'crypto';
 
 // Redis 설정
 const REDIS_STREAM_KEY = "recommendation_tasks_stream";
@@ -89,7 +89,7 @@ export const getUserRecommendations = async (req, res) => {
 async function requestNewRecommendation(userId) {
   try {
     // Redis Stream에 추천 요청 전송
-    const taskId = uuidv4();
+    const taskId = crypto.randomUUID();
     const taskData = {
       userId,
       taskId,

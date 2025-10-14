@@ -27,9 +27,11 @@ router.use('/auth', authRoutes);
 // 관리자 관련 라우트
 router.use('/admin', adminRoutes);
 
-// 상품 관련 라우트 (순서 중요: 구체적인 경로를 먼저!)
-router.use('/products', recommendationRoutes);  // /products/recommendations
+// 상품 관련 라우트
 router.use('/products', productRoutes);         // /products/, /products/:id
+
+// 추천 관련 라우트
+router.use('/recommendations', recommendationRoutes);
 
 // 이벤트 관련 라우트
 router.use('/events', eventRoutes);

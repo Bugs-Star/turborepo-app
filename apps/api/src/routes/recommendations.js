@@ -11,14 +11,14 @@ import { Router } from 'express';
 import { 
   getUserRecommendations, 
   refreshUserRecommendations 
-} from '../controllers/recommendationController.js';
+} from '../controllers/recommendationController.simple.js';
 import { auth } from '../middlewares/auth.js';
 
 const router = Router();
 
 /**
  * 사용자 개인화 추천 조회
- * GET /api/products/recommendations
+ * GET /api/recommendations
  * 
  * Query Parameters:
  * - limit: 추천 상품 개수 (기본값: 5)
@@ -35,13 +35,13 @@ const router = Router();
  *   }
  * }
  */
-router.get('/recommendations', auth, getUserRecommendations);
+router.get('/', auth, getUserRecommendations);
 
 // Health check 엔드포인트 제거됨
 
 /**
  * 사용자 추천 캐시 갱신 요청
- * POST /api/products/recommendations/refresh
+ * POST /api/recommendations/refresh
  * 
  * 사용자의 기존 추천 캐시를 삭제하고 새로운 추천을 요청합니다.
  * 구매 패턴이 변경되었거나 즉시 새로운 추천을 받고 싶을 때 사용합니다.
@@ -57,6 +57,6 @@ router.get('/recommendations', auth, getUserRecommendations);
  *   }
  * }
  */
-router.post('/recommendations/refresh', auth, refreshUserRecommendations);
+router.post('/refresh', auth, refreshUserRecommendations);
 
 export default router;
