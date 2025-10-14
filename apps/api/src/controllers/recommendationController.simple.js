@@ -20,16 +20,16 @@ export const getUserRecommendations = async (req, res) => {
 
     console.log(`[Recommendation API] 사용자 '${userId}' 추천 요청`);
 
-    // 임시로 추천 상품만 반환 (실제 AI 추천 대신)
+    // 임시로 추천 상품만 반환 (실제 AI 추천 대신, 이미지 제외)
     const recommendations = await Product.find({ isRecommended: true })
       .sort({ recommendedOrder: 1 })
       .limit(parseInt(limit))
-      .select('productCode productName productImg');
+      .select('_id productCode productName');
 
     const formattedRecommendations = recommendations.map((product, index) => ({
+      _id: product._id,
       productCode: product.productCode,
       productName: product.productName,
-      productImg: product.productImg,
       recommendationScore: 1.0 - (index * 0.1), // 임시 점수
       recommendationRank: index + 1
     }));

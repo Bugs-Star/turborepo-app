@@ -90,11 +90,11 @@ export interface ProductDisplayOptions {
   gridColumns: 2 | 3 | 4;
 }
 
-// 개인화 추천 상품 타입
+// 개인화 추천 상품 타입 (이미지 제외로 메모리 절약)
 export interface PersonalizedRecommendation {
+  _id: string;
   productCode: string;
   productName: string;
-  productImg: string;
   recommendationScore: number;
   recommendationRank: number;
 }
