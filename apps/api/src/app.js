@@ -44,7 +44,7 @@ app.use(express.json());                         // Content-Type: application/js
 app.use(express.urlencoded({ extended: true })); // Content-Type: application/x-www-form-urlencoded 형식(주로 HTML 폼 제출)의 요청 본문을 파싱
 
 // Route 설정
-app.use("/", routes);
+app.use("/api", routes);
 
 // Error 핸들링
 // -- 404 Not Found 핸들러
