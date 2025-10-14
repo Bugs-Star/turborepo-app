@@ -58,3 +58,8 @@ preprocessed_configs/
 uuid
 status
 store/
+
+# Back-recommendation-worker
+item_vectors.json
+preprocessed_vectors.json
+user_vectors.json
