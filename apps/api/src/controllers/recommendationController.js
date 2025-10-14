@@ -169,10 +169,10 @@ async function getProductDetails(recommendationIds, limit) {
 
     console.log(`[Recommendation API] 상품 상세 정보 조회: ${productCodes.join(', ')}`);
 
-    // MongoDB에서 상품 정보 조회 (상품 사진과 이름만)
+    // MongoDB에서 상품 정보 조회 (_id 포함, 이미지 제외로 메모리 절약)
     const products = await Product.find({
       productCode: { $in: productCodes }
-    }).select('productCode productName productImg');
+    }).select('_id productCode productName');
 
     // 추천 순서 유지하면서 상세 정보 매핑
     const detailedRecommendations = [];
@@ -186,9 +186,9 @@ async function getProductDetails(recommendationIds, limit) {
       
       if (product) {
         detailedRecommendations.push({
+          _id: product._id,
           productCode: product.productCode,
           productName: product.productName,
-          productImg: product.productImg,
           recommendationScore: score,
           recommendationRank: i + 1
         });
