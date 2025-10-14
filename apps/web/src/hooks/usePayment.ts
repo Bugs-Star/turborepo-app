@@ -5,6 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { usePaymentStore } from "@/stores/paymentStore";
 import { PaymentMethod, PAYMENT_METHODS } from "@/types/payment";
 import { handleError, getUserFriendlyMessage } from "@/lib/errorHandler";
+import { useBackgroundRecommendationRefresh } from "./useRecommendationRefresh";
 
 export type { PaymentMethod };
 export { PAYMENT_METHODS };
@@ -13,6 +14,7 @@ export const usePayment = () => {
   const { showToast } = useToast();
   const router = useRouter();
   const queryClient = useQueryClient();
+  const { refreshInBackground } = useBackgroundRecommendationRefresh();
 
   // Zustand 스토어에서 상태 가져오기
   const {
@@ -55,9 +57,14 @@ export const usePayment = () => {
         setLastUsedMethod(method);
 
         showToast("주문이 완료되었습니다!", "success");
+        
         // 장바구니 쿼리 무효화하여 즉시 업데이트
         queryClient.invalidateQueries({ queryKey: ["cart"] });
         queryClient.invalidateQueries({ queryKey: ["cartCount"] });
+        
+        // 🎯 주문 완료 후 백그라운드에서 추천 갱신
+        refreshInBackground();
+        
         // 즉시 주문 내역 페이지로 이동
         router.push("/order-history");
       } else {

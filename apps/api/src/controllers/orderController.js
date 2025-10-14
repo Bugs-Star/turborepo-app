@@ -11,7 +11,8 @@ import User from '../models/User.js';
 import Product from '../models/Product.js';
 import Order from '../models/Order.js';
 import mongoose from 'mongoose';
-import { generateOrderNumber } from '../utils/generateOrderNumber.js';
+import { generateOrderNumber } from '../services/orderNumberGenerator.js';
+import { refreshUserRecommendationsInBackground } from './recommendationController.js';
 
 // 주문 생성 (결제)
 export const createOrder = async (req, res) => {
@@ -110,6 +111,15 @@ export const createOrder = async (req, res) => {
     await user.save({ session });
 
     await session.commitTransaction();
+
+    // 🎯 주문 완료 후 백그라운드에서 추천 갱신 (비동기, 실패해도 주문에 영향 없음)
+    refreshUserRecommendationsInBackground(user._id.toString())
+      .then(() => {
+        console.log(`[ORDER_COMPLETE] 사용자 ${user._id} 추천 갱신 요청 완료`);
+      })
+      .catch((error) => {
+        console.warn(`[ORDER_COMPLETE] 사용자 ${user._id} 추천 갱신 실패 (무시됨):`, error.message);
+      });
 
     res.json({
       success: true,

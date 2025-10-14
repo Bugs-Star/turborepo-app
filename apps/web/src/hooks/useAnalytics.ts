@@ -44,13 +44,15 @@ export const useAnalytics = () => {
       screenName: string,
       durationSeconds: number,
       startTime: string,
-      endTime: string
+      endTime: string,
+      promotionId?: string
     ) => {
       logger.log("viewScreenDuration", {
         screenName: screenName,
         durationSeconds: durationSeconds,
         startTime: startTime,
         endTime: endTime,
+        promotionId: promotionId,
       });
     },
     []
@@ -165,6 +167,7 @@ export const useAnalytics = () => {
       targetId: promotion._id,
       sourceComponent: "promotion_section",
       promotionName: promotion.title,
+      promotionId: promotion._id,
     });
   }, []);
 

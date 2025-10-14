@@ -16,16 +16,17 @@
   --muted-foreground: #6b7280;
 
   --border: #e5e7eb;
+
+  --brand: #005c14;
+  --danger: #d74753;
+  --edit: #6b7280;
+  --accent: #f59e0b;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
-    --brand: #005c14;
-    --danger: #d74753;
-    --edit: #6b7280;
-    --accent: #f59e0b;
 
     /* dark용 카드/보더 */
     --card: #111213;
@@ -33,7 +34,6 @@
     --muted: #17181a;
     --muted-foreground: #9ca3af;
     --border: #24262a;
-    --danger: #e25562;
   }
 }
 

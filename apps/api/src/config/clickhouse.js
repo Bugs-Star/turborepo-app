@@ -39,6 +39,7 @@ export const connectClickHouse = async () => {
   try {
     await clickhouseClient.query({ query: 'SELECT 1' });
     console.log('✅ ClickHouse 연결 성공');
+    startKeepAlive();
   } catch (error) {
     console.error('❌ ClickHouse 연결 실패:', error);
   }
@@ -47,12 +48,35 @@ export const connectClickHouse = async () => {
 // ClickHouse 연결 종료 함수
 export const disconnectClickHouse = async () => {
   try {
-    // Use the close() method to gracefully disconnect.
-    await clickhouseClient.close();
+    await clickhouseClient.close();   // Use the close() method to gracefully disconnect.
     console.log('🔌 ClickHouse 연결 종료');
   } catch (error) {
     console.error('❌ ClickHouse 연결 종료 실패:', error);
   }
+};
+
+// ClickHouse Keep-Alive 함수
+const keepAlive = async () => {
+  try {
+    await clickhouseClient.query({ query: 'SELECT 1 as ping' });
+    // console.log('🔄 ClickHouse Keep-Alive 성공');
+  } catch (error) {
+    // 연결이 닫혔을 때는 조용히 무시
+    if (error.message?.includes('closed') || error.message?.includes('destroyed')) {
+      return;
+    }
+    // console.error('❌ ClickHouse Keep-Alive 실패:', error);
+  }
+};
+
+// Keep-Alive 스케줄러
+let keepAliveInterval = null;
+
+export const startKeepAlive = () => {
+  // 5분마다 keep-alive 쿼리 실행
+  keepAliveInterval = setInterval(() => {
+    keepAlive();
+  }, 5 * 60 * 1000); // 5분 = 300,000ms
 };
 
 export default clickhouseClient;

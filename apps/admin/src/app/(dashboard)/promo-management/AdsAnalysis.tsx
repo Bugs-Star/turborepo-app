@@ -1,28 +1,43 @@
+// apps/admin/src/app/(dashboard)/ads/AdsAnalysis.tsx
+"use client";
+
+import { useMemo, useState } from "react";
 import ChartCard from "@/components/ChartCard";
 import FilterPanel from "./FilterPanel";
+import { useGetPromoData } from "@/hooks/promo/useGetPromoData";
 
-const viewTimeData = [
-  { name: "1주", value: 45 },
-  { name: "2주", value: 48 },
-  { name: "3주", value: 44 },
-  { name: "4주", value: 47 },
-  { name: "5주", value: 42 },
-  { name: "6주", value: 41 },
-];
+function getInitialYM() {
+  const now = new Date();
+  return { y: now.getFullYear(), m: now.getMonth() + 1 };
+}
 
-const clickData = [
-  { name: "1주", value: 520 },
-  { name: "2주", value: 480 },
-  { name: "3주", value: 510 },
-  { name: "4주", value: 490 },
-  { name: "5주", value: 450 },
-  { name: "6주", value: 420 },
-];
+export default function AdsAnalysis() {
+  const init = useMemo(getInitialYM, []);
+  const [year, setYear] = useState(init.y);
+  const [month, setMonth] = useState(init.m);
 
-const AdsAnalysis = () => {
+  const { data, isLoading, isFetching, isError, refetch } = useGetPromoData({
+    year,
+    month,
+  });
+
+  const promotions = data?.promotions ?? [];
+  const viewTimeData = data?.viewSeries ?? [];
+  const clickData = data?.clickSeries ?? [];
+
   return (
     <div className="flex gap-4 max-w-6xl mx-auto mt-10 mb-5">
-      <FilterPanel />
+      <FilterPanel
+        year={year}
+        month={month}
+        onYearChange={setYear}
+        onMonthChange={setMonth}
+        onApply={() => refetch()}
+        promotions={promotions}
+        isLoading={isLoading || isFetching}
+        error={isError}
+      />
+
       <ChartCard
         title="광고 시청 시간 추세"
         subtitle="사용자의 광고 시청시간 추세"
@@ -30,6 +45,7 @@ const AdsAnalysis = () => {
         label="광고 시청 시간"
         fillColor="#8FD27F"
       />
+
       <ChartCard
         title="광고 클릭 추세"
         subtitle="사용자의 광고 클릭 건수"
@@ -39,6 +55,4 @@ const AdsAnalysis = () => {
       />
     </div>
   );
-};
-
-export default AdsAnalysis;
+}

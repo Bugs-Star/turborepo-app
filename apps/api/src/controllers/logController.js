@@ -7,7 +7,7 @@
  * History
  * ------------------------------------------------------------*/
 
-import { validateLogs } from "../utils/logValidator.js";
+import { validateLogs } from "../services/logDataValidator.js";
 import Redis from "ioredis";
 const redisClient = new Redis(process.env.REDIS_URL);
 
@@ -40,7 +40,7 @@ export const handleBatchLogs = async (req, res) => {
 // 중요 로그 수신 (즉시 처리)
 export const handleImmediateLogs = async (req, res) => {
   try {
-    const validation = validateLogs(req.bodys);
+    const validation = validateLogs(req.body);
     if (!validation.isValid) {
       console.error("[immediate 검증 실패]", validation.error);
       return res.status(400).json({ success: false, error: validation.error });

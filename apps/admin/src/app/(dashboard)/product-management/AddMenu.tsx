@@ -111,7 +111,7 @@ const AddMenu = () => {
                   className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition cursor-pointer
                     ${
                       active
-                        ? "bg-brand text-brand-foreground border-[color:var(--color-brand)]"
+                        ? "bg-brand text-white border-[color:var(--color-brand)]"
                         : "bg-muted text-card-foreground border border-border hover:opacity-90"
                     }`}
                   aria-pressed={active}
@@ -131,7 +131,7 @@ const AddMenu = () => {
             className={`flex items-center gap-2 px-4 py-2 rounded-lg border text-sm font-medium transition cursor-pointer
               ${
                 isRecommended
-                  ? "bg-accent text-accent-foreground border-[color:var(--color-accent)]"
+                  ? "bg-accent text-white  border-[color:var(--color-accent)]"
                   : "bg-muted text-card-foreground border border-border hover:opacity-90"
               }`}
             title="추천메뉴 등록"

@@ -1,5 +1,10 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
+# 벡터
+item_vectors.js
+preprocessed_vectors.js
+user_vectors.js
+
 # Dependencies
 node_modules
 .pnp
@@ -26,6 +31,7 @@ coverage
 # Build Outputs
 .next/
 out/
+out.zip
 build
 dist
 
@@ -52,3 +58,8 @@ preprocessed_configs/
 uuid
 status
 store/
+
+# Back-recommendation-worker
+item_vectors.json
+preprocessed_data.json
+user_vectors.json

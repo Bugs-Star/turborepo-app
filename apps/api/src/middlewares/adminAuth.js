@@ -9,7 +9,7 @@
 
 import jwt from 'jsonwebtoken';
 import Admin from '../models/Admin.js';
-import { isBlacklisted } from '../utils/jwtBlacklist.js';
+import { isBlacklisted } from '../utils/jwtBlacklistUtil.js';
 
 export const adminAuth = async (req, res, next) => {
   try {

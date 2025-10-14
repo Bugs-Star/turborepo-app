@@ -1,58 +1,89 @@
 import axiosInstance from "./axios";
-import { AuthService } from "./auth";
+import { AuthService, STORAGE_KEYS } from "./auth";
+import type {
+  AxiosError,
+  AxiosResponse,
+  InternalAxiosRequestConfig,
+  AxiosRequestHeaders,
+} from "axios";
 
-export function setupInterceptors() {
-  // **요청 인터셉터**
+// _retry 플래그 안전 추가
+type RetriableConfig = InternalAxiosRequestConfig & { _retry?: boolean };
+
+const LOGIN_URL = "/admin/login";
+const REFRESH_URL = "/admin/refresh";
+const LOGOUT_URL = "/admin/logout";
+
+const isNoAuth = (url?: string) =>
+  !!url &&
+  (url.endsWith(LOGIN_URL) ||
+    url.endsWith(REFRESH_URL) ||
+    url.endsWith(LOGOUT_URL));
+
+export function setupInterceptors(): void {
+  // 요청 인터셉터: accessToken 자동 부착 (단, refresh/login/logout은 제외)
   axiosInstance.interceptors.request.use(
     (config) => {
-      if (typeof window !== "undefined") {
-        const accessToken = localStorage.getItem("accessToken");
+      if (!isNoAuth(config.url) && typeof window !== "undefined") {
+        const accessToken =
+          localStorage.getItem(STORAGE_KEYS.access) ?? undefined;
         if (accessToken) {
-          config.headers?.set("Authorization", `Bearer ${accessToken}`);
+          const headers = (config.headers ?? {}) as AxiosRequestHeaders;
+          headers.Authorization = `Bearer ${accessToken}`;
+          config.headers = headers;
         }
       }
       return config;
     },
-    (error) => Promise.reject(error)
+    (error: AxiosError) => Promise.reject(error)
   );
 
-  // **응답 인터셉터**
+  // 응답 인터셉터: 401이면 1회에 한해 리프레시 → 원요청 재시도
   axiosInstance.interceptors.response.use(
-    (response) => response,
-    async (error) => {
-      const originalRequest = error.config;
+    (response: AxiosResponse) => response,
+    async (error: AxiosError): Promise<AxiosResponse | never> => {
+      const status = error.response?.status;
+      const original = error.config as RetriableConfig | undefined;
+      const url = original?.url;
 
-      // 401 처리 + 무한 루프 방지
-      if (error.response?.status === 401 && !originalRequest._retry) {
-        originalRequest._retry = true;
+      // 리프레시 자체가 실패(만료)하면 바로 세션 종료
+      if (
+        (status === 401 || status === 403) &&
+        url &&
+        url.endsWith(REFRESH_URL)
+      ) {
+        if (typeof window !== "undefined") {
+          localStorage.removeItem(STORAGE_KEYS.access);
+          localStorage.removeItem(STORAGE_KEYS.refresh);
+          window.location.href = "/login";
+        }
+        return Promise.reject(error);
+      }
+
+      if (status === 401 && original && !original._retry) {
+        // 로그인/리프레시/로그아웃 요청은 스킵
+        if (isNoAuth(url)) return Promise.reject(error);
+
+        original._retry = true;
 
         try {
-          const refreshToken = localStorage.getItem("refreshToken");
-          if (!refreshToken) throw new Error("No refresh token available");
+          const newAccessToken = await AuthService.refreshAccessToken();
+          if (typeof window !== "undefined") {
+            localStorage.setItem(STORAGE_KEYS.access, newAccessToken);
+          }
 
-          // 새 accessToken 발급
-          const { accessToken: newAccessToken } =
-            await AuthService.refreshAccessToken(refreshToken);
+          const headers = (original.headers ?? {}) as AxiosRequestHeaders;
+          headers.Authorization = `Bearer ${newAccessToken}`;
+          original.headers = headers;
 
-          // 로컬스토리지 갱신
-          localStorage.setItem("accessToken", newAccessToken);
-
-          // 원래 요청에 새로운 토큰 설정 후 재요청
-          originalRequest.headers = {
-            ...originalRequest.headers,
-            Authorization: `Bearer ${newAccessToken}`,
-          };
-
-          return axiosInstance(originalRequest);
-        } catch (refreshError) {
-          console.error("Token refresh failed:", refreshError);
-
-          // 토큰 갱신 실패 → 세션 초기화 및 로그인 페이지 이동
-          localStorage.removeItem("accessToken");
-          localStorage.removeItem("refreshToken");
-          window.location.href = "/login";
-
-          return Promise.reject(refreshError);
+          return axiosInstance(original);
+        } catch (refreshErr) {
+          if (typeof window !== "undefined") {
+            localStorage.removeItem(STORAGE_KEYS.access);
+            localStorage.removeItem(STORAGE_KEYS.refresh);
+            window.location.href = "/login";
+          }
+          return Promise.reject(refreshErr);
         }
       }
 

@@ -1,21 +1,19 @@
 import axiosInstance from "./axios";
 
-// 광고 추가에 사용하는 payload
+/* ---------- Types ---------- */
 export interface AddPromoPayload {
   title: string;
   description: string;
   promotionImg: File;
-  startDate: string; // ISO string
-  endDate: string; // ISO string
+  startDate: string; // ISO
+  endDate: string; // ISO
 }
 
-// 광고 응답 데이터
 export interface PromoResponse {
   _id: string;
   title: string;
   description: string;
-  promotionImg: string; // URL 또는 data URL
-
+  promotionImg: string;
   startDate: string; // ISO
   endDate: string; // ISO
   isActive: boolean;
@@ -24,12 +22,10 @@ export interface PromoResponse {
   promotionOrder?: number;
 }
 
-// 광고 조회 파라미터
 export interface GetPromosParams {
   isActive?: boolean;
 }
 
-// 광고 조회 응답 (✅ 페이지네이션 제거)
 export interface GetPromosResponse {
   promotions: PromoResponse[];
 }
@@ -42,19 +38,47 @@ export interface DeletePromoResponse {
 export interface ReorderPromosResponse {
   message: string;
   updatedCount: number;
-  newOrder: string[]; // 서버가 돌려주는 최종 ID 순서
+  newOrder: string[];
 }
 
+export interface ViewTrendPoint {
+  name: string; // "1주" ~ "5주"
+  viewDuration: number; // 서버 기준 단위
+}
+
+export interface ClickTrendPoint {
+  name: string; // "1주" ~ "5주"
+  clicks: number;
+}
+
+export interface MonthlyPromosMeta {
+  year: number;
+  month: number;
+  generatedAt: string; // ISO
+}
+
+export interface MonthlyPromosResponse {
+  promotions: PromoResponse[];
+  viewTrendData: ViewTrendPoint[];
+  clickTrendData: ClickTrendPoint[];
+  meta: MonthlyPromosMeta;
+}
+
+export interface MonthlyPromosParams {
+  year: number; // 예: 2025
+  month: number; // 예: 9
+}
+
+/* ---------- Service ---------- */
 export const PromoService = {
-  getAll: async (params?: GetPromosParams): Promise<GetPromosResponse> => {
+  async getAll(params?: GetPromosParams): Promise<GetPromosResponse> {
     const { data } = await axiosInstance.get<GetPromosResponse>("/promotions", {
       params,
     });
     return data;
   },
 
-  // 광고 추가
-  addPromo: async (payload: AddPromoPayload): Promise<PromoResponse> => {
+  async addPromo(payload: AddPromoPayload): Promise<PromoResponse> {
     const formData = new FormData();
     formData.append("title", payload.title);
     formData.append("description", payload.description);
@@ -62,17 +86,18 @@ export const PromoService = {
     formData.append("startDate", payload.startDate);
     formData.append("endDate", payload.endDate);
 
-    const response = await axiosInstance.post("/admin/promotions", formData, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
-    return response.data;
+    const { data } = await axiosInstance.post<PromoResponse>(
+      "/admin/promotions",
+      formData,
+      { headers: { "Content-Type": "multipart/form-data" } }
+    );
+    return data;
   },
 
-  // 광고 수정
-  editPromo: async (
+  async editPromo(
     promoId: string,
     payload: Partial<AddPromoPayload>
-  ): Promise<PromoResponse> => {
+  ): Promise<PromoResponse> {
     const formData = new FormData();
     if (payload.title) formData.append("title", payload.title);
     if (payload.description)
@@ -82,29 +107,46 @@ export const PromoService = {
     if (payload.startDate) formData.append("startDate", payload.startDate);
     if (payload.endDate) formData.append("endDate", payload.endDate);
 
-    const response = await axiosInstance.put(
+    const { data } = await axiosInstance.put<PromoResponse>(
       `/admin/promotions/${promoId}`,
       formData,
       { headers: { "Content-Type": "multipart/form-data" } }
     );
-    return response.data;
+    return data;
   },
 
-  // 광고 삭제
-  deletePromo: async (promoId: string): Promise<DeletePromoResponse> => {
-    const res = await axiosInstance.delete(`/admin/promotions/${promoId}`);
-    return res.data;
+  async deletePromo(promoId: string): Promise<DeletePromoResponse> {
+    const { data } = await axiosInstance.delete<DeletePromoResponse>(
+      `/admin/promotions/${promoId}`
+    );
+    return data;
   },
 
-  // ✅ 배치 재정렬: JSON POST
-  reorderPromotions: async (
+  async reorderPromotions(
     promotionIds: string[]
-  ): Promise<ReorderPromosResponse> => {
+  ): Promise<ReorderPromosResponse> {
     const { data } = await axiosInstance.post<ReorderPromosResponse>(
       "/admin/promotions/reorder",
-      { promotionIds }, // 서버 스펙에 맞춰 키 이름 정확히!
+      { promotionIds },
       { headers: { "Content-Type": "application/json" } }
     );
     return data;
   },
+
+  /** 월간 프로모션 + 트렌드 */
+  async getMonthlyPromos(
+    params: MonthlyPromosParams
+  ): Promise<MonthlyPromosResponse> {
+    const { data } = await axiosInstance.get<MonthlyPromosResponse>(
+      "/admin/promotions/monthly",
+      { params } // ?year=YYYY&month=M
+    );
+    return data;
+  },
 };
+
+export async function getMonthlyPromos(
+  params: MonthlyPromosParams
+): Promise<MonthlyPromosResponse> {
+  return PromoService.getMonthlyPromos(params);
+}

@@ -54,7 +54,7 @@ const BaseForm = ({
         e.preventDefault();
         onSubmit(e);
       }}
-      className="max-w-5xl mx-auto mt-5 bg-card text-card-foreground border border-border p-8 rounded-lg"
+      className="max-w-5xl mx-auto mt-5 bg-card text-card-foreground border border-border p-8 rounded-lg mb-10"
     >
       <h1 className="text-xl font-bold mb-6">{title}</h1>
 

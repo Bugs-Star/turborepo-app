@@ -22,16 +22,13 @@ interface EditPromoProps {
 
 function toLocalInputValue(iso?: string) {
   if (!iso) return "";
-  // datetime-local용 YYYY-MM-DDTHH:mm
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "";
   const pad = (n: number) => String(n).padStart(2, "0");
   const yyyy = d.getFullYear();
   const mm = pad(d.getMonth() + 1);
   const dd = pad(d.getDate());
-  const hh = pad(d.getHours());
-  const mi = pad(d.getMinutes());
-  return `${yyyy}-${mm}-${dd}T${hh}:${mi}`;
+  return `${yyyy}-${mm}-${dd}`;
 }
 
 const EditPromo = ({ promotionId, initialData, onClose }: EditPromoProps) => {
@@ -84,7 +81,7 @@ const EditPromo = ({ promotionId, initialData, onClose }: EditPromoProps) => {
       onClick={onClose}
     >
       <div
-        className="relative bg-white rounded-2xl shadow-lg w-full max-w-2xl p-6"
+        className="relative bg-background rounded-2xl shadow-lg w-full max-w-2xl p-6"
         onClick={(e) => e.stopPropagation()}
       >
         {/* 닫기 버튼 */}
@@ -140,11 +137,11 @@ const EditPromo = ({ promotionId, initialData, onClose }: EditPromoProps) => {
                 시작 일시
               </label>
               <input
-                type="datetime-local"
+                type="date"
                 name="startDate"
                 value={start}
                 onChange={(e) => setStart(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-4 py-2"
+                className="w-full text-sm border border-gray-300 rounded-lg px-2  py-2"
               />
             </div>
             <div>
@@ -152,11 +149,11 @@ const EditPromo = ({ promotionId, initialData, onClose }: EditPromoProps) => {
                 종료 일시
               </label>
               <input
-                type="datetime-local"
+                type="date"
                 name="endDate"
                 value={end}
                 onChange={(e) => setEnd(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-4 py-2"
+                className="w-full text-sm border border-gray-300 rounded-lg px-2 py-2"
               />
             </div>
           </div>

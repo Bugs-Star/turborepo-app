@@ -15,7 +15,7 @@ import {
   decodeRefreshToken,
 } from "../utils/refreshTokenUtils.js";
 import { compressMulterFile } from "../utils/imageUtils.js";
-import { addToBlacklist } from "../utils/jwtBlacklist.js";
+import { addToBlacklist } from "../utils/jwtBlacklistUtil.js";
 
 // 회원가입
 export const register = async (req, res) => {
