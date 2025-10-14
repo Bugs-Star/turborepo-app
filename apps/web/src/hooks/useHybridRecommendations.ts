@@ -7,7 +7,7 @@ import type { Product } from "@/types/product";
 interface HybridRecommendation {
   _id: string;
   productName: string;
-  productImg: string;
+  productImg?: string; // 개인화 추천에서는 없고, 수동 추천에서만 있음
   productCode?: string;
   price?: number;
   category?: string;
@@ -37,7 +37,6 @@ export const useHybridRecommendations = (
 ): UseHybridRecommendationsReturn => {
   const { limit = 5 } = options;
   const { isAuthenticated } = useAuthStore();
-
   // 개인화 추천 (인증된 사용자만)
   const {
     data: personalizedData,
@@ -85,12 +84,12 @@ export const useHybridRecommendations = (
     // 개인화 추천이 성공한 경우
     if (personalizedData && personalizedData.length > 0) {
       const hybridProducts: HybridRecommendation[] = personalizedData.map((item) => ({
-        _id: item.productCode, // productCode를 _id로 사용
+        _id: item._id, // 백엔드에서 직접 받은 MongoDB _id 사용
         productName: item.productName,
-        productImg: item.productImg,
         productCode: item.productCode,
         recommendationScore: item.recommendationScore,
         recommendationRank: item.recommendationRank,
+        // productImg는 개인화 추천에서 제외됨 (메모리 절약)
       }));
 
       return {
@@ -103,7 +102,6 @@ export const useHybridRecommendations = (
     }
 
     // 개인화 추천이 실패했거나 결과가 없는 경우 → 수동 추천으로 폴백
-    console.log('[HybridRecommendations] 개인화 추천 실패, 수동 추천으로 폴백');
     return {
       data: { products: manualData?.products || [] },
       isLoading: manualLoading,
