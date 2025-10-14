@@ -289,3 +289,35 @@ export const refreshUserRecommendations = async (req, res) => {
     });
   }
 };
+
+/**
+ * 백그라운드에서 사용자 추천 갱신 (주문 완료 후 호출)
+ * 이 함수는 주문 프로세스에 영향을 주지 않도록 비동기로 실행됨
+ */
+export const refreshUserRecommendationsInBackground = async (userId) => {
+  try {
+    console.log(`[Background Refresh] 사용자 ${userId} 추천 갱신 시작`);
+    
+    // 기존 캐시 삭제
+    const resultKey = `${REDIS_RESULT_KEY_PREFIX}${userId}`;
+    await redisClient.del(resultKey);
+    
+    // 새로운 추천 요청 (결과를 기다리지 않음)
+    requestNewRecommendation(userId)
+      .then((recommendations) => {
+        if (recommendations && recommendations.length > 0) {
+          console.log(`[Background Refresh] 사용자 ${userId} 추천 갱신 완료: ${recommendations.length}개`);
+        } else {
+          console.log(`[Background Refresh] 사용자 ${userId} 추천 요청 전송됨 (결과 대기 중)`);
+        }
+      })
+      .catch((error) => {
+        console.warn(`[Background Refresh] 사용자 ${userId} 추천 요청 실패:`, error.message);
+      });
+    
+    return true;
+  } catch (error) {
+    console.error(`[Background Refresh] 사용자 ${userId} 추천 갱신 오류:`, error);
+    throw error;
+  }
+};

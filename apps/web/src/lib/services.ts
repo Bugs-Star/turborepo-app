@@ -1,4 +1,5 @@
 import { api } from "./api";
+import type { PersonalizedRecommendationsResponse } from "@/types/product";
 
 // 타입 정의
 export interface User {
@@ -108,11 +109,38 @@ export const productService = {
     return await api.get<{ product: Product }>(`/products/${id}`);
   },
 
-  // 추천 상품 목록 조회
+  // 추천 상품 목록 조회 (기존 방식)
   getRecommendedProducts: async (): Promise<{ products: Product[] }> => {
     return await api.get<{ products: Product[] }>(
       "/products?isRecommended=true"
     );
+  },
+
+  // 개인화 추천 상품 조회
+  getPersonalizedRecommendations: async (params?: {
+    limit?: number;
+    includeDetails?: boolean;
+  }): Promise<PersonalizedRecommendationsResponse> => {
+    const queryParams = new URLSearchParams();
+    if (params?.limit) queryParams.append("limit", params.limit.toString());
+    if (params?.includeDetails !== undefined) 
+      queryParams.append("includeDetails", params.includeDetails.toString());
+
+    const url = `/recommendations${queryParams.toString() ? `?${queryParams.toString()}` : ""}`;
+    return await api.get<PersonalizedRecommendationsResponse>(url);
+  },
+
+  // 개인화 추천 갱신
+  refreshPersonalizedRecommendations: async (): Promise<{
+    success: boolean;
+    message: string;
+    data: {
+      userId: string;
+      recommendationCount?: number;
+      timestamp: string;
+    };
+  }> => {
+    return await api.post("/recommendations/refresh");
   },
 
   // 카테고리별 상품 조회

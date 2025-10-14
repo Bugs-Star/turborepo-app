@@ -65,7 +65,7 @@ export const getUsers = async (req, res) => {
 
     // 유저 리스트 (이름, 이메일, 가입일)
     const users = await User.find()
-      .select('name email createdAt')
+      .select('_id name email createdAt')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
@@ -80,6 +80,7 @@ export const getUsers = async (req, res) => {
       },
       users: users.map(user => ({
         name: user.name,
+        userId: user._id,
         email: user.email,
         createdAt: user.createdAt
       })),

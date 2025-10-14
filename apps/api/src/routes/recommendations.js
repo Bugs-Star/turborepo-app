@@ -11,7 +11,7 @@ import { Router } from 'express';
 import { 
   getUserRecommendations, 
   refreshUserRecommendations 
-} from '../controllers/recommendationController.simple.js';
+} from '../controllers/recommendationController.js';
 import { auth } from '../middlewares/auth.js';
 
 const router = Router();
