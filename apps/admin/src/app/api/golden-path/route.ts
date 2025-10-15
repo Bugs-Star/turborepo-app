@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { getRawPathsFromClickHouse } from "@/lib/api/goldenPath";
+import { getRawPathsFromClickHouse } from "@/lib/api/getRawPaths";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";

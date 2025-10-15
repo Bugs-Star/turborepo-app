@@ -9,30 +9,27 @@ import { periodToRange, type PeriodParams } from "@/lib/period";
 import {
   useGetGoldenPath,
   type GoldenPathApiParams,
-  type GoldenPathApiResponse,
 } from "@/hooks/dashboard/useGetGoldenPath";
 
 type Props = {
-  params: PeriodParams; // ✅ 부모에서 통일된 타입
+  params: PeriodParams;
   title?: string;
   subtitle?: string;
 };
 
 export default function GoldenPath({ params, title, subtitle }: Props) {
-  // ⬇️ 내부에서 GoldenPath 전용 파라미터로 변환
   const range = periodToRange(params);
   const gpParams: GoldenPathApiParams = {
-    period: params.periodType, // "weekly" | "monthly" | "yearly"
+    period: params.periodType,
     from: range.from,
     to: range.to,
-    // 필요시 기본값: minSupport: 2, topK: 8, ngramMax: 5,
+    // 선택: minSupport/topK/ngramMax 조정
   };
 
   const { data, isLoading, isError, error } = useGetGoldenPath(gpParams);
-
-  const buckets = data?.buckets ?? [];
-  const models: Array<ReturnType<typeof toViewModel>> = buckets.map((b) =>
-    toViewModel(b)
+  const models = useMemo(
+    () => (data?.buckets ?? []).map((b) => toViewModel(b)),
+    [data]
   );
 
   if (isLoading) {
@@ -87,17 +84,65 @@ function MonthCard({ model }: { model: ReturnType<typeof toViewModel> }) {
         </div>
       </div>
 
+      {/* <SectionTitle>전체 골든패스</SectionTitle>
       {model.rows.length === 0 ? (
-        <div className="text-sm text-gray-500">
-          충분한 데이터가 없어 대표 경로가 없어요.
-        </div>
+        <EmptyMsg />
       ) : (
         <div className="space-y-4">
           {model.rows.map((row, idx) => (
-            <PathRow key={idx} row={row} />
+            <PathRow key={`g-${idx}`} row={row} />
           ))}
         </div>
+      )} */}
+      {/* Top3 상품별 골든패스 */}
+      {model.byItem && model.byItem.length > 0 && (
+        <div className="mt-8">
+          <SectionTitle>Top3 상품별 골든패스</SectionTitle>
+          <div className="space-y-6">
+            {model.byItem.map((bi, i) => (
+              <div
+                key={`${bi.item}-${i}`}
+                className="rounded-xl border bg-white/70 p-4"
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <div className="text-sm font-semibold">
+                    {bi.item}
+                    <span className="ml-2 text-xs text-gray-500">
+                      (성공세션 {bi.totalSessions.toLocaleString()})
+                    </span>
+                  </div>
+                </div>
+
+                {bi.rows.length === 0 ? (
+                  <EmptyMsg small />
+                ) : (
+                  <div className="space-y-3">
+                    {bi.rows.map((row, j) => (
+                      <PathRow key={`bi-${i}-${j}`} row={row} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
       )}
+    </div>
+  );
+}
+
+function SectionTitle({ children }: { children: React.ReactNode }) {
+  return (
+    <h4 className="text-sm md:text-base font-semibold text-gray-800 mb-2">
+      {children}
+    </h4>
+  );
+}
+
+function EmptyMsg({ small = false }: { small?: boolean }) {
+  return (
+    <div className={`${small ? "text-xs" : "text-sm"} text-gray-500`}>
+      충분한 데이터가 없어 대표 경로가 없어요.
     </div>
   );
 }

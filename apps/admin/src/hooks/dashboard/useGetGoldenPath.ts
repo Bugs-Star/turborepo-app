@@ -17,6 +17,7 @@ export type GoldenPathApiItem = {
   support: number;
   successRate: number;
   coverage: number;
+  purchasedTop?: Array<{ name: string; count: number }>;
 };
 
 export type GoldenPathApiBucket = {
@@ -26,12 +27,20 @@ export type GoldenPathApiBucket = {
   totalSessions: number;
   successSessions: number;
   top: GoldenPathApiItem[];
+  topByItem?: GoldenPathApiByItem[];
 };
 
 export type GoldenPathApiResponse = {
   params: Record<string, unknown>;
   buckets: GoldenPathApiBucket[];
   bucketsCount: number;
+};
+
+// Top3 상품별 응답 타입 추가
+export type GoldenPathApiByItem = {
+  item: string;
+  totalSessions: number;
+  top: GoldenPathApiItem[];
 };
 
 export async function fetchGoldenPath(
