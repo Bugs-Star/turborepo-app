@@ -56,7 +56,7 @@ export default function Footer() {
         <div className="mb-6">
           <div className="flex items-center mb-4">
             <span className="text-green-800 font-black text-lg">
-              BUCKSSTAR®
+              BUGSSTAR®
             </span>
           </div>
 
@@ -84,7 +84,7 @@ export default function Footer() {
 
         {/* 저작권 및 호스팅 정보 섹션 */}
         <div className="text-[10px] text-gray-500">
-          © 2025 Bucksstar Coffee Company. All Rights Reserved. Hosting By
+          © 2025 Bugsstar Coffee Company. All Rights Reserved. Hosting By
           Caffeine Overflow Co.
         </div>
       </div>
