@@ -33,7 +33,7 @@ export default function GoldenPath({ params, title, subtitle }: Props) {
 
   if (isLoading) {
     return (
-      <div className="flex items-center gap-2 text-sm text-gray-600">
+      <div className="flex items-center gap-2 text-sm text-gray-600 mt-10">
         <Loader2 className="size-4 animate-spin" />
         골든 패스를 불러오는 중…
       </div>
@@ -41,7 +41,7 @@ export default function GoldenPath({ params, title, subtitle }: Props) {
   }
   if (isError || !data) {
     return (
-      <div className="text-red-600 text-sm">
+      <div className="text-red-600 text-sm mt-10">
         골든 패스를 불러오지 못했어요.{" "}
         {error instanceof Error ? error.message : ""}
       </div>

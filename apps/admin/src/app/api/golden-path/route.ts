@@ -4,12 +4,14 @@ import { getRawPathsFromClickHouse } from "@/lib/api/getRawPaths";
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
+type Period = "weekly" | "monthly" | "yearly";
+
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
 
     // 모두 옵션: 없으면 필터 없음
-    const period = searchParams.get("period") as any | null;
+    const period = searchParams.get("period") as Period | null;
     const storeId = searchParams.get("storeId"); // 'all' 또는 미지정 → 필터 없음
     const from = searchParams.get("from");
     const to = searchParams.get("to");
