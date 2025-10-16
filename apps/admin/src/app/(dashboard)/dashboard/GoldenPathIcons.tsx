@@ -9,22 +9,23 @@ import {
   LogIn,
   Sparkles,
   FileText,
-  Utensils,
   User,
   Search,
   type LucideIcon,
+  Coffee,
+  Gift,
 } from "lucide-react";
 import type { StepKind } from "@/lib/api/goldenPathAnalysis";
 
 const ICONS: Record<StepKind, LucideIcon> = {
   home: House,
-  menu: Utensils,
+  menu: Coffee,
   menuDetail: Search,
   event: Sparkles,
+  promotion: Gift,
   cart: ShoppingCart,
   payment: CreditCard,
   login: LogIn,
-  landing: FileText,
   profile: User,
   other: FileText,
 };

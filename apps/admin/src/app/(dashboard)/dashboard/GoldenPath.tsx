@@ -69,30 +69,12 @@ export default function GoldenPath({ params, title, subtitle }: Props) {
 function MonthCard({ model }: { model: ReturnType<typeof toViewModel> }) {
   return (
     <div className="rounded-2xl bg-[#f7f3ea] p-4 md:p-6 border border-amber-100 shadow-sm">
-      <div className="flex items-baseline justify-between gap-4 mb-4">
-        <div>
-          <h3 className="text-lg md:text-xl font-bold">{model.title}</h3>
-          <p className="text-xs md:text-sm text-gray-500">
-            {`가장 빈번한 고객 주문 경로 • 성공 세션 ${model.success.toLocaleString()} / 전체 ${model.total.toLocaleString()}`}
-          </p>
-        </div>
-        <div className="text-xs">
-          <span className="inline-flex items-center gap-1 rounded-md border px-2 py-1 bg-white">
-            판매 <ChevronRight className="size-3" />
-          </span>
-        </div>
+      <div>
+        <h3 className="text-lg md:text-xl font-bold">{model.title}</h3>
+        <p className="text-xs md:text-sm text-gray-500">
+          {`가장 빈번한 고객 주문 경로 • 전체 성공 세션 ${model.success.toLocaleString()} `}
+        </p>
       </div>
-
-      {/* <SectionTitle>전체 골든패스</SectionTitle>
-      {model.rows.length === 0 ? (
-        <EmptyMsg />
-      ) : (
-        <div className="space-y-4">
-          {model.rows.map((row, idx) => (
-            <PathRow key={`g-${idx}`} row={row} />
-          ))}
-        </div>
-      )} */}
 
       {/* Top3 상품별 골든패스 */}
       {model.byItem && model.byItem.length > 0 && (
@@ -102,7 +84,7 @@ function MonthCard({ model }: { model: ReturnType<typeof toViewModel> }) {
             {model.byItem.map((bi, i) => (
               <div
                 key={`${bi.item}-${i}`}
-                className="rounded-xl border bg-white/70 p-4"
+                className="rounded-xl bg-white/70 p-4"
               >
                 <div className="flex items-center justify-between mb-3">
                   <div className="text-sm font-semibold">
@@ -127,6 +109,14 @@ function MonthCard({ model }: { model: ReturnType<typeof toViewModel> }) {
           </div>
         </div>
       )}
+
+      <div className="mt-6 text-sm">
+        <div>*성공 세션 : 구매완료된 세션</div>
+        <div>*지원 세션 : 해당 경로가 등장한 세션 수</div>
+        <div>
+          *커버리지 : 전체 성공 세션 중, 이 경로를 포함한 성공 세션의 비율
+        </div>
+      </div>
     </div>
   );
 }
@@ -166,11 +156,7 @@ function PathRow({
               커버리지 <b className="ml-1">{Math.round(row.coverage * 100)}%</b>
             </span>
             <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 text-blue-700 px-2 py-1">
-              지원(세션) <b className="ml-1">{row.support.toLocaleString()}</b>
-            </span>
-            <span className="inline-flex items-center gap-1 rounded-full bg-gray-50 text-gray-700 px-2 py-1">
-              성공률{" "}
-              <b className="ml-1">{Math.round(row.successRate * 100)}%</b>
+              지원 세션 <b className="ml-1">{row.support.toLocaleString()}</b>
             </span>
           </div>
         </div>
