@@ -1,11 +1,14 @@
 import "server-only";
 import { ch } from "@/lib/clickhouse";
 
-const VIEW = process.env.CLICKHOUSE_GOLDEN_PATH_VIEW!;
-if (!VIEW) {
-  throw new Error(
-    "Set CLICKHOUSE_GOLDEN_PATH_VIEW (e.g. analytics.golden_paths)"
-  );
+function requireView(): string {
+  const v = process.env.CLICKHOUSE_GOLDEN_PATH_VIEW;
+  if (!v) {
+    throw new Error(
+      "Set CLICKHOUSE_GOLDEN_PATH_VIEW (e.g. analytics.golden_paths)"
+    );
+  }
+  return v;
 }
 
 type Period = "weekly" | "monthly" | "yearly";
@@ -69,7 +72,7 @@ export async function getRawPathsFromClickHouse(params?: {
   // ── 파라미터 바인딩 ─────────────────────────────────────
   type QueryParamValue = string | number | boolean | null | undefined;
   const query_params: Record<string, QueryParamValue> = {
-    view: VIEW,
+    view: requireView(),
     limit,
   };
   if (period) query_params.period = period;
