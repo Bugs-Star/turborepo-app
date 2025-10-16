@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 import { ChevronRight, Loader2 } from "lucide-react";
 import { iconFor } from "./GoldenPathIcons";
-
+import type { StepKind } from "@/lib/api/goldenPathAnalysis";
 import { toViewModel } from "@/lib/api/goldenPathAnalysis";
 import { periodToRange, type PeriodParams } from "@/lib/period";
 import {
@@ -151,7 +151,7 @@ function PathRow({
   row,
 }: {
   row: {
-    steps: { raw: string; kind: string; label: string; sub?: string }[];
+    steps: { raw: string; kind: StepKind; label: string; sub?: string }[];
     support: number;
     coverage: number;
     successRate: number;
@@ -180,7 +180,7 @@ function PathRow({
             {row.steps
               .map((s, i) => (
                 <Step key={`${s.raw}-${i}`} label={s.label} sub={s.sub}>
-                  {iconFor(s.kind as any)}
+                  {iconFor(s.kind)}
                 </Step>
               ))
               .flatMap((el, i, arr) =>

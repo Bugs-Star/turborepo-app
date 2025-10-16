@@ -34,12 +34,13 @@ export async function GET(req: NextRequest) {
       },
       { status: 200, headers: { "Cache-Control": "no-store" } }
     );
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : JSON.stringify(err);
     console.error("[GET /api/golden-path] error:", err);
     return Response.json(
       {
         error: "Failed to fetch from ClickHouse",
-        detail: String(err?.message ?? err),
+        detail: message,
       },
       { status: 500 }
     );

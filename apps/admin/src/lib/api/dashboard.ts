@@ -70,6 +70,12 @@ type UserActivityTrendResponse =
       >;
     };
 
+/** ✅ visitorTrendData 요소의 구체 타입 */
+type VisitorTrendRow = Partial<UserActivityPoint> &
+  Record<string, string | number>;
+/** ✅ normalize가 받을 수 있는 통합 입력 타입 */
+type NormalizableRow = UserActivityPoint | VisitorTrendRow;
+
 /** 타입가드 */
 function hasSummary(
   d: ReportsResponse
@@ -86,10 +92,10 @@ function hasTrend(
 ): d is { trendData?: SalesTrendPoint[] } {
   return typeof d === "object" && !Array.isArray(d);
 }
-/** [NEW] visitorTrendData 타입가드 */
+/** ✅ any 제거 */
 function hasVisitorTrend(
   d: UserActivityTrendResponse
-): d is { visitorTrendData?: any[] } {
+): d is { visitorTrendData?: VisitorTrendRow[] } {
   return typeof d === "object" && !Array.isArray(d);
 }
 
@@ -161,18 +167,39 @@ export const DashboardApi = {
       { params }
     );
 
-    const normalize = (rows: any[]): UserActivityPoint[] =>
+    /** ✅ any 없이 두 케이스(UserActivityPoint[] | VisitorTrendRow[]) 모두 처리 */
+    const normalize = (
+      rows: ReadonlyArray<NormalizableRow>
+    ): UserActivityPoint[] =>
       (rows ?? []).map((r) => ({
-        name: String(r.name ?? ""),
-        totalVisitors: Number(r.totalVisitors ?? 0),
-        uniqueVisitors: Number(r.uniqueVisitors ?? 0),
-        activeVisitors: Number(r.activeVisitors ?? 0),
-        bounce: Number(r.bounce ?? 0),
+        name: String(
+          (r as UserActivityPoint).name ?? (r as VisitorTrendRow).name ?? ""
+        ),
+        totalVisitors: Number(
+          (r as UserActivityPoint).totalVisitors ??
+            (r as VisitorTrendRow).totalVisitors ??
+            0
+        ),
+        uniqueVisitors: Number(
+          (r as UserActivityPoint).uniqueVisitors ??
+            (r as VisitorTrendRow).uniqueVisitors ??
+            0
+        ),
+        activeVisitors: Number(
+          (r as UserActivityPoint).activeVisitors ??
+            (r as VisitorTrendRow).activeVisitors ??
+            0
+        ),
+        bounce: Number(
+          (r as UserActivityPoint).bounce ?? (r as VisitorTrendRow).bounce ?? 0
+        ),
       }));
 
-    if (Array.isArray(data)) return normalize(data);
+    if (Array.isArray(data)) {
+      return normalize(data as ReadonlyArray<NormalizableRow>);
+    }
     if (hasVisitorTrend(data) && Array.isArray(data.visitorTrendData)) {
-      return normalize(data.visitorTrendData);
+      return normalize(data.visitorTrendData as ReadonlyArray<NormalizableRow>);
     }
     return [];
   },

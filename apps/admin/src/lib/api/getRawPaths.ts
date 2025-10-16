@@ -67,7 +67,11 @@ export async function getRawPathsFromClickHouse(params?: {
   `;
 
   // ── 파라미터 바인딩 ─────────────────────────────────────
-  const query_params: Record<string, any> = { view: VIEW, limit };
+  type QueryParamValue = string | number | boolean | null | undefined;
+  const query_params: Record<string, QueryParamValue> = {
+    view: VIEW,
+    limit,
+  };
   if (period) query_params.period = period;
   if (storeId && storeId !== "all") query_params.storeId = storeId;
   if (from) query_params.from = from;
