@@ -70,8 +70,12 @@ export const fetchVisitorTrendData = async (periodType, year, month, week) => {
       const weekEnd = new Date(weekStart);
       weekEnd.setUTCDate(weekStart.getUTCDate() + 6);
 
+      // Limit weekEnd to today's date
+      const today = new Date();
+      const finalWeekEnd = weekEnd > today ? today : weekEnd;
+
       const weekStartStr = weekStart.toISOString().split("T")[0];
-      const weekEndStr = weekEnd.toISOString().split("T")[0];
+      const weekEndStr = finalWeekEnd.toISOString().split("T")[0];
 
       query = `SELECT 
                  toDayOfMonth(period_start) as period_label,

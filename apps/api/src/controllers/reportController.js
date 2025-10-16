@@ -36,13 +36,17 @@ const fetchStateData = async (tableName, periodType, year, month, week) => {
       break;
     case "weekly":
       // 시간대 문제를 피하기 위해 모든 날짜 계산을 UTC 기준으로 수행합니다.
-      const firstDayOfMonth = new Date(Date.UTC(year, month - 1, 1)); // 1. 해당 달의 첫 번째 날을 UTC 기준으로 찾는다.
-      const firstDayOfWeek = firstDayOfMonth.getUTCDay(); // 2. 첫째 날이 무슨 요일인지 UTC 기준으로 구한다 (0=일요일, 1=월요일, …).
-      const firstSunday = new Date(firstDayOfMonth); // 3. 첫째 주 시작일(바로 앞 일요일)을 UTC 기준으로 구한다.
-      firstSunday.setUTCDate(1 - firstDayOfWeek); // 4. 목표 주의 시작일을 UTC 기준으로 구한다.
-      const targetDate = new Date(firstSunday);
-      targetDate.setUTCDate(firstSunday.getUTCDate() + (week - 1) * 7); // 5. 날짜를 YYYY-MM-DD 형식으로 포맷한다.
-      const period_start = targetDate.toISOString().split("T")[0];
+      // 1. 해당 월의 첫째 날을 기준으로 날짜 객체를 생성합니다.
+      const firstDayOfMonth = new Date(Date.UTC(year, month - 1, 1));
+      // 2. 첫째 날의 요일(0=일요일, 6=토요일)을 가져옵니다.
+      const dayOfWeek = firstDayOfMonth.getUTCDay();
+      // 3. 해당 월의 첫째 주 일요일 날짜를 계산하고, 목표 주(week)까지의 날짜를 더합니다.
+      //    - (1 - dayOfWeek)는 첫째 주 일요일을 찾습니다. (예: 1일이 수요일(3)이면 1-3=-2, 즉 이전 달 28일)
+      //    - ((week - 1) * 7)은 목표 주까지의 날짜를 더합니다.
+      const targetDay = new Date(
+        Date.UTC(year, month - 1, 1 - dayOfWeek + (week - 1) * 7),
+      );
+      const period_start = targetDay.toISOString().split("T")[0];
 
       query += " AND period_start = {period_start:String}";
       query_params.period_start = period_start;

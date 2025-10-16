@@ -95,8 +95,8 @@ async function workerLoop() {
       let recommendedItems = []
       if (!userVector) {
         console.warn(`[Realtime] 사용자 '${userId}'의 벡터를 찾을 수 없음. 폴백 추천 실행.`);
-        const fallbackItems = await getPopularItemsFallback();
-        console.log(`[Fallback Result] 추천 결과:`, fallbackItems);
+        recommendedItems = await getPopularItemsFallback();
+        console.log(`[Fallback Result] 추천 결과:`, recommendedItems);
       } else {
         // --- ❗️ 이 부분이 수정되었습니다 ---
         // Milvus에 보내기 직전에 사용자 벡터를 정규화하여 단위를 맞춰줍니다.

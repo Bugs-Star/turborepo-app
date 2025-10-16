@@ -17,6 +17,7 @@ import promotionRoutes from './promotions.js';
 import cartRoutes from './cart.js';
 import orderRoutes from './order.js';
 import logRoutes from './logs.js';
+import recommendationRoutes from './recommendations.js';
 
 const router = Router();
 
@@ -27,7 +28,10 @@ router.use('/auth', authRoutes);
 router.use('/admin', adminRoutes);
 
 // 상품 관련 라우트
-router.use('/products', productRoutes);
+router.use('/products', productRoutes);         // /products/, /products/:id
+
+// 추천 관련 라우트
+router.use('/recommendations', recommendationRoutes);
 
 // 이벤트 관련 라우트
 router.use('/events', eventRoutes);
