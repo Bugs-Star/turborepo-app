@@ -23,7 +23,6 @@ export default function GoldenPath({ params, title, subtitle }: Props) {
     period: params.periodType,
     from: range.from,
     to: range.to,
-    // 선택: minSupport/topK/ngramMax 조정
   };
 
   const { data, isLoading, isError, error } = useGetGoldenPath(gpParams);
@@ -94,6 +93,7 @@ function MonthCard({ model }: { model: ReturnType<typeof toViewModel> }) {
           ))}
         </div>
       )} */}
+
       {/* Top3 상품별 골든패스 */}
       {model.byItem && model.byItem.length > 0 && (
         <div className="mt-8">

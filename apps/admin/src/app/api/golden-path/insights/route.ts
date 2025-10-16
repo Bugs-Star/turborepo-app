@@ -60,8 +60,6 @@ export async function GET(req: NextRequest) {
       path: r.path?.length ? [...r.path, VIRTUAL_SUCCESS] : [VIRTUAL_SUCCESS],
     }));
 
-    // 메뉴 매핑: 서버에 이미 사전이 있으면 주입, 아니면 휴리스틱
-    // 예) DB/캐시에서 로드하여 아래에 pass 가능
     const menuIdByItem = deriveMenuLookupFromRows(rawWithVirtualSuccess);
 
     const buckets = computeGoldenPaths(rawWithVirtualSuccess, {
