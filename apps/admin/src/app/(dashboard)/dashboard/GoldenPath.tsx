@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { ChevronRight, Loader2 } from "lucide-react";
+import { ChevronRight, Loader2, Crown } from "lucide-react";
 import { iconFor } from "./GoldenPathIcons";
 import type { StepKind } from "@/lib/api/goldenPathAnalysis";
 import { toViewModel } from "@/lib/api/goldenPathAnalysis";
@@ -10,6 +10,7 @@ import {
   useGetGoldenPath,
   type GoldenPathApiParams,
 } from "@/hooks/dashboard/useGetGoldenPath";
+import { isAxiosError } from "axios";
 
 type Props = {
   params: PeriodParams;
@@ -17,8 +18,30 @@ type Props = {
   subtitle?: string;
 };
 
+/** 에러 메시지 파서: 404는 고정 문구, 그 외는 서버/클라 메시지 노출 */
+function parseErrorMessage(error: unknown): string {
+  if (isAxiosError<{ message?: string }>(error)) {
+    const status = error.response?.status;
+    if (status === 404) return "골든 패스 데이터가 없습니다.";
+    return (
+      error.response?.data?.message ||
+      error.message ||
+      "요청 중 오류가 발생했습니다."
+    );
+  }
+  if (error instanceof Error)
+    return error.message || "알 수 없는 오류가 발생했습니다.";
+  if (typeof error === "string") return error;
+  try {
+    return JSON.stringify(error);
+  } catch {
+    return "알 수 없는 오류가 발생했습니다.";
+  }
+}
+
 export default function GoldenPath({ params, title, subtitle }: Props) {
   const range = periodToRange(params);
+
   const gpParams: GoldenPathApiParams = {
     period: params.periodType,
     from: range.from,
@@ -33,27 +56,43 @@ export default function GoldenPath({ params, title, subtitle }: Props) {
 
   if (isLoading) {
     return (
-      <div className="flex items-center gap-2 text-sm text-gray-600 mt-10">
+      <div className="mt-10 flex items-center gap-2 text-sm text-muted-foreground">
         <Loader2 className="size-4 animate-spin" />
         골든 패스를 불러오는 중…
       </div>
     );
   }
-  if (isError || !data) {
+
+  // ⚠️ 에러 처리 (404 별도 문구)
+  if (isError) {
+    const message = parseErrorMessage(error);
     return (
-      <div className="text-red-600 text-sm mt-10">
-        골든 패스를 불러오지 못했어요.{" "}
-        {error instanceof Error ? error.message : ""}
+      <div className="mt-10 rounded-xl border border-border bg-card p-3 text-sm text-danger">
+        골든 패스를 불러오지 못했어요. <br />
+        <span className="text-muted-foreground">{message}</span>
+      </div>
+    );
+  }
+
+  // 📭 빈 데이터
+  if (!data || !data.buckets?.length) {
+    return (
+      <div className="mt-10 rounded-xl border border-border bg-card p-3 text-sm text-danger">
+        표시할 골든 패스 데이터가 없습니다.
       </div>
     );
   }
 
   return (
-    <section className="space-y-6 mt-10">
+    <section className="mt-10 space-y-6">
       {(title || subtitle) && (
         <header className="space-y-1">
-          {title && <h2 className="text-xl font-semibold">{title}</h2>}
-          {subtitle && <p className="text-sm text-gray-500">{subtitle}</p>}
+          {title && (
+            <h2 className="text-xl font-semibold text-foreground">{title}</h2>
+          )}
+          {subtitle && (
+            <p className="text-sm text-muted-foreground">{subtitle}</p>
+          )}
         </header>
       )}
 
@@ -68,72 +107,90 @@ export default function GoldenPath({ params, title, subtitle }: Props) {
 
 function MonthCard({ model }: { model: ReturnType<typeof toViewModel> }) {
   return (
-    <div className="rounded-2xl bg-[#f7f3ea] p-4 md:p-6 border border-amber-100 shadow-sm">
-      <div className="flex items-baseline justify-between gap-4 mb-4">
-        <div>
-          <h3 className="text-lg md:text-xl font-bold">{model.title}</h3>
-          <p className="text-xs md:text-sm text-gray-500">
-            {`가장 빈번한 고객 주문 경로 • 성공 세션 ${model.success.toLocaleString()} / 전체 ${model.total.toLocaleString()}`}
-          </p>
-        </div>
-        <div className="text-xs">
-          <span className="inline-flex items-center gap-1 rounded-md border px-2 py-1 bg-white">
-            판매 <ChevronRight className="size-3" />
-          </span>
-        </div>
-      </div>
+    <div
+      className="
+        rounded-2xl border border-border bg-card shadow-sm
+        [--ring:color-mix(in_oklab,var(--color-accent),transparent_75%)]
+      "
+    >
+      {/* 상단 골든 라인 */}
+      <div className="h-1 rounded-t-2xl bg-accent/50" />
 
-      {/* <SectionTitle>전체 골든패스</SectionTitle>
-      {model.rows.length === 0 ? (
-        <EmptyMsg />
-      ) : (
-        <div className="space-y-4">
-          {model.rows.map((row, idx) => (
-            <PathRow key={`g-${idx}`} row={row} />
-          ))}
-        </div>
-      )} */}
-
-      {/* Top3 상품별 골든패스 */}
-      {model.byItem && model.byItem.length > 0 && (
-        <div className="mt-8">
-          <SectionTitle>Top3 상품별 골든패스</SectionTitle>
-          <div className="space-y-6">
-            {model.byItem.map((bi, i) => (
-              <div
-                key={`${bi.item}-${i}`}
-                className="rounded-xl border bg-white/70 p-4"
-              >
-                <div className="flex items-center justify-between mb-3">
-                  <div className="text-sm font-semibold">
-                    {bi.item}
-                    <span className="ml-2 text-xs text-gray-500">
-                      (성공세션 {bi.totalSessions.toLocaleString()})
-                    </span>
-                  </div>
-                </div>
-
-                {bi.rows.length === 0 ? (
-                  <EmptyMsg small />
-                ) : (
-                  <div className="space-y-3">
-                    {bi.rows.map((row, j) => (
-                      <PathRow key={`bi-${i}-${j}`} row={row} />
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
+      <div className="p-4 md:p-6">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <div className="mb-1 inline-flex items-center gap-1 rounded-full border border-accent/30 bg-accent/10 px-2 py-0.5 text-[11px] font-medium text-accent">
+              <Crown className="size-[12px]" />
+              Golden Path
+            </div>
+            <h3 className="text-lg font-bold text-foreground md:text-xl">
+              {model.title}
+            </h3>
+            <p className="mt-1 text-xs text-muted-foreground md:text-sm">
+              가장 빈번한 고객 주문 경로 • 전체 성공 세션{" "}
+              <b className="tabular-nums text-foreground">
+                {model.success.toLocaleString()}
+              </b>
+            </p>
           </div>
         </div>
-      )}
+
+        {/* Top3 상품별 골든패스 */}
+        {model.byItem && model.byItem.length > 0 && (
+          <div className="mt-7">
+            <SectionTitle>Top3 상품별 골든패스</SectionTitle>
+            <div className="space-y-5">
+              {model.byItem.map((bi, i) => (
+                <div
+                  key={`${bi.item}-${i}`}
+                  className="
+                    rounded-xl border border-border bg-card p-4
+                    shadow-[0_0_0_1px_var(--color-border)]
+                    hover:shadow-[0_0_0_1px_var(--color-border),0_6px_18px_-6px_var(--ring)]
+                    transition-shadow
+                  "
+                >
+                  <div className="mb-3 flex items-center justify-between">
+                    <div className="text-sm font-semibold text-foreground">
+                      {bi.item}
+                      <span className="ml-2 text-xs font-normal text-muted-foreground">
+                        (성공세션 {bi.totalSessions.toLocaleString()})
+                      </span>
+                    </div>
+                  </div>
+
+                  {bi.rows.length === 0 ? (
+                    <EmptyMsg small />
+                  ) : (
+                    <div className="space-y-3">
+                      {bi.rows.map((row, j) => (
+                        <PathRow key={`bi-${i}-${j}`} row={row} />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* 설명 */}
+        <div className="mt-6 text-sm text-muted-foreground">
+          <div>*성공 세션 : 구매완료된 세션</div>
+          <div>*지원 세션 : 해당 경로가 사용된 세션 수</div>
+          <div>
+            *커버리지 : 전체 성공 세션 중, 이 경로를 포함한 성공 세션의 비율
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <h4 className="text-sm md:text-base font-semibold text-gray-800 mb-2">
+    <h4 className="mb-2 inline-flex items-center gap-2 text-sm font-semibold text-foreground md:text-base">
+      <span className="inline-block h-[10px] w-[10px] rounded-full bg-accent/60 shadow-[0_0_0_3px_color-mix(in_oklab,var(--color-accent),transparent_80%)]" />
       {children}
     </h4>
   );
@@ -141,12 +198,13 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 
 function EmptyMsg({ small = false }: { small?: boolean }) {
   return (
-    <div className={`${small ? "text-xs" : "text-sm"} text-gray-500`}>
+    <div className={`${small ? "text-xs" : "text-sm"} text-muted-foreground`}>
       충분한 데이터가 없어 대표 경로가 없어요.
     </div>
   );
 }
 
+/** 경로 한 줄 */
 function PathRow({
   row,
 }: {
@@ -158,25 +216,34 @@ function PathRow({
   };
 }) {
   return (
-    <div className="rounded-2xl bg-white border border-gray-100 p-4 md:p-5 shadow-sm">
+    <div
+      className="
+        rounded-2xl border border-border bg-card p-4 shadow-sm md:p-5
+        hover:shadow-[0_6px_18px_-6px_var(--ring)] transition-shadow
+      "
+    >
       <div className="flex flex-col gap-3 md:gap-4">
-        <div className="flex items-center justify-between text-xs md:text-sm text-gray-600">
-          <div className="flex items-center gap-3">
-            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 text-emerald-700 px-2 py-1">
-              커버리지 <b className="ml-1">{Math.round(row.coverage * 100)}%</b>
-            </span>
-            <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 text-blue-700 px-2 py-1">
-              지원(세션) <b className="ml-1">{row.support.toLocaleString()}</b>
-            </span>
-            <span className="inline-flex items-center gap-1 rounded-full bg-gray-50 text-gray-700 px-2 py-1">
-              성공률{" "}
-              <b className="ml-1">{Math.round(row.successRate * 100)}%</b>
-            </span>
+        {/* 메타 배지 */}
+        <div className="flex items-center justify-between text-xs md:text-sm">
+          <div className="flex flex-wrap items-center gap-2 md:gap-3">
+            <Chip>
+              커버리지{" "}
+              <b className="ml-1 tabular-nums text-foreground">
+                {Math.round(row.coverage * 100)}%
+              </b>
+            </Chip>
+            <Chip>
+              지원 세션{" "}
+              <b className="ml-1 tabular-nums text-foreground">
+                {row.support.toLocaleString()}
+              </b>
+            </Chip>
           </div>
         </div>
 
+        {/* 경로 */}
         <div className="overflow-x-auto">
-          <div className="flex items-center gap-2 md:gap-3 min-w-max">
+          <div className="min-w-max flex items-center gap-2 md:gap-3">
             {row.steps
               .map((s, i) => (
                 <Step key={`${s.raw}-${i}`} label={s.label} sub={s.sub}>
@@ -189,7 +256,7 @@ function PathRow({
                       el,
                       <ChevronRight
                         key={`arrow-${i}`}
-                        className="size-5 shrink-0 text-gray-400"
+                        className="size-5 shrink-0 text-accent/70"
                       />,
                     ]
                   : [el]
@@ -201,27 +268,68 @@ function PathRow({
   );
 }
 
+/** 스텝 칩 */
 function Step({
   children,
   label,
   sub,
+  highlight = false,
 }: {
   children: React.ReactNode;
   label: string;
   sub?: string;
+  highlight?: boolean;
 }) {
   return (
-    <div className="flex flex-col items-center justify-center px-3 py-2 rounded-xl border bg-white shadow-sm">
-      <div className="p-2 rounded-lg bg-slate-50 border mb-1">{children}</div>
-      <div className="text-[11px] md:text-xs font-medium leading-tight">
+    <div
+      className={[
+        "flex flex-col items-center justify-center rounded-xl border px-3 py-2 shadow-sm",
+        "border-border bg-card",
+        "transition-transform",
+        highlight
+          ? "ring-2 ring-accent/40 ring-offset-0 shadow-[0_4px_14px_-6px_var(--ring)]"
+          : "",
+      ].join(" ")}
+      title={sub ? `${label} • ${safeDecode(sub)}` : label}
+    >
+      <div
+        className={[
+          "mb-1 rounded-lg border p-2",
+          "border-border",
+          highlight ? "bg-accent/15 text-accent" : "bg-muted text-foreground",
+        ].join(" ")}
+      >
+        {children}
+      </div>
+      <div className="text-[11px] font-medium leading-tight text-foreground md:text-xs">
         {label}
       </div>
       {sub && (
-        <div className="text-[10px] md:text-[11px] text-gray-500 truncate max-w-[140px]">
+        <div className="max-w-[160px] truncate text-[10px] text-muted-foreground md:text-[11px]">
           {safeDecode(sub)}
         </div>
       )}
     </div>
+  );
+}
+
+/** 메타 칩 */
+function Chip({
+  children,
+  subtle = false,
+}: {
+  children: React.ReactNode;
+  subtle?: boolean;
+}) {
+  return (
+    <span
+      className={[
+        "inline-flex items-center gap-1 rounded-full px-2 py-1",
+        subtle ? "bg-accent/10 text-accent/90" : "bg-accent/15 text-accent",
+      ].join(" ")}
+    >
+      {children}
+    </span>
   );
 }
 

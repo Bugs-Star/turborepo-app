@@ -21,6 +21,27 @@ type PeriodParams = {
   week?: number;
 };
 
+/** 에러 메시지 파서: 404는 고정 문구, 그 외는 서버/클라 메시지 노출 */
+function parseErrorMessage(error: unknown): string {
+  if (isAxiosError<{ message?: string }>(error)) {
+    const status = error.response?.status;
+    if (status === 404) return "기간별 분석 데이터가 없습니다.";
+    return (
+      error.response?.data?.message ||
+      error.message ||
+      "요청 중 오류가 발생했습니다."
+    );
+  }
+  if (error instanceof Error)
+    return error.message || "알 수 없는 오류가 발생했습니다.";
+  if (typeof error === "string") return error;
+  try {
+    return JSON.stringify(error);
+  } catch {
+    return "알 수 없는 오류가 발생했습니다.";
+  }
+}
+
 export default function PeriodicalAnalysis({
   params,
 }: {
@@ -35,11 +56,7 @@ export default function PeriodicalAnalysis({
 
   const sum = useMemo(() => summarize(data ?? []), [data]);
 
-  const errorMsg = isAxiosError<{ message?: string }>(error)
-    ? (error.response?.data?.message ?? "데이터를 불러오지 못했습니다.")
-    : isError
-      ? "데이터를 불러오지 못했습니다."
-      : "";
+  const errorMsg = isError ? parseErrorMessage(error) : "";
 
   const titlePrefix =
     params.periodType === "yearly"
@@ -55,27 +72,36 @@ export default function PeriodicalAnalysis({
       {isLoading && (
         <div className="text-sm text-muted-foreground">불러오는 중...</div>
       )}
+
       {isError && <div className="text-sm text-danger">{errorMsg}</div>}
 
       {!isLoading && !isError && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatCard
-            label={`${titlePrefix} 총 판매액`}
-            value={KRW.format(sum.total_sales)}
-          />
-          <StatCard
-            label={`${titlePrefix} 총 주문 수`}
-            value={NUM.format(sum.total_orders)}
-          />
-          <StatCard
-            label={`${titlePrefix} 평균 주문액`}
-            value={KRW.format(sum.avg_order_value)}
-          />
-          <StatCard
-            label={`${titlePrefix} 방문자 수`}
-            value={NUM.format(sum.unique_visitors)}
-          />
-        </div>
+        <>
+          {!data || data.length === 0 ? (
+            <div className="text-sm text-muted-foreground">
+              표시할 기간별 분석 데이터가 없습니다.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <StatCard
+                label={`${titlePrefix} 총 판매액`}
+                value={KRW.format(sum.total_sales)}
+              />
+              <StatCard
+                label={`${titlePrefix} 총 주문 수`}
+                value={NUM.format(sum.total_orders)}
+              />
+              <StatCard
+                label={`${titlePrefix} 평균 주문액`}
+                value={KRW.format(sum.avg_order_value)}
+              />
+              <StatCard
+                label={`${titlePrefix} 방문자 수`}
+                value={NUM.format(sum.unique_visitors)}
+              />
+            </div>
+          )}
+        </>
       )}
     </div>
   );

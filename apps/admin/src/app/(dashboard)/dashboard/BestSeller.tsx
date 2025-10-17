@@ -54,6 +54,27 @@ function RankBadge({ rank }: { rank: number }) {
   );
 }
 
+/** 에러 메시지 파서: 404는 고정 문구, 그 외는 서버/클라이언트 메시지 그대로 */
+function parseErrorMessage(error: unknown): string {
+  if (isAxiosError<{ message?: string }>(error)) {
+    const status = error.response?.status;
+    if (status === 404) return "베스트셀러 데이터가 없습니다.";
+    return (
+      error.response?.data?.message ||
+      error.message ||
+      "요청 중 오류가 발생했습니다."
+    );
+  }
+  if (error instanceof Error)
+    return error.message || "알 수 없는 오류가 발생했습니다.";
+  if (typeof error === "string") return error;
+  try {
+    return JSON.stringify(error);
+  } catch {
+    return "알 수 없는 오류가 발생했습니다.";
+  }
+}
+
 export default function BestSeller({
   params,
   limit = 5,
@@ -63,14 +84,20 @@ export default function BestSeller({
   limit?: number;
   className?: string;
 }) {
-  const { data, isLoading, isFetching, isError, error } = useGetBestSeller({
+  const {
+    data,
+    isLoading,
+    isFetching: _isFetching,
+    isError,
+    error,
+  } = useGetBestSeller({
     periodType: params.periodType,
     year: params.year,
     month: params.periodType !== "yearly" ? params.month : undefined,
     week: params.periodType === "weekly" ? params.week : undefined,
   });
 
-  // rank 기준으로 정렬 후 상위 N개만 추출
+  // rank 기준 정렬 후 상위 N개
   const rows = useMemo(() => {
     const arr = [...(data ?? [])];
     arr.sort((a, b) => a.rank - b.rank || b.order_count - a.order_count);
@@ -86,11 +113,7 @@ export default function BestSeller({
           ? `${params.month}월 ${params.week}주`
           : "";
 
-  const errorMsg = isAxiosError<{ message?: string }>(error)
-    ? (error.response?.data?.message ?? "데이터를 불러오지 못했습니다.")
-    : isError
-      ? "데이터를 불러오지 못했습니다."
-      : "";
+  const errorMsg = isError ? parseErrorMessage(error) : "";
 
   return (
     <div
@@ -114,6 +137,7 @@ export default function BestSeller({
           ))}
         </div>
       )}
+
       {isError && <div className="text-sm text-danger">{errorMsg}</div>}
 
       {/* 표 */}

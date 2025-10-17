@@ -13,7 +13,7 @@ export type StepKind =
   | "cart"
   | "payment"
   | "login"
-  | "landing"
+  | "promotion"
   | "profile"
   | "other";
 
@@ -73,7 +73,7 @@ function parseStep(raw: string): ViewStep {
   }
   if (r.startsWith("/promotion/")) {
     const slug = decodeURIComponent(r.split("/").pop() || "");
-    return { raw: r, kind: "landing", label: "프로모션", sub: slug };
+    return { raw: r, kind: "promotion", label: "프로모션", sub: slug };
   }
 
   // 랜딩 기타
@@ -90,7 +90,6 @@ function toViewRow(i: GoldenPathApiItem): ViewRow {
 }
 
 function formatTitle(period_type: string, period_start: string) {
-  // 예: monthly + 2025-10-01 → "2025년 10월"
   try {
     const d = new Date(period_start);
     const y = d.getFullYear();
