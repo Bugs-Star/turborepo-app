@@ -10,12 +10,34 @@ import {
   useGetGoldenPath,
   type GoldenPathApiParams,
 } from "@/hooks/dashboard/useGetGoldenPath";
+import { isAxiosError } from "axios";
 
 type Props = {
   params: PeriodParams;
   title?: string;
   subtitle?: string;
 };
+
+/** 에러 메시지 파서: 404는 고정 문구, 그 외는 서버/클라 메시지 노출 */
+function parseErrorMessage(error: unknown): string {
+  if (isAxiosError<{ message?: string }>(error)) {
+    const status = error.response?.status;
+    if (status === 404) return "골든 패스 데이터가 없습니다.";
+    return (
+      error.response?.data?.message ||
+      error.message ||
+      "요청 중 오류가 발생했습니다."
+    );
+  }
+  if (error instanceof Error)
+    return error.message || "알 수 없는 오류가 발생했습니다.";
+  if (typeof error === "string") return error;
+  try {
+    return JSON.stringify(error);
+  } catch {
+    return "알 수 없는 오류가 발생했습니다.";
+  }
+}
 
 export default function GoldenPath({ params, title, subtitle }: Props) {
   const range = periodToRange(params);
@@ -40,11 +62,23 @@ export default function GoldenPath({ params, title, subtitle }: Props) {
       </div>
     );
   }
-  if (isError || !data) {
+
+  // ⚠️ 에러 처리 (404 별도 문구)
+  if (isError) {
+    const message = parseErrorMessage(error);
     return (
-      <div className="mt-10 rounded-lg border border-border bg-card p-3 text-sm text-danger">
-        골든 패스를 불러오지 못했어요.{" "}
-        {error instanceof Error ? error.message : ""}
+      <div className="mt-10 rounded-xl border border-border bg-card p-3 text-sm text-danger">
+        골든 패스를 불러오지 못했어요. <br />
+        <span className="text-muted-foreground">{message}</span>
+      </div>
+    );
+  }
+
+  // 📭 빈 데이터
+  if (!data || !data.buckets?.length) {
+    return (
+      <div className="mt-10 rounded-xl border border-border bg-card p-3 text-sm text-danger">
+        표시할 골든 패스 데이터가 없습니다.
       </div>
     );
   }
@@ -76,7 +110,7 @@ function MonthCard({ model }: { model: ReturnType<typeof toViewModel> }) {
     <div
       className="
         rounded-2xl border border-border bg-card shadow-sm
-        [--ring:color-mix(in_oklab,var(--color-accent),transparent 75%)]
+        [--ring:color-mix(in_oklab,var(--color-accent),transparent_75%)]
       "
     >
       {/* 상단 골든 라인 */}
@@ -143,7 +177,7 @@ function MonthCard({ model }: { model: ReturnType<typeof toViewModel> }) {
         {/* 설명 */}
         <div className="mt-6 text-sm text-muted-foreground">
           <div>*성공 세션 : 구매완료된 세션</div>
-          <div>*지원 세션 : 해당 경로가 등장한 세션 수</div>
+          <div>*지원 세션 : 해당 경로가 사용된 세션 수</div>
           <div>
             *커버리지 : 전체 성공 세션 중, 이 경로를 포함한 성공 세션의 비율
           </div>
@@ -253,8 +287,7 @@ function Step({
         "border-border bg-card",
         "transition-transform",
         highlight
-          ? // 골든 하이라이트(결제)
-            "ring-2 ring-accent/40 ring-offset-0 shadow-[0_4px_14px_-6px_var(--ring)]"
+          ? "ring-2 ring-accent/40 ring-offset-0 shadow-[0_4px_14px_-6px_var(--ring)]"
           : "",
       ].join(" ")}
       title={sub ? `${label} • ${safeDecode(sub)}` : label}
