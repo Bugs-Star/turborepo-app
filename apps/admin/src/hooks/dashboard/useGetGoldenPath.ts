@@ -120,10 +120,5 @@ export function useGetGoldenPath(
     queryKey: ["goldenPath", params],
     queryFn: () => fetchGoldenPath(params),
     staleTime: 60_000,
-    // 404 같은 경우 재시도 의미 없으면 아래처럼 끌 수 있음
-    retry: (failureCount, error) => {
-      if ((error as any)?.status === 404) return false;
-      return failureCount < 2;
-    },
   });
 }
