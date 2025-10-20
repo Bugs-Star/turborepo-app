@@ -8,6 +8,7 @@ import PurchaseHistoryModal from "./PurchaseHistoryModal";
 type Row = {
   name: string;
   email: string;
+  userId: string;
   joined: string;
   purchase_history: React.ReactNode;
 };
@@ -24,12 +25,16 @@ export default function CustomerList() {
   const [selectedUser, setSelectedUser] = useState<{
     name: string;
     email: string;
+    userId: string;
   } | null>(null);
 
-  const onOpenModal = useCallback((name: string, email: string) => {
-    setSelectedUser({ name, email });
-    setOpen(true);
-  }, []);
+  const onOpenModal = useCallback(
+    (name: string, email: string, userId: string) => {
+      setSelectedUser({ name, email, userId });
+      setOpen(true);
+    },
+    []
+  );
   const onCloseModal = useCallback(() => setOpen(false), []);
 
   // API
@@ -52,10 +57,11 @@ export default function CustomerList() {
     return users.map((u) => ({
       name: u.name,
       email: u.email,
+      userId: u.userId,
       joined: fmtDate(u.createdAt),
       purchase_history: (
         <button
-          onClick={() => onOpenModal(u.name, u.email)}
+          onClick={() => onOpenModal(u.name, u.email, u.userId)}
           className="px-2 py-1 rounded border border-border bg-card hover:opacity-90 text-xs cursor-pointer"
         >
           구매내역 보기
@@ -112,6 +118,7 @@ export default function CustomerList() {
           onClose={onCloseModal}
           userName={selectedUser.name}
           userEmail={selectedUser.email}
+          userId={selectedUser.userId}
         />
       )}
     </div>

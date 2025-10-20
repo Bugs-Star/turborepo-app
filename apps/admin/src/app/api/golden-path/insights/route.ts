@@ -1,6 +1,10 @@
 import { NextRequest } from "next/server";
-import { getRawPathsFromClickHouse } from "@/lib/api/goldenPath";
-import { computeGoldenPaths } from "@/lib/analytics/goldenPath";
+import { getRawPathsFromClickHouse } from "@/lib/api/getRawPaths";
+import {
+  computeGoldenPaths,
+  deriveMenuLookupFromRows,
+  type RawPathRow,
+} from "@/lib/analytics/goldenPath";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -15,7 +19,7 @@ export async function GET(req: NextRequest) {
       | "monthly"
       | "yearly"
       | null;
-    const storeId = searchParams.get("storeId"); // 'all'이면 전체
+    const storeId = searchParams.get("storeId");
     const from = searchParams.get("from");
     const to = searchParams.get("to");
     const limit = Number(searchParams.get("limit") ?? 5000);
@@ -25,12 +29,16 @@ export async function GET(req: NextRequest) {
     const minSupport = Number(searchParams.get("minSupport") ?? 3);
     const topK = Number(searchParams.get("topK") ?? 10);
     const successRateAlwaysOne =
-      searchParams.get("successRateAlwaysOne") === "true";
+      (searchParams.get("successRateAlwaysOne") ?? "true") === "true";
 
-    // ✅ 가상 성공 토큰(sentinel)
+    const byPurchasedTop = Number(searchParams.get("byPurchasedTop") ?? 3);
+    const onePathPerItem =
+      (searchParams.get("onePerItem") ?? "true") === "true";
+    const requireMenuDetailInItemPath =
+      (searchParams.get("requireMenuDetail") ?? "true") === "true";
+
+    // 성공 엔드포인트 (기본값)
     const VIRTUAL_SUCCESS = "__SUCCESS__";
-
-    // 성공 엔드포인트 (요청이 없더라도 기본값 + 가상 토큰 포함)
     const successParams = searchParams.getAll("success");
     const successEndpointsBase = successParams.length
       ? successParams
@@ -46,22 +54,26 @@ export async function GET(req: NextRequest) {
       limit,
     });
 
-    // ✅ 모든 세션 path의 끝에 가상 성공 토큰 주입
-    const rawWithVirtualSuccess = raw.map((r) => ({
+    // 모든 세션 path의 끝에 가상 성공 토큰 주입
+    const rawWithVirtualSuccess: RawPathRow[] = raw.map((r) => ({
       ...r,
       path: r.path?.length ? [...r.path, VIRTUAL_SUCCESS] : [VIRTUAL_SUCCESS],
     }));
 
-    // ✅ 기존 알고리즘 그대로 사용하되 성공 세션 전제 + 가상 토큰 포함
+    const menuIdByItem = deriveMenuLookupFromRows(rawWithVirtualSuccess);
+
     const buckets = computeGoldenPaths(rawWithVirtualSuccess, {
-      successEndpoints, // 가상 토큰 포함된 성공 집합
+      successEndpoints,
       ngramMax,
       minSupport,
       topK,
       dedupeConsecutive: true,
-      assumeAllSuccessful: true, // 성공 세션만 가져온 전제
-      successRateAlwaysOne, // 필요 시 true
-      // normalize: defaultNormalize (기본값)
+      assumeAllSuccessful: true,
+      successRateAlwaysOne,
+      byPurchasedTop,
+      onePathPerItem,
+      requireMenuDetailInItemPath,
+      menuIdByItem, // <- 주입
     });
 
     return Response.json(
@@ -75,10 +87,11 @@ export async function GET(req: NextRequest) {
           ngramMax,
           minSupport,
           topK,
-          // 에코백은 실제로 사용된 성공 엔드포인트(가상 토큰 포함)를 보여주자
+          byPurchasedTop,
+          onePathPerItem,
+          requireMenuDetailInItemPath,
           successEndpoints,
           successRateAlwaysOne,
-          // 참고: 이 API는 가상 성공 토큰 주입을 사용 중
           mode: "virtual-success-sentinel",
           virtualSuccessToken: VIRTUAL_SUCCESS,
         },
@@ -87,12 +100,14 @@ export async function GET(req: NextRequest) {
       },
       { status: 200, headers: { "Cache-Control": "no-store" } }
     );
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : JSON.stringify(err);
     console.error("[GET /api/golden-path/insights] error:", err);
+
     return Response.json(
       {
         error: "Failed to compute golden path",
-        detail: String(err?.message ?? err),
+        detail: message,
       },
       { status: 500 }
     );

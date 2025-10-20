@@ -1,11 +1,14 @@
 import "server-only";
 import { ch } from "@/lib/clickhouse";
 
-const VIEW = process.env.CLICKHOUSE_GOLDEN_PATH_VIEW!;
-if (!VIEW) {
-  throw new Error(
-    "Set CLICKHOUSE_GOLDEN_PATH_VIEW (e.g. analytics.golden_paths)"
-  );
+function requireView(): string {
+  const v = process.env.CLICKHOUSE_GOLDEN_PATH_VIEW;
+  if (!v) {
+    throw new Error(
+      "Set CLICKHOUSE_GOLDEN_PATH_VIEW (e.g. analytics.golden_paths)"
+    );
+  }
+  return v;
 }
 
 type Period = "weekly" | "monthly" | "yearly";
@@ -42,6 +45,7 @@ export async function getRawPathsFromClickHouse(params?: {
       toString(s.ps) AS period_start,
       s.store_id,
       s.path,
+      s.purchased_items,
       s.user_count,
       s.total_sessions
     FROM (
@@ -49,6 +53,7 @@ export async function getRawPathsFromClickHouse(params?: {
         period_type,
         store_id,
         path,
+        purchased_items,
         user_count,
         total_sessions,
         /* period_start를 Date로 표준화 */
@@ -65,7 +70,11 @@ export async function getRawPathsFromClickHouse(params?: {
   `;
 
   // ── 파라미터 바인딩 ─────────────────────────────────────
-  const query_params: Record<string, any> = { view: VIEW, limit };
+  type QueryParamValue = string | number | boolean | null | undefined;
+  const query_params: Record<string, QueryParamValue> = {
+    view: requireView(),
+    limit,
+  };
   if (period) query_params.period = period;
   if (storeId && storeId !== "all") query_params.storeId = storeId;
   if (from) query_params.from = from;
@@ -82,6 +91,7 @@ export async function getRawPathsFromClickHouse(params?: {
     period_start: string; // toString(ps)
     store_id: string | null;
     path: string[];
+    purchased_items: string[];
     user_count: number;
     total_sessions: number;
   }>;

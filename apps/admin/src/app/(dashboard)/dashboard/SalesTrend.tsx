@@ -12,6 +12,7 @@ import {
   Tooltip,
   CartesianGrid,
 } from "recharts";
+import { isAxiosError } from "axios";
 
 const KRW = new Intl.NumberFormat("ko-KR", {
   style: "currency",
@@ -33,12 +34,39 @@ type Props = {
   height?: number; // 차트 영역 높이
 };
 
+/** 에러 메시지 파서: 404는 고정 문구, 그 외는 서버/클라 메시지 노출 */
+function parseErrorMessage(error: unknown): string {
+  if (isAxiosError<{ message?: string }>(error)) {
+    const status = error.response?.status;
+    if (status === 404) return "매출 트렌드 데이터가 없습니다.";
+    return (
+      error.response?.data?.message ||
+      error.message ||
+      "요청 중 오류가 발생했습니다."
+    );
+  }
+  if (error instanceof Error)
+    return error.message || "알 수 없는 오류가 발생했습니다.";
+  if (typeof error === "string") return error;
+  try {
+    return JSON.stringify(error);
+  } catch {
+    return "알 수 없는 오류가 발생했습니다.";
+  }
+}
+
 export default function SalesTrend({
   params,
   className = "",
   height = 220,
 }: Props) {
-  const { data, isLoading, isFetching, isError } = useGetSalesTrend({
+  const {
+    data,
+    isLoading,
+    isFetching: _isFetching,
+    isError,
+    error,
+  } = useGetSalesTrend({
     periodType: params.periodType,
     year: params.year,
     month: params.periodType !== "yearly" ? params.month : undefined,
@@ -51,7 +79,7 @@ export default function SalesTrend({
       name: d.name,
       sales: d.sales ?? 0,
     }));
-    // 주차/일자 label 이 정렬되지 않았을 수 있으니 name 기준 정렬 시도 (숫자 우선)
+    // 주차/일자 label 정렬 보정 (숫자 우선)
     const num = (s: string) => Number(String(s).replace(/\D+/g, "")) || 0;
     return arr.sort((a, b) => num(a.name) - num(b.name));
   }, [data]);
@@ -74,6 +102,8 @@ export default function SalesTrend({
         : params.periodType === "weekly" && params.month && params.week
           ? `${params.month}월 ${params.week}주`
           : "";
+
+  const errorMsg = isError ? parseErrorMessage(error) : "";
 
   return (
     <div
@@ -99,16 +129,11 @@ export default function SalesTrend({
         </div>
       )}
 
-      {isError && (
-        <div className="text-sm text-danger">
-          트렌드 데이터를 불러오지 못했습니다.
-        </div>
-      )}
+      {isError && <div className="text-sm text-danger">{errorMsg}</div>}
 
-      {/* 본문 (차트 + 테이블) */}
+      {/* 본문 (차트) */}
       {!isLoading && !isError && (
         <>
-          {/* 차트 */}
           {chartData.length ? (
             <div style={{ width: "100%", height }} className="mb-4">
               <ResponsiveContainer>
@@ -154,7 +179,11 @@ export default function SalesTrend({
                 </AreaChart>
               </ResponsiveContainer>
             </div>
-          ) : null}
+          ) : (
+            <div className="text-sm text-muted-foreground">
+              표시할 매출 데이터가 없습니다.
+            </div>
+          )}
         </>
       )}
     </div>

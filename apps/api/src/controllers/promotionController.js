@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import Promotion from '../models/Promotion.js';
 import { compressMulterFile } from '../utils/imageUtils.js';
-import { fetchPromotionTrendsData } from '../services/promotionTrendDataService.js';
+import { fetchPromotionTrendsDataByPromotion } from '../services/promotionTrendDataService.js';
 
 // 프로모션 등록
 export const createPromotion = async (req, res) => {
@@ -355,15 +355,18 @@ export const deletePromotion = async (req, res) => {
 };
 
 // 관리자용 프로모션 통합 데이터 조회 (프로모션 목록 + 추세 데이터)
-export const getPromotionsWithTrends = async (req, res) => {
+// getPromotionsWithTrends: 월간 통합 엔드포인트는 요구사항 변경으로 제거되었습니다.
+
+// 특정 프로모션의 주차별(weekly) 추세 + 전체 프로모션 목록 반환
+export const getPromotionWeeklyTrends = async (req, res) => {
   try {
+    const { id } = req.params;
     const { year, month } = req.query;
 
-    // 파라미터 검증
     if (!year || !month) {
       return res.status(400).json({ 
         message: 'year와 month 파라미터가 필요합니다.',
-        example: '/admin/promotions/monthly?year=2025&month=9'
+        example: '/admin/promotions/:id/weekly?year=2025&month=9'
       });
     }
 
@@ -377,39 +380,29 @@ export const getPromotionsWithTrends = async (req, res) => {
       });
     }
 
-    console.log('프로모션 통합 데이터 조회 요청:', { year: yearNum, month: monthNum });
+    // 프로모션 존재 여부 확인 (id, title만 사용)
+    const promotion = await Promotion.findById(id).select('_id title');
+    if (!promotion) {
+      return res.status(404).json({ message: '프로모션을 찾을 수 없습니다.' });
+    }
 
-    // 1. MongoDB에서 프로모션 목록 조회 (기존 getPromotions와 동일)
-    await Promotion.deactivateExpiredPromotions();
-    
-    const promotions = await Promotion.find()
-      .select('-adminId') // 관리자 정보 제외
-      .sort({ promotionOrder: 1, createdAt: -1 });
+    // 특정 프로모션의 주차별 추세 데이터 조회
+    const trendsData = await fetchPromotionTrendsDataByPromotion(yearNum, monthNum, String(id));
 
-    // 2. ClickHouse에서 추세 데이터 조회
-    const trendsData = await fetchPromotionTrendsData(yearNum, monthNum);
-
-    // 3. 통합 응답 데이터 구성
     const responseData = {
-      promotions: promotions,
+      promotion: { _id: promotion._id, title: promotion.title },
       viewTrendData: trendsData.viewTrendData,
       clickTrendData: trendsData.clickTrendData,
       meta: {
         year: yearNum,
         month: monthNum,
-        generatedAt: new Date().toISOString(),
+        generatedAt: new Date().toISOString()
       }
     };
 
-    console.log('프로모션 통합 데이터 조회 완료:', {
-      promotionsCount: promotions.length,
-      viewTrendDataCount: trendsData.viewTrendData.length,
-      clickTrendDataCount: trendsData.clickTrendData.length,
-    });
-
     res.status(200).json(responseData);
   } catch (error) {
-    console.error('프로모션 통합 데이터 조회 오류:', error);
+    console.error('프로모션 주차별 추세 조회 오류:', error);
     res.status(500).json({ 
       message: '서버 오류가 발생했습니다.',
       error: error.message

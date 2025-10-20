@@ -3,13 +3,13 @@
  * Brief     : 주문 관련 컨트롤러
  * Author    : 송용훈
  * Date      : 2025-08-15
- * Version   : 
+ * Version   :
  * History
  * ------------------------------------------------------------*/
 
-import Order from '../models/Order.js';
-import User from '../models/User.js';
-import mongoose from 'mongoose';
+import Order from "../models/Order.js";
+import User from "../models/User.js";
+import mongoose from "mongoose";
 
 // 일반 유저 목록 조회
 export const getUsers = async (req, res) => {
@@ -21,34 +21,50 @@ export const getUsers = async (req, res) => {
     // 현재 날짜 기준으로 이번 달의 시작과 끝 계산
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+    const endOfMonth = new Date(
+      now.getFullYear(),
+      now.getMonth() + 1,
+      0,
+      23,
+      59,
+      59,
+      999
+    );
 
     // 전달 기준 날짜 계산
     const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-    const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999);
+    const endOfLastMonth = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      0,
+      23,
+      59,
+      59,
+      999
+    );
 
     // 총 일반 유저 수 (현재)
     const totalUsers = await User.countDocuments();
 
     // 전달 말 기준 총 유저 수
     const totalUsersLastMonth = await User.countDocuments({
-      createdAt: { $lte: endOfLastMonth }
+      createdAt: { $lte: endOfLastMonth },
     });
 
     // 이번 달 가입한 유저 수
     const newUsersThisMonth = await User.countDocuments({
       createdAt: {
         $gte: startOfMonth,
-        $lte: endOfMonth
-      }
+        $lte: endOfMonth,
+      },
     });
 
     // 전달 가입한 유저 수
     const newUsersLastMonth = await User.countDocuments({
       createdAt: {
         $gte: startOfLastMonth,
-        $lte: endOfLastMonth
-      }
+        $lte: endOfLastMonth,
+      },
     });
 
     // 증감률 계산 함수
@@ -58,14 +74,20 @@ export const getUsers = async (req, res) => {
     };
 
     // 총 회원수 증감률 (전달 대비)
-    const totalUsersGrowthRate = calculateGrowthRate(totalUsers, totalUsersLastMonth);
+    const totalUsersGrowthRate = calculateGrowthRate(
+      totalUsers,
+      totalUsersLastMonth
+    );
 
     // 신규 회원 증감률 (전달 대비)
-    const newUsersGrowthRate = calculateGrowthRate(newUsersThisMonth, newUsersLastMonth);
+    const newUsersGrowthRate = calculateGrowthRate(
+      newUsersThisMonth,
+      newUsersLastMonth
+    );
 
     // 유저 리스트 (이름, 이메일, 가입일)
     const users = await User.find()
-      .select('_id name email createdAt')
+      .select("_id name email createdAt")
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
@@ -76,27 +98,28 @@ export const getUsers = async (req, res) => {
         totalUsers,
         totalUsersGrowthRate,
         newUsersThisMonth,
-        newUsersGrowthRate
+        newUsersGrowthRate,
       },
-      users: users.map(user => ({
+      users: users.map((user) => ({
+        userId: u._id,
         name: user.name,
         userId: user._id,
         email: user.email,
-        createdAt: user.createdAt
+        createdAt: user.createdAt,
       })),
       pagination: {
         currentPage: page,
         totalPages: Math.ceil(totalUsers / limit),
         totalUsers,
         hasNextPage: page < Math.ceil(totalUsers / limit),
-        hasPrevPage: page > 1
-      }
+        hasPrevPage: page > 1,
+      },
     };
 
     res.json(response);
   } catch (error) {
-    console.error('유저 목록 조회 오류:', error);
-    res.status(500).json({ message: '서버 오류가 발생했습니다.' });
+    console.error("유저 목록 조회 오류:", error);
+    res.status(500).json({ message: "서버 오류가 발생했습니다." });
   }
 };
 
@@ -107,20 +130,22 @@ export const getUserOrders = async (req, res) => {
     const { page = 1, limit = 10 } = req.query;
 
     if (!mongoose.Types.ObjectId.isValid(userId)) {
-      return res.status(400).json({ message: '유효하지 않은 사용자 ID입니다.' });
+      return res
+        .status(400)
+        .json({ message: "유효하지 않은 사용자 ID입니다." });
     }
 
     // 사용자 정보 먼저 조회
-    const user = await User.findById(userId).select('name email');
+    const user = await User.findById(userId).select("name email");
     if (!user) {
-      return res.status(404).json({ message: '사용자를 찾을 수 없습니다.' });
+      return res.status(404).json({ message: "사용자를 찾을 수 없습니다." });
     }
 
     const orders = await Order.find({ userId })
       .sort({ createdAt: -1 })
       .limit(limit * 1)
       .skip((page - 1) * limit)
-      .populate('items.productId', 'productName productImg price');
+      .populate("items.productId", "productName productImg price");
 
     const total = await Order.countDocuments({ userId });
 
@@ -128,25 +153,24 @@ export const getUserOrders = async (req, res) => {
       userId: {
         _id: user._id,
         name: user.name,
-        email: user.email
+        email: user.email,
       },
-      orders: orders.map(order => ({
+      orders: orders.map((order) => ({
         _id: order._id,
         orderNumber: order.orderNumber,
         items: order.items,
         totalPrice: order.totalPrice,
         paymentMethod: order.paymentMethod,
-        createdAt: order.createdAt
+        createdAt: order.createdAt,
       })),
       pagination: {
         currentPage: parseInt(page),
         totalPages: Math.ceil(total / limit),
-        totalOrders: total
-      }
+        totalOrders: total,
+      },
     });
-
   } catch (error) {
-    console.error('사용자 주문 목록 조회 오류:', error);
-    res.status(500).json({ message: '서버 오류가 발생했습니다.' });
+    console.error("사용자 주문 목록 조회 오류:", error);
+    res.status(500).json({ message: "서버 오류가 발생했습니다." });
   }
 };
