@@ -41,30 +41,32 @@ export interface ReorderPromosResponse {
   newOrder: string[];
 }
 
+/** 서버 주간 포맷 */
 export interface ViewTrendPoint {
   name: string; // "1주" ~ "5주"
-  viewDuration: number; // 서버 기준 단위
+  viewDuration: number; // 보통 초(예시 기준). 이미 분이면 훅에서 나누기 제거.
 }
-
 export interface ClickTrendPoint {
   name: string; // "1주" ~ "5주"
   clicks: number;
 }
 
-export interface MonthlyPromosMeta {
+export interface WeeklyMeta {
   year: number;
   month: number;
   generatedAt: string; // ISO
 }
 
-export interface MonthlyPromosResponse {
-  promotions: PromoResponse[];
+export interface WeeklyPromoResponse {
+  promotion: { _id: string; title: string };
   viewTrendData: ViewTrendPoint[];
   clickTrendData: ClickTrendPoint[];
-  meta: MonthlyPromosMeta;
+  meta: WeeklyMeta;
 }
 
-export interface MonthlyPromosParams {
+export interface WeeklyPromoParams {
+  promotionId: string;
+  periodType?: "weekly"; // 고정 weekly (기본값)
   year: number; // 예: 2025
   month: number; // 예: 9
 }
@@ -133,20 +135,15 @@ export const PromoService = {
     return data;
   },
 
-  /** 월간 프로모션 + 트렌드 */
-  async getMonthlyPromos(
-    params: MonthlyPromosParams
-  ): Promise<MonthlyPromosResponse> {
-    const { data } = await axiosInstance.get<MonthlyPromosResponse>(
-      "/admin/promotions/monthly",
-      { params } // ?year=YYYY&month=M
+  async getPromoWeekly(
+    params: WeeklyPromoParams
+  ): Promise<WeeklyPromoResponse> {
+    const { promotionId, year, month, periodType = "weekly" } = params;
+
+    const { data } = await axiosInstance.get<WeeklyPromoResponse>(
+      `/admin/promotions/${promotionId}/${periodType}`,
+      { params: { year, month } }
     );
     return data;
   },
 };
-
-export async function getMonthlyPromos(
-  params: MonthlyPromosParams
-): Promise<MonthlyPromosResponse> {
-  return PromoService.getMonthlyPromos(params);
-}

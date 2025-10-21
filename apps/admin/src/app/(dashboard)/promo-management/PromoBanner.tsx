@@ -18,6 +18,8 @@ const PromoBanner = () => {
   const { data, isLoading, isError, refetch } = useGetAllPromo({
     isActive: true,
   });
+
+  console.log("프로모", data);
   const { mutate: deletePromo } = useDeletePromo();
 
   const { mutate: commitOrder, isPending } = useReorderPromos();

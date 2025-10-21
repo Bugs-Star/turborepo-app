@@ -105,6 +105,8 @@ export default function SalesTrend({
 
   const errorMsg = isError ? parseErrorMessage(error) : "";
 
+  const compact = new Intl.NumberFormat("en-US", { notation: "compact" });
+
   return (
     <div
       className={`rounded-2xl border border-border bg-card text-foreground p-5 shadow-sm mt-10 ${className}`}
@@ -158,7 +160,7 @@ export default function SalesTrend({
                   <CartesianGrid strokeDasharray="3 3" opacity={0.4} />
                   <XAxis dataKey="name" tickLine={false} axisLine={false} />
                   <YAxis
-                    tickFormatter={(v) => NUM.format(v)}
+                    tickFormatter={(v) => compact.format(v)}
                     tickLine={false}
                     axisLine={false}
                     width={60}
