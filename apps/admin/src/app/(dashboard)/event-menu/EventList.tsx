@@ -130,9 +130,7 @@ const EventList = () => {
     );
   if (isError)
     return (
-      <div className="text-center mt-5" style={{ color: "#dc2626" }}>
-        데이터 불러오기 실패
-      </div>
+      <div className="text-center mt-5 text-danger">데이터 불러오기 실패</div>
     );
 
   return (

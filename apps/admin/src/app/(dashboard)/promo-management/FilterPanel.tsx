@@ -1,4 +1,3 @@
-// apps/admin/src/app/(dashboard)/ads/FilterPanel.tsx
 "use client";
 
 import type { PromoResponse } from "@/lib/api/promo";
@@ -6,12 +5,14 @@ import type { PromoResponse } from "@/lib/api/promo";
 type Props = {
   year: number;
   month: number;
+  selectedPromotionId?: string | null;
   onYearChange: (y: number) => void;
   onMonthChange: (m: number) => void;
+  onPromotionChange: (id: string) => void;
   onApply: () => void;
   promotions?: PromoResponse[];
-  isLoading?: boolean;
-  error?: boolean;
+  isLoading?: boolean; // 조회 버튼 로딩
+  error?: boolean; // 프로모션 목록 로딩 오류 등
 };
 
 const years = (() => {
@@ -26,8 +27,10 @@ const months = Array.from({ length: 12 }, (_, i) => i + 1);
 export default function FilterPanel({
   year,
   month,
+  selectedPromotionId,
   onYearChange,
   onMonthChange,
+  onPromotionChange,
   onApply,
   promotions = [],
   isLoading,
@@ -64,41 +67,26 @@ export default function FilterPanel({
           </select>
         </div>
 
-        <button
-          onClick={onApply}
-          className="w-full bg-[#005C14] text-white py-2 rounded-lg cursor-pointer disabled:opacity-60"
-          disabled={isLoading}
+        {/* 프로모션 선택 */}
+        <label className="block text-sm font-medium mb-2">프로모션</label>
+        <select
+          className="border rounded-md px-2 py-1 cursor-pointer bg-background w-full mb-4"
+          value={selectedPromotionId ?? ""}
+          onChange={(e) => onPromotionChange(e.target.value)}
         >
-          {isLoading ? "불러오는 중…" : "조회하기"}
-        </button>
-      </div>
+          <option value="" disabled>
+            프로모션을 선택하세요
+          </option>
+          {promotions.map((p) => (
+            <option key={p._id} value={p._id}>
+              {p.title}
+            </option>
+          ))}
+        </select>
 
-      {/* 등록한 광고 박스 */}
-      <div className="rounded-2xl border border-border bg-card p-4 shadow-sm mt-5">
-        <h3 className="text-sm font-medium mb-2">등록한 광고</h3>
-        {error ? (
-          <div className="text-xs text-danger">
-            데이터를 불러오지 못했습니다.
-          </div>
-        ) : isLoading ? (
-          <ul className="space-y-2">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <li key={i} className="h-4 bg-muted rounded animate-pulse" />
-            ))}
-          </ul>
-        ) : promotions.length === 0 ? (
-          <div className="text-xs text-muted-foreground">
-            표시할 광고가 없습니다.
-          </div>
-        ) : (
-          <ul className="space-y-2 text-sm">
-            {promotions.slice(0, 6).map((p) => (
-              <li key={p._id} className="truncate">
-                {p.title}
-              </li>
-            ))}
-          </ul>
-        )}
+        <div onClick={onApply} className="text-muted-foreground">
+          {isLoading ? "로딩 중…" : ""}
+        </div>
       </div>
     </div>
   );

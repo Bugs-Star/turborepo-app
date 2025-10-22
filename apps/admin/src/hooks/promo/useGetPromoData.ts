@@ -7,9 +7,8 @@ import {
 } from "@tanstack/react-query";
 import {
   PromoService,
-  type MonthlyPromosParams,
-  type MonthlyPromosResponse,
-  type PromoResponse,
+  type WeeklyPromoParams,
+  type WeeklyPromoResponse,
   type ViewTrendPoint,
   type ClickTrendPoint,
 } from "@/lib/api/promo";
@@ -21,10 +20,9 @@ export interface ChartPoint {
 }
 
 export interface PromoQueryResult {
-  promotions: PromoResponse[];
   viewSeries: ChartPoint[];
   clickSeries: ChartPoint[];
-  meta: MonthlyPromosResponse["meta"];
+  meta: WeeklyPromoResponse["meta"];
 }
 
 /* ========= 달력 유틸 (일요일 시작) ========= */
@@ -67,25 +65,32 @@ function normalizeWeeklySeries<T extends { name: string }>(
 }
 
 /* ========= 단위 변환 ========= */
-/** 서버가 초 단위로 내려줄 경우 분으로 변환(이미 분이면 아래 나누기 제거) */
+/** 서버가 초 단위(viewDuration)를 내려줄 경우 분으로 변환(이미 분이면 나누기 제거) */
 function toMinutes(secondsOrMinutes: number): number {
   return Math.round((secondsOrMinutes ?? 0) / 60);
 }
 
 export function useGetPromoData(
-  params: MonthlyPromosParams
+  params: WeeklyPromoParams
 ): UseQueryResult<PromoQueryResult, Error> {
-  const { year, month } = params;
-  const key = ["promotions-monthly", year, month] as const;
+  const { promotionId, year, month } = params;
+  const key = ["promotion-weekly", promotionId, year, month] as const;
 
   return useQuery<
-    MonthlyPromosResponse, // TQueryFnData (raw 응답)
+    WeeklyPromoResponse, // TQueryFnData (raw)
     Error, // TError
-    PromoQueryResult, // TData (select 이후의 형태)
+    PromoQueryResult, // TData (select 이후)
     typeof key // TQueryKey
   >({
     queryKey: key,
-    queryFn: () => PromoService.getMonthlyPromos({ year, month }),
+    enabled: Boolean(promotionId),
+    queryFn: () =>
+      PromoService.getPromoWeekly({
+        promotionId,
+        year,
+        month,
+        periodType: "weekly",
+      }),
     placeholderData: keepPreviousData,
     select: (res): PromoQueryResult => {
       const totalWeeks = weeksInMonthSunStart(year, month);
@@ -103,7 +108,6 @@ export function useGetPromoData(
       );
 
       return {
-        promotions: res.promotions ?? [],
         viewSeries,
         clickSeries,
         meta: res.meta,

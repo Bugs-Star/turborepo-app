@@ -1,4 +1,3 @@
-// lib/api/goldenPathAnalysis.ts
 import type {
   GoldenPathApiBucket,
   GoldenPathApiItem,
