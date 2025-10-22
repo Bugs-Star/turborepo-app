@@ -101,9 +101,8 @@ export const getUsers = async (req, res) => {
         newUsersGrowthRate,
       },
       users: users.map((user) => ({
-        userId: u._id,
-        name: user.name,
         userId: user._id,
+        name: user.name,
         email: user.email,
         createdAt: user.createdAt,
       })),
