@@ -9,7 +9,7 @@
       "env": [
         "CLICKHOUSE_HOST",
         "CLICKHOUSE_PORT",
-        "CLICKHOUSE_USER",
+        "CLICKHOUSE_USERNAME",
         "CLICKHOUSE_PASSWORD",
         "CLICKHOUSE_DATABASE"
       ]
