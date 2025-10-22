@@ -26,12 +26,12 @@ export const useReorderEvents = () => {
       return a._id.localeCompare(b._id);
     },
 
-    /** ✅ 변경: updates → id 배열로 변환하여 배치 엔드포인트 호출 */
+    /** ✅ 변경: updates → id 배열로 변환하여 서버 스키마(eventIds)로 전송 */
     persist: async (updates: ReorderUpdate[]) => {
-      const normalized = [...updates]
+      const eventIds = [...updates]
         .sort((a, b) => a.order - b.order)
-        .map((u, idx) => ({ id: u.id, order: idx })); // 안전하게 0..n-1 재부여
-      await EventsService.reorderEvents(normalized);
+        .map((u) => u.id);
+      await EventsService.reorderEvents(eventIds);
     },
   });
 };

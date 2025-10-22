@@ -110,12 +110,10 @@ export const EventsService = {
     return data as EventItem;
   },
 
-  reorderEvents: async (
-    updates: ReorderUpdate[]
-  ): Promise<ReorderEventsResponse> => {
+  reorderEvents: async (eventIds: string[]): Promise<ReorderEventsResponse> => {
     const { data } = await axiosInstance.post<ReorderEventsResponse>(
       "/admin/events/reorder",
-      { updates }
+      { eventIds }
     );
     return data;
   },
