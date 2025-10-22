@@ -15,8 +15,23 @@ type MenuItem = {
   localOrder?: number;
 };
 
+const LS_KEY = "recommendMenu.reorderEnabled";
+
 const RecommendMenu = () => {
   const { data, isLoading, isError } = useGetAllRecommendedMenu(1, 50);
+
+  // ⛳️ 토글 상태 (localStorage 유지)
+  const [reorderEnabled, setReorderEnabled] = useState<boolean>(false);
+  useEffect(() => {
+    const saved =
+      typeof window !== "undefined" ? localStorage.getItem(LS_KEY) : null;
+    if (saved != null) setReorderEnabled(saved === "1");
+  }, []);
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem(LS_KEY, reorderEnabled ? "1" : "0");
+    }
+  }, [reorderEnabled]);
 
   // 서버 데이터 → 초기 표시 순서 보장 (recommendedOrder ASC, tie: _id)
   const initialMenus = useMemo<MenuItem[]>(() => {
@@ -90,6 +105,33 @@ const RecommendMenu = () => {
     });
   };
 
+  // 🔕 OFF일 때: 전체 기능 숨기고 안내만
+  if (!reorderEnabled) {
+    return (
+      <div className="max-w-5xl mx-auto mt-5 bg-background p-6 rounded-lg border border-border">
+        <div className="flex items-center justify-between">
+          <h1 className="text-lg font-bold">추천 메뉴</h1>
+          {/* 토글 스위치 */}
+          <label className="inline-flex items-center gap-2 text-sm cursor-pointer select-none text-muted-foreground">
+            <input
+              type="checkbox"
+              className="sr-only peer"
+              checked={reorderEnabled}
+              onChange={(e) => setReorderEnabled(e.target.checked)}
+            />
+            <span className="w-10 h-6 rounded-full bg-muted-foreground relative peer-checked:bg-primary transition-colors">
+              <span className="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-all peer-checked:left-4" />
+            </span>
+            활성화
+          </label>
+        </div>
+        <p className="text-sm text-muted-foreground mt-3">
+          정렬 기능이 비활성화되어 있습니다. 활성화를 위해 우측 상단 토글을
+          켜주세요.
+        </p>
+      </div>
+    );
+  }
   if (isLoading) {
     return (
       <div className="text-center mt-5 text-muted-foreground">로딩 중...</div>
@@ -107,14 +149,29 @@ const RecommendMenu = () => {
   return (
     <div className="max-w-5xl mx-auto mt-5 bg-background p-6 rounded-lg">
       {/* 헤더 */}
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-lg font-bold">추천 메뉴 재정렬</h1>
+      <div className="flex items-center justify-between mb-6 gap-3">
+        <div className="flex">
+          {" "}
+          <h1 className="text-lg font-bold">추천 메뉴 재정렬</h1>
+          <label className="inline-flex items-center gap-2 text-sm cursor-pointer select-none text-muted-foreground ml-5 ">
+            <input
+              type="checkbox"
+              className="sr-only peer"
+              checked={reorderEnabled}
+              onChange={(e) => setReorderEnabled(e.target.checked)}
+            />
+            <span className="w-10 h-6 rounded-full bg-muted-foreground relative peer-checked:bg-primary transition-colors">
+              <span className="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-all peer-checked:left-4 " />
+            </span>
+            비활성화
+          </label>
+        </div>
 
         <div className="flex items-center gap-2 text-muted-foreground min-h-5">
           {isPending ? (
             <>
               <Loader2 className="w-4 h-4 animate-spin" />
-              <span className="text-xs text-gray-500">저장중..</span>
+              <span className="text-xs">저장중..</span>
             </>
           ) : (
             <>
