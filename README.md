@@ -105,7 +105,7 @@
       <td style="padding: 6px;">
         <a href="https://gist.github.com/hello22433/3e7203fdd3031dda51ffd108f7727c43">데이터 흐름 설계</a>,
         <a href="https://gist.github.com/hello22433/b5f1fda77706a3dbafb19b96e4f50b00">Log/Recommendation Worker 구현</a>,
-        <a href="https://gist.github.com/hello22433/ebfaead1e77811772e6c12583f029038">log data 정제 및 통계 자료 생성(ClickHouse)</a>,
+        <a href="https://gist.github.com/hello22433/ebfaead1e77811772e6c12583f029038">log data 분석 및 통계 자료 생성(ClickHouse)</a>,
         <a href="https://gist.github.com/hello22433/7a581e7b27681777961c3bf365583f8f">맞춤형 추천 기능(Milvus)</a>
       </td>
     </tr>
@@ -181,7 +181,7 @@
 </details>
 
 <details>
-  <summary>이정관(FS) : <i><b>"기능은 완성이 아니라 경험으로 완성된다."</b></i></summary>
+  <summary>이정관(FS) : <i><b>"기능은 잡동이 아니라 경험으로 완성된다."</b></i></summary>
   <table>
     <tr>
       <td align="center" width="160">
