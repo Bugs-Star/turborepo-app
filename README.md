@@ -181,7 +181,7 @@
 </details>
 
 <details>
-  <summary>이정관(FS) : <i><b>"기능은 잡동이 아니라 경험으로 완성된다."</b></i></summary>
+  <summary>이정관(FS) : <i><b>"기능은 작동이 아니라 경험으로 완성된다."</b></i></summary>
   <table>
     <tr>
       <td align="center" width="160">
